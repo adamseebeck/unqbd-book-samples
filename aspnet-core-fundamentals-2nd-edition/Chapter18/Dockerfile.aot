@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/dotnet/sdk:11.0-resolute-aot AS build
+WORKDIR /src
+COPY global.json AdventureWorks.Deployment.csproj ./
+RUN dotnet restore -r linux-x64 -p:PublishAot=true
+COPY . .
+RUN dotnet publish -r linux-x64 -c Release --no-restore -p:PublishAot=true -warnaserror -o /out
+
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled
+WORKDIR /app
+COPY --from=build /out .
+USER $APP_UID
+ENV ASPNETCORE_HTTP_PORTS=8080
+EXPOSE 8080
+ENTRYPOINT ["./AdventureWorks.Deployment"]

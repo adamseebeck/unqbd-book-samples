@@ -1,0 +1,7 @@
+bin/
+obj/
+.git/
+publish*/
+TestResults/
+*.user
+*.secrets.json

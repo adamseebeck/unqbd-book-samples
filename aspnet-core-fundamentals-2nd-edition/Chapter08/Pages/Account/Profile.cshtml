@@ -1,0 +1,6 @@
+@page
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = "Identity.Application")]
+<h1>Profile</h1>
+<p>@User.Identity?.Name</p>
+<p>@User.FindFirst("library_card")?.Value</p>
+<form method="post" asp-page="/Account/Login" asp-page-handler="Logout"><button>Sign out</button></form>

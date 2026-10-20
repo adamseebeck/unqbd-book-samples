@@ -1,0 +1,16 @@
+@page
+@model Chapter07Sample.Pages.Orders.CreateModel
+<h1>Validate order input</h1>
+<p>@Model.StatusMessage</p>
+<form method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All"></div>
+    <label asp-for="Input.ProductId"></label>
+    <input asp-for="Input.ProductId" />
+    <label asp-for="Input.Quantity"></label>
+    <input asp-for="Input.Quantity" />
+    <label asp-for="Input.Email"></label>
+    <input asp-for="Input.Email" />
+    <label asp-for="Upload"></label>
+    <input asp-for="Upload" type="file" />
+    <button type="submit">Validate</button>
+</form>

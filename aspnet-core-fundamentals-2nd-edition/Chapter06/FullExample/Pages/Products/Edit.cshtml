@@ -1,0 +1,19 @@
+@page "{id:int}"
+@model AdventureWorks.Pages.Products.EditModel
+@{
+    ViewData["Title"] = "Edit product";
+}
+<h1>Edit product</h1>
+@if (Model.StatusMessage is not null)
+{
+    <p role="status">@Model.StatusMessage</p>
+}
+<div asp-validation-summary="All"></div>
+<form method="post">
+    <partial name="_ProductForm" for="Input" />
+    <button type="submit">Save</button>
+</form>
+<form method="post" asp-page-handler="Delete" asp-route-id="@RouteData.Values["id"]">
+    <button type="submit">Delete</button>
+</form>
+<vc:product-summary></vc:product-summary>

@@ -1,0 +1,12 @@
+@page
+@model ProfileModel
+<h1>Fictional customer profile</h1>
+@if (Model.StatusMessage is not null) { <p role="status">@Model.StatusMessage</p> }
+<div asp-validation-summary="All"></div>
+<form method="post">
+    <label asp-for="Input.Name"></label><input asp-for="Input.Name" /><span asp-validation-for="Input.Name"></span>
+    <label asp-for="Input.Email"></label><input asp-for="Input.Email" /><span asp-validation-for="Input.Email"></span>
+    <button type="submit">Save</button>
+</form>
+<form method="post" asp-page-handler="Deactivate"><button type="submit">Deactivate</button></form>
+<vc:recent-orders></vc:recent-orders>

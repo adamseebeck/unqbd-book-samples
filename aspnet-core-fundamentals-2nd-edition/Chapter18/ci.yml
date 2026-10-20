@@ -1,0 +1,21 @@
+name: Validate deployment artifact
+on: [push, pull_request]
+permissions:
+    contents: read
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: Chapter18
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: '11.0.x'
+            - name: Execute unit and integration assertions
+              run: dotnet test ../Chapter15/Tests/AdventureWorks.Tests.csproj -c Release --logger trx
+            - name: Publish framework-dependent artifact
+              run: dotnet publish -c Release -o publish -p:UseAppHost=false
+            - name: Build local image
+              run: docker build -t adventureworks-validation:${{ github.sha }} .

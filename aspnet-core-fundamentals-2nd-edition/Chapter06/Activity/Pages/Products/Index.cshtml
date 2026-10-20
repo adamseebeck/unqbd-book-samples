@@ -1,0 +1,17 @@
+@page
+@inject ProductStore Products
+@{
+    ViewData["Title"] = "Products";
+    var products = await Products.ListAsync();
+}
+<h1>Products</h1>
+@if (TempData["StatusMessage"] is string message)
+{
+    <p role="status">@message</p>
+}
+<ul>
+@foreach (var product in products)
+{
+    <li><a asp-page="./Edit" asp-route-id="@product.Id">@product.Name</a></li>
+}
+</ul>

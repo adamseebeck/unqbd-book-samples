@@ -6,9 +6,9 @@
 
 ## Solved Source and Execution
 
-The exact solved code delta below applies to a complete copied target. Follow the command rather than changing canonical source.
+The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
 
-The activity has an exact executable delta and copy runner at `../ActivityInvestigations/Chapter03`. Its README explains the expected observation and restoration.
+The exact code change and its copy script are in `../ActivityInvestigations/Chapter03`. Its README describes the expected result and how to start over.
 
 ## Reference Implementation
 
@@ -20,10 +20,10 @@ The activity has an exact executable delta and copy runner at `../ActivityInvest
 
 The counter turns a render check into an execution check. File responsibilities, process-aware breakpoints, and explicit startup commands make later failures easier to isolate.
 
-## Verification Boundary
+## Production Notes
 
 Detailed exceptions help a local developer, but they expose internals to untrusted users. Keep the development environment local and let production use its exception handler. A browser connection failure should present a recovery path rather than an unexplained frozen page. The template's reconnection UI belongs to the same server circuit behavior; it cannot preserve state after the server has discarded that circuit.
 
 Keep one known startup command.
 
-Record the command, selected environment, URL, and process for each test run. Those four facts prevent an old app on another port from being mistaken for the current build. A local debugging pass establishes this sample's behavior, not production availability or performance.
+Note the command, environment, URL and process for each run. Those four facts keep you from mistaking an old app on another port for the current build. Local debugging shows how this sample behaves, not how it performs or stays available in production.

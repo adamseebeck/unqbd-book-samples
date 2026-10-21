@@ -1,16 +1,16 @@
 # Chapter 19 Activity Answer
 
-- Use the supplied hub and LiveCatalog as the answer reference. Connect two tabs, send a valid notice, and require both to display it.
-- Send whitespace and require a stable validation message. Navigate one tab away and return to verify a new owned connection.
-- Record that the returned tab has no durable history unless another connected client sends a new notice.
+- Use the supplied hub and LiveCatalog as the answer reference. Connect two tabs, send a valid notice, and check that both display it.
+- Send whitespace and check for a stable validation message. Navigate one tab away and return to verify a new owned connection.
+- Notice that the returned tab shows no history until another connected client sends a new notice.
 - Change only the client-side retained notice limit from twenty to five.
-- Keep two clients connected while sending six numbered notices. Require exactly the last five in both lists, then repeat the existing validation and connection-lifetime observations.
+- Keep two clients connected while sending six numbered notices. Check that both lists show exactly the last five, then repeat the existing validation and connection-lifetime checks.
 
 ## Solved Source and Execution
 
-The exact solved code delta below applies to a complete copied target. Follow the command rather than changing canonical source.
+The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
 
-The activity has an exact executable delta and copy runner at `../ActivityInvestigations/Chapter19`. Its README explains the expected observation and restoration.
+The exact code change and its copy script are in `../ActivityInvestigations/Chapter19`. Its README describes the expected result and how to start over.
 
 ## Reference Implementation
 
@@ -24,10 +24,10 @@ The activity has an exact executable delta and copy runner at `../ActivityInvest
 
 The hub validates and broadcasts, the browser owns its connection, and callbacks enter the renderer. Connection recovery and message persistence remain separate contracts.
 
-## Verification Boundary
+## Production Notes
 
-A public hub is unsuitable for private notifications until the server enforces access and group membership. Rate limits, payload limits, authenticated connection expiry, scale-out, and backpressure need a design tied to the deployment. This bounded loopback fixture demonstrates broadcast behavior and validation; it does not claim an internet-scale chat system.
+A public hub is unsuitable for private notifications until the server enforces access and group membership. Rate limits, payload limits, authenticated connection expiry, scale-out, and backpressure need a design tied to the deployment. This local example demonstrates broadcast behavior and validation; it isn't an internet-scale chat system.
 
 Reconnection is not message durability.
 
-Dispose the owned HubConnection when the component leaves the page. Avoid performing UI mutations directly on a transport callback context. Under load, bound the callback work and consider batching renders; measuring a two-client local pass cannot establish production throughput or latency. The browser transcript and hub validation results should identify the actual transport path exercised.
+Dispose the owned HubConnection when the component leaves the page. Avoid performing UI mutations directly on a transport callback context. Under load, bound the callback work and batch renders. A two-client local test can't tell you production throughput or latency, so load-test before you rely on it. When you test, note which transport the connection actually used.

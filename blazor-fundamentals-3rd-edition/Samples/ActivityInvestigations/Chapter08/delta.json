@@ -9,6 +9,6 @@
       "after": "MinimumLength = 10"
     }
   ],
-  "expected": "The changed ten-character minimum rejects a nine-character message and accepts ten characters with otherwise valid values. Check the actual interactive component and an antiforgery-protected static form POST. Restoring the baseline returns its five-character rule.",
+  "expected": "The changed ten-character minimum rejects a nine-character message and accepts ten characters with otherwise valid values. Check both the interactive component and an antiforgery-protected static form POST. A fresh copy brings back the five-character rule.",
   "status": "Run the copied project to confirm the expected outcome."
 }

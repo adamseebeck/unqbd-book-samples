@@ -9,6 +9,6 @@
       "after": "Title=\"UnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifier\""
     }
   ],
-  "expected": "At a recorded narrow viewport/zoom the long identifier wraps, article height increases and the document has no horizontal overflow. Restore the normal title. Emulation is not a physical-device pass.",
+  "expected": "At a narrow viewport and zoom level (note which you used), the long identifier wraps, the article grows taller and the page has no horizontal overflow. Restore the normal title. Emulation isn't a physical-device test.",
   "status": "Run the copied project to confirm the expected outcome."
 }

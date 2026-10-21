@@ -5,9 +5,9 @@
 
 ## Solved Source and Execution
 
-The exact solved code delta below applies to a complete copied target. Follow the command rather than changing canonical source.
+The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
 
-The activity has an exact executable delta and copy runner at `../ActivityInvestigations/Chapter22`. Its README explains the expected observation and restoration.
+The exact code change and its copy script are in `../ActivityInvestigations/Chapter22`. Its README describes the expected result and how to start over.
 
 ## Reference Implementation
 
@@ -20,10 +20,10 @@ The activity has an exact executable delta and copy runner at `../ActivityInvest
 
 The logger category, message template, execution host, and provider determine what a log means. The local event demonstrates that path without implying an unconfigured monitoring service exists.
 
-## Verification Boundary
+## Production Notes
 
 Structured logs should use bounded property names and values. A raw URL, arbitrary search string, or user identifier can create high cardinality, sensitive content, and high storage cost. Correlation identifiers are useful when their lifecycle and exposure are controlled. Never log authentication cookies, bearer tokens, passwords, or an entire configuration object.
 
-Verify the receiver before claiming observability.
+Check the receiver before you rely on monitoring.
 
 Metrics and traces complement logs but do not replace error handling. A production collector needs delivery, sampling, retention, and access decisions. The local example verifies a structured server event only. It does not measure a production error rate or promise durable telemetry after the process exits.

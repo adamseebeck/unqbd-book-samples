@@ -7,9 +7,9 @@
 
 ## Solved Source and Execution
 
-The exact solved code delta below applies to a complete copied target. Follow the command rather than changing canonical source.
+The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
 
-The activity has an exact executable delta and copy runner at `../ActivityInvestigations/Chapter16`. Its README explains the expected observation and restoration.
+The exact code change and its copy script are in `../ActivityInvestigations/Chapter16`. Its README describes the expected result and how to start over.
 
 ## Reference Implementation
 
@@ -23,10 +23,10 @@ The activity has an exact executable delta and copy runner at `../ActivityInvest
 
 A static parent can host explicit interactive islands, while prerender and runtime activation have different instances. Renderer identity and actual clicks make those boundaries observable.
 
-## Verification Boundary
+## Production Notes
 
 Server-rendered HTML is generated for a request, not automatically at application build time. A Blazor Web App with Server interactivity still needs an ASP.NET Core host even when some routes are static. Copying its initial HTML to static storage does not preserve server endpoints or circuits. Standalone WebAssembly has a different deployment artifact, discussed in Chapter 23.
 
-Test each runtime you claim to support.
+Test each runtime you support.
 
-The .NET 11 template uses BasePath in the document head and includes a reconnection component for Server circuits. Their presence is not proof of correct subdirectory hosting or reconnection after circuit expiry. Verify asset URLs, direct routes, transport recovery, and fresh state in the actual deployment arrangement. Compilation of shared components establishes neither WebAssembly startup nor browser interactivity.
+The .NET 11 template uses BasePath in the document head and includes a reconnection component for Server circuits. Having them doesn't mean subdirectory hosting or reconnection after circuit expiry works. Check asset URLs, direct routes, transport recovery and fresh state in your real deployment. Shared components that compile still need a browser test to show that WebAssembly starts and the page is interactive.

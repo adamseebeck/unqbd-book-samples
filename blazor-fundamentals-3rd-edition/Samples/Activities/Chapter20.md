@@ -1,16 +1,16 @@
 # Chapter 20 Activity Answer
 
 - Use the supplied PWA Home and generated worker files as the answer reference. Publish locally, save one title, wait for worker control, stop the local server, and reload the same URL.
-- Require the title to remain visible. Restore the server afterward.
-- Record installability or physical-device checks separately and make no hosted deployment or account change.
+- Check that the title is still visible. Restore the server afterward.
+- Installation and physical-device testing are separate checks; this activity doesn't deploy anything.
 - Change the local reading-list limit and its message from fifty to three titles in a disposable PWA copy.
-- Save three titles, attempt a fourth, and require the stored list to remain three after reloading. Keep this modified component check separate from the original published-shell offline acceptance.
+- Save three titles, try a fourth, and check that the stored list still has three after reloading. This changed copy is separate from the published offline check above.
 
 ## Solved Source and Execution
 
-The exact solved code delta below applies to a complete copied target. Follow the command rather than changing canonical source.
+The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
 
-The activity has an exact executable delta and copy runner at `../ActivityInvestigations/Chapter20`. Its README explains the expected observation and restoration.
+The exact code change and its copy script are in `../ActivityInvestigations/Chapter20`. Its README describes the expected result and how to start over.
 
 ## Reference Implementation
 
@@ -20,12 +20,12 @@ The activity has an exact executable delta and copy runner at `../ActivityInvest
 
 ## Expected Reasoning
 
-The PWA shell and device-local list use different browser stores. Published-worker activation, same-origin reloads, and storage failure handling establish the narrow offline behavior taught here.
+The PWA shell and device-local list use different browser stores. Published-worker activation, same-origin reloads and storage failure handling make up the offline behavior this chapter teaches.
 
-## Verification Boundary
+## Production Notes
 
 Service workers have an update lifecycle, and an old worker can continue serving an old shell while pages remain open. Test upgrade behavior with two distinct published versions before relying on a rollout. Cache storage can fail or be evicted. Present recovery and export options for valuable offline work rather than treating browser storage as a permanent backup.
 
 Keep offline data ownership explicit.
 
-The current sample has no offline mutation queue and no conflict resolution. An online synchronization feature would require authenticated ownership, idempotent writes, version handling, and a visible recovery path. Do not infer those capabilities from a saved title. The author validation record must distinguish a local published offline reload from installation on a physical device or hosted deployment.
+The sample has no offline mutation queue and no conflict resolution, so a saved title doesn't mean it can sync. An online synchronization feature would require authenticated ownership, idempotent writes, version handling, and a visible recovery path. A local offline reload of the published app is also different from installing it on a physical device or running a hosted deployment, so test each one you need.

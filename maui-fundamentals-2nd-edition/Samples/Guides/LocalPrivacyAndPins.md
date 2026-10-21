@@ -1,6 +1,6 @@
 # Local privacy and additional TLS checks
 
-These are bounded extension exercises. Neither an accepted local prompt nor a matched public key grants permission to a server record.
+These are small extension exercises. Neither an accepted local prompt nor a matched public key grants permission to a server record.
 
 ## Put a local prompt behind a small contract
 
@@ -12,7 +12,7 @@ Authenticator combinations and fallback vary by OS version. A device-credential 
 
 For Apple, create a fresh LocalAuthentication.LAContext for an owned request. Call CanEvaluatePolicy with the exact LAPolicy, show a truthful reason, then use EvaluatePolicy/EvaluatePolicyAsync. Connect page departure/cancellation to Invalidate and treat its cancellation result as expected. Decide explicitly whether the policy permits a device passcode fallback. Face ID requires the app's truthful NSFaceIDUsageDescription. Do not serialize or log a biometric representation; the system owns that material. A successful policy evaluation does not automatically change a Keychain item's access-control flags. See [LocalAuthentication](https://developer.apple.com/documentation/localauthentication/).
 
-For either platform, test missing enrollment, lockout, alternate credentials, canceled prompt, repeated taps and page departure on actual devices. The extension is intentionally not registered as a working biometric adapter in Inventory.App: a test fake is not a device implementation. The contract and cancellation behavior are executable portable source, while this walkthrough names the native work needed to complete the extension honestly.
+For either platform, test missing enrollment, lockout, alternate credentials, canceled prompt, repeated taps and page departure on actual devices. The extension is intentionally not registered as a working biometric adapter in Inventory.App, because a test fake is not a device implementation. The contract and cancellation behavior are runnable portable source; this walkthrough names the native work needed to complete the extension.
 
 ## Add pins without weakening TLS
 

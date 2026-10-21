@@ -1,9 +1,9 @@
 # Chapter 19 Activity Code Delta
 
-From Samples/ActivityInvestigations run `python create_copy.py --chapter 19 --output C:/BookExercises/Chapter19` with Python 3, choosing a new working directory outside the canonical source. The runner verifies the exact baseline and applies delta.json to a complete copied target. It preserves a before/after hash manifest.
+From Samples/ActivityInvestigations run `python create_copy.py --chapter 19 --output C:/BookExercises/Chapter19` with Python 3, choosing a new working folder outside the companion code. The script checks that its starting files are unchanged, copies the complete project and applies delta.json to the copy.
 
-From that new directory run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631` with the pinned SDK.
+From that new directory run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631` with the SDK that global.json selects.
 
-Send six uniquely numbered notices while two browser clients remain connected. Each client retains exactly notices2 through6, and neither shows notice1. Validation, ownership/disposal and lack of replay remain the original hub contract.
+Send six uniquely numbered notices while two browser clients remain connected. Each client keeps exactly notices 2 through 6, and neither shows notice 1. Validation, connection ownership and disposal, and the lack of replay are unchanged from the original hub.
 
-To restore the implementation, use another fresh copy of the documented baseline. Deliberate failures belong only in the disposable copy. The expected outcome above is what to look for; running the check is what confirms it.
+To start over, make another fresh copy. Make deliberate failures only in the disposable copy, and run the check to confirm the outcome above.

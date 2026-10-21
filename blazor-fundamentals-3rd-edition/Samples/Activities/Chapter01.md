@@ -16,9 +16,9 @@ Exact static-copy delta: `../ActivitySolutions/Chapter01/Home.razor`; its README
 
 A component model and an execution model answer different questions. LibraryDesk will use static pages for content and explicit interactive boundaries for behavior, while keeping private decisions on the server.
 
-## Verification Boundary
+## Production Notes
 
-Server interactivity requires server memory and an active network path for each connected circuit. WebAssembly moves component work to the browser but adds startup downloads and exposes its assemblies and configuration to the user. Static rendering avoids an interactive runtime for content that needs only links and form posts. None of these choices is universally faster. Measure the actual screen and deployment environment before making a performance claim.
+Server interactivity requires server memory and an active network path for each connected circuit. WebAssembly moves component work to the browser but adds startup downloads and exposes its assemblies and configuration to the user. Static rendering avoids an interactive runtime for content that needs only links and form posts. None of these choices is always faster. Measure the real page in your deployment environment before you choose one for speed.
 
 Never put secrets in downloadable client code.
 

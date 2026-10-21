@@ -9,6 +9,6 @@
       "after": "    <p id=\"feedback-message-help\">Use 5 to 300 characters. This example saves locally.</p>\n    <InputTextArea id=\"feedback-message\" aria-required=\"true\" aria-describedby=\"feedback-message-help feedback-message-error\" @bind-Value=\"model.Message\" />"
     }
   ],
-  "expected": "The message textarea references the new existing help paragraph through aria-describedby, while its original label still targets the textarea. Invalid and valid form cases retain their behavior. Browser keyboard/focus observations and any unavailable screen-reader audit are recorded separately.",
+  "expected": "The message textarea references the new existing help paragraph through aria-describedby, while its original label still targets the textarea. Invalid and valid form cases behave as before. Check keyboard and focus behavior in a browser, and screen-reader behavior if you have one.",
   "status": "Run the copied project to confirm the expected outcome."
 }

@@ -9,6 +9,6 @@
       "after": "<h1>My first server counter</h1>"
     }
   ],
-  "expected": "The changed heading is visible and two Add one clicks show Current count: 2. A new full document load starts a new component at zero. Record whether the actual heading edit used Hot Reload or a restart; do not infer support from a compiled copy.",
+  "expected": "The changed heading is visible and two Add one clicks show Current count: 2. A new full document load starts a new component at zero. Note whether your heading edit applied through Hot Reload or needed a restart; a compiled copy can't tell you.",
   "status": "Run the copied project to confirm the expected outcome."
 }

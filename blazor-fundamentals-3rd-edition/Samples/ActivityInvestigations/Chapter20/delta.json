@@ -15,6 +15,6 @@
       "after": "limited to 3 titles."
     }
   ],
-  "expected": "The changed PWA stores exactly three titles. A fourth save reports the three-title limit without another localStorage write, and a fresh component reloads the same three persisted titles. This focused component proof is separate from the finished PWA published-worker offline test.",
+  "expected": "The changed PWA stores exactly three titles. A fourth save reports the three-title limit without another localStorage write, and a fresh component reloads the same three persisted titles. This component test is separate from the finished PWA's offline test with the published worker.",
   "status": "Run the copied project to confirm the expected outcome."
 }

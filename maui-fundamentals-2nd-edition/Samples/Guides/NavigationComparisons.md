@@ -2,7 +2,7 @@
 
 These are small study alternatives to the registered workflow, not additional routes already installed in AppShell. Use a separate scratch page to compare their contracts.
 
-## Attribute assignment and dictionary receipt
+## Attribute assignment and query dictionaries
 
 QueryProperty assigns an incoming value through a named public property. This example stores only an identifier; its setter does not start unobserved asynchronous work. The attribute uses reflection and is not trim safe. Prefer IQueryAttributable for the book's trimming/AOT preparation, and validate before loading either way.
 

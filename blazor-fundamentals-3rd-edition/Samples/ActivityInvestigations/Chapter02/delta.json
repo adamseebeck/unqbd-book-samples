@@ -9,6 +9,6 @@
       "after": "<h1>LibraryDesk setup verified</h1>"
     }
   ],
-  "expected": "After the clean baseline and SDK selection experiment, the changed static home heading is returned by the running checkpoint. Restoring the unavailable SDK pin remains a separate setup check.",
+  "expected": "After the SDK experiment, the running checkpoint returns the changed static home heading. Restore the correct SDK version in global.json before you continue.",
   "status": "Run the copied project to confirm the expected outcome."
 }

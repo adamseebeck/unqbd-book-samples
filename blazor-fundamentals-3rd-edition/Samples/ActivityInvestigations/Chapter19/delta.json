@@ -9,6 +9,6 @@
       "after": "if (notices.Count == 5)"
     }
   ],
-  "expected": "Send six uniquely numbered notices while two browser clients remain connected. Each client retains exactly notices2 through6, and neither shows notice1. Validation, ownership/disposal and lack of replay remain the original hub contract.",
+  "expected": "Send six uniquely numbered notices while two browser clients remain connected. Each client keeps exactly notices 2 through 6, and neither shows notice 1. Validation, connection ownership and disposal, and the lack of replay are unchanged from the original hub.",
   "status": "Run the copied project to confirm the expected outcome."
 }

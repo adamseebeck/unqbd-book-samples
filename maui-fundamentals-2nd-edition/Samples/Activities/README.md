@@ -1,10 +1,10 @@
 # Chapter activity solutions
 
-Keep the complete Samples tree. Each ActivityNN.csproj is a native entry configuration over the same reference source; its BookActivity metadata opens the matching exercise. The default application also exposes exercises through Practice. These are full solution inputs, not claims that every target has executed.
+Keep the complete Samples tree. Each ActivityNN.csproj is a native entry configuration over the same reference source; its BookActivity metadata opens the matching exercise. The default application also exposes the exercises through its Practice page. Each entry is a complete solution; run it on the targets you have.
 
 From Samples, a Windows activity build uses `dotnet build Activities/Chapter01/Activity01.csproj -p:BookTargetFrameworks=net11.0-windows10.0.19041.0 -f net11.0-windows10.0.19041.0`. Use the corresponding run/IDE target only after its prerequisites are installed. Portable tests use `dotnet test Inventory.Tests/Inventory.Tests.csproj`.
 
-Physical sensors, camera, permissions, assistive tools, Apple scene behavior, signing and packaging require their actual target. See the execution matrix; unavailable is not passing.
+Physical sensors, camera, permissions, assistive tools, Apple scene behavior, signing and packaging need a real target. If you can't run a target, treat its checks as untested, not passed.
 
 ## Chapter 1
 
@@ -14,7 +14,7 @@ Solution: [Inventory.App/Controls.cs](../Inventory.App/Controls.cs). Native entr
 
 Run: Controls and platform; Android/Apple gradient and reconnect checks.
 
-Check: InventoryTests.Route_round_trip (portable prerequisite only; no native handler claim).
+Check: InventoryTests.Route_round_trip covers the portable part; check the native handler on each target.
 
 ## Chapter 2
 
@@ -24,7 +24,7 @@ Solution: [Inventory.App/ActivityPages.cs](../Inventory.App/ActivityPages.cs). N
 
 Run: Controls and platform; background, platform/runtime labels and explicit target builds.
 
-Check: SDK/workload/native build receipts.
+Check: the SDK, workload and native build output for each target.
 
 ## Chapter 3
 
@@ -44,7 +44,7 @@ Solution: [Inventory.App/AdaptiveSettingsPage.cs](../Inventory.App/AdaptiveSetti
 
 Run: Adaptive settings; widths 599/600, safe area, keyboard and large text.
 
-Check: Native width/assistive checks; no portable visual pass.
+Check: width and assistive behavior on a native target; there's no portable visual test.
 
 ## Chapter 5
 
@@ -74,7 +74,7 @@ Solution: [Inventory.App/WorkflowPages.cs](../Inventory.App/WorkflowPages.cs). N
 
 Run: Real Shell Cart/Checkout/Confirmation; invalid totals, own confirmation/back guard, explicit reset and safe Cart restart from a non-sensitive hint.
 
-Check: Portable parameter/dialog tests where available; actual Shell/lifecycle behavior requires its native check.
+Check: portable parameter and dialog tests; check Shell and lifecycle behavior on a native target.
 
 ## Chapter 8
 
@@ -104,7 +104,7 @@ Solution: [Inventory.Tests/ActivityTests.cs](../Inventory.Tests/ActivityTests.cs
 
 Run: Portable project; fictional total, one overlapping save, returned ID, invalid/canceled/failure paths.
 
-Check: Order activity tests; no claim of sequential/server idempotency or real order/payment/send.
+Check: Order activity tests. They don't cover server-side idempotency, and no real order, payment or message is involved.
 
 ## Chapter 11
 
@@ -124,7 +124,7 @@ Solution: [Inventory.App/InspectionPage.cs](../Inventory.App/InspectionPage.cs).
 
 Run: Site inspection; permission/capability, cancel, 2.5g peaks/500ms, 2s debounce, confirm-only list clear.
 
-Check: ShakeDetector and LocationCoordinator portable tests plus unavailable/actual device scope.
+Check: ShakeDetector and LocationCoordinator portable tests, plus device checks on real hardware.
 
 ## Chapter 13
 
@@ -134,7 +134,7 @@ Solution: [Inventory.App/RenewalPracticePage.cs](../Inventory.App/RenewalPractic
 
 Run: Controlled expiry/renewal clock and failure UI plus portable session tests; real sign-in requires your own registration and native setup.
 
-Check: Token/vault/cooldown/cancel tests and identity guide; no provider/account result.
+Check: token, vault, cooldown and cancellation tests and the identity guide; no real provider or account is involved.
 
 ## Chapter 14
 
@@ -144,7 +144,7 @@ Solution: [Inventory.App/LocalizedSettingsPage.cs](../Inventory.App/LocalizedSet
 
 Run: English/Spanish settings, heading label, decorative shape, large text, keyboard, contrast.
 
-Check: RESX/config static checks plus actual assistive matrix.
+Check: RESX and configuration checks, plus assistive-technology tests on your targets.
 
 ## Chapter 15
 
@@ -154,7 +154,7 @@ Solution: [Inventory.App/BrowsingPage.cs](../Inventory.App/BrowsingPage.cs). Nat
 
 Run: Browser lifetimes; 20-row pages, departure cancellation, return visit, one active message callback.
 
-Check: Paging/cancel tests plus native lifetime/profiler limits.
+Check: paging and cancellation tests, plus native lifetime and profiler checks.
 
 ## Chapter 16
 
@@ -162,6 +162,6 @@ Version/pipeline/release preparation
 
 Solution: [Tools/update-version.ps1](../Tools/update-version.ps1). Native entry: [Activity16.csproj](Chapter16/Activity16.csproj).
 
-Run: Disposable XML helper tests and ordinary Release build; signing/publish/store/calendar actions remain separate.
+Run: Disposable XML helper tests and an ordinary Release build; signing, publishing, store and calendar steps are separate.
 
-Check: Version-helper positive/negative tests and target build receipt.
+Check: version-helper positive and negative tests and the target build output.

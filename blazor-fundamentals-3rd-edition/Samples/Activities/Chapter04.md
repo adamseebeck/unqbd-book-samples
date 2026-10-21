@@ -18,10 +18,10 @@ Complete executable extension: `../ActivitySolutions/Chapter04`. Run and test co
 
 Parameters enter from a parent, private state belongs to an instance, and lifecycle work belongs at the stage that provides its prerequisites. Independent toggle behavior checks that those boundaries are working.
 
-## Verification Boundary
+## Production Notes
 
 Component boundaries should follow meaningful UI responsibilities. Splitting every line of markup into a component adds overhead and makes the data flow harder to follow. Start with a cohesive unit such as ToggleMessage, then extract shared behavior when it has a clear contract. A small parameter surface is easier to test and maintain than a component that reaches into unrelated services.
 
 Define the child before composing it.
 
-Rendering does not make a component a security boundary. Parameter values reach markup unless you deliberately keep them server-only. Use text rendering for book descriptions; do not turn untrusted descriptions into MarkupString. The toggle changes presentation only and makes no claim about restricting access to the underlying data.
+Rendering does not make a component a security boundary. Parameter values reach markup unless you deliberately keep them server-only. Use text rendering for book descriptions; do not turn untrusted descriptions into MarkupString. The toggle changes presentation only; it doesn't restrict access to the underlying data.

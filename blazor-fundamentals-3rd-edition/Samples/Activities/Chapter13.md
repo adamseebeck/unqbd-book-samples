@@ -1,6 +1,6 @@
 # Chapter 13 Activity Answer
 
-- Add a third BookItem and select it through the existing SelectBook component. Require the parent status to show its numeric identifier.
+- Add a third BookItem and select it through the existing SelectBook component. Check that the parent status shows its numeric identifier.
 - Replace only the row fragment with a title and price layout while leaving BookList unchanged. The supplied files are the answer reference for typed composition and parent-owned selection.
 
 ## Solved Source and Execution
@@ -20,7 +20,7 @@ Complete executable extension: `../ActivitySolutions/Chapter13`. Run and test co
 
 A typed fragment controls row markup, a typed callback reports the selection, and a local error boundary contains unexpected failures. Clear ownership removes the need for most imperative references.
 
-## Verification Boundary
+## Production Notes
 
 Templates execute rendering logic supplied by the parent, so keep the contract narrow and avoid passing arbitrary executable fragments across a render-mode boundary. Delegate-like render content cannot be serialized as an ordinary parameter into a different runtime. Compose the BookList and SelectBook inside one interactive island.
 

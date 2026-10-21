@@ -15,6 +15,6 @@
       "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
     }
   ],
-  "expected": "Two clicks produce sequential ReadNumber 1 and 2 and BookCount 3 in baseline server Information logs. With the category threshold Warning, UI counts still advance but those Information records are absent. Restore the original category threshold.",
+  "expected": "Two clicks produce sequential ReadNumber 1 and 2 and BookCount 3 in the server's Information logs. With the category threshold Warning, UI counts still advance but those Information records are absent. Restore the original category threshold.",
   "status": "Run the copied project to confirm the expected outcome."
 }

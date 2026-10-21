@@ -9,6 +9,6 @@
       "after": "@foreach (var book in books)\n    {\n        <div @key=\"book.Id\" style=\"height: 40px\">@book.Id: @book.Title</div>\n    }"
     }
   ],
-  "expected": "The deliberate foreach variant renders all 10000 rows. The original Virtualize checkpoint renders a small visible window and later identifiers after scrolling. Record row counts, not an unsupported latency claim.",
+  "expected": "The deliberate foreach variant renders all 10000 rows. The original Virtualize checkpoint renders a small visible window and later identifiers after scrolling. Compare row counts; this test doesn't measure latency.",
   "status": "Run the copied project to confirm the expected outcome."
 }

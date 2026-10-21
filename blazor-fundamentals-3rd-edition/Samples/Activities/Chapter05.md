@@ -7,7 +7,7 @@
 
 Complete executable extension: `../ActivitySolutions/Chapter05`. Run and test commands are in that checkpoint's README.
 
-The activity has an exact executable delta and copy runner at `../ActivityInvestigations/Chapter05`. Its README explains the expected observation and restoration.
+The exact code change and its copy script are in `../ActivityInvestigations/Chapter05`. Its README describes the expected result and how to start over.
 
 ## Reference Implementation
 
@@ -19,7 +19,7 @@ The activity has an exact executable delta and copy runner at `../ActivityInvest
 
 Razor renders state, binding chooses how input updates it, and conditions explain empty outcomes. A local filter makes those relationships visible before form and network abstractions are added.
 
-## Verification Boundary
+## Production Notes
 
 The filter recomputes when rendered. That is appropriate for three titles, but repeatedly allocating and scanning a large collection can dominate rendering. Move expensive filtering into a deliberate state update or a query service when measurement shows a need. Do not hide stale results behind a ShouldRender override; Chapter 15 explains why that can create correctness defects.
 

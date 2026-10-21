@@ -27,6 +27,6 @@
       "after": "<ModeCounter Step=\"4\" @rendermode=\"InteractiveAuto\" />"
     }
   ],
-  "expected": "The new scalar Step parameter changes one-click counts to 2 for Server, 3 for WebAssembly and 4 for Auto. Component checks verify parameter behavior; the three real islands must also report their observed renderer and counts in a browser. Full reload recreates their state.",
+  "expected": "The new scalar Step parameter changes one-click counts to 2 for Server, 3 for WebAssembly and 4 for Auto. Component tests check parameter behavior; run the page in a browser to see each island's renderer and count. Full reload recreates their state.",
   "status": "Run the copied project to confirm the expected outcome."
 }

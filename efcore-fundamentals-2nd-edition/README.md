@@ -55,9 +55,9 @@ dotnet run --project Chapter04
 
 The generated migrations and snapshots included here are the inputs for each checkpoint. Inspect them and run the checkpoint; do not generate a second InitialRetail with the same role. Activity 4 adds Description after its initial snapshot, activity 7 adds Supplier after the relationship snapshot, and activity 15 adds ExternalReference after the final model snapshot.
 
-For Activity15, run the expanded model first, then run `dotnet run --project Testing/PriorModelCompatibility` with that same `EFCORE_BOOK_MIGRATION_CONNECTION`. The proof project compiles the entire unchanged `Chapter15/Program.cs` through a source link. It reads the original product fields, rowversion, query filter, category/placement relationships, owned address, customer profile, order lines and converted TPH payment against the expanded schema. It neither recreates a reduced legacy model nor applies migrations.
+For Activity15, run the expanded model first, then run `dotnet run --project Testing/PriorModelCompatibility` with that same `EFCORE_BOOK_MIGRATION_CONNECTION`. The compatibility project compiles the entire unchanged `Chapter15/Program.cs` through a source link. It reads the original product fields, rowversion, query filter, category/placement relationships, owned address, customer profile, order lines and converted TPH payment against the expanded schema. It neither recreates a reduced legacy model nor applies migrations.
 
-Keep migration operator databases until you have completed their observations, then remove only the dedicated database you created for that lab. Do not call EnsureCreated and Migrate on the same database. A Down method does not recover data dropped with a column.
+Keep the migration databases until you finish the exercise, then remove only the dedicated database you created for that lab. Do not call EnsureCreated and Migrate on the same database. A Down method does not recover data dropped with a column.
 
 ## Provider experiments
 
@@ -65,10 +65,10 @@ Keep migration operator databases until you have completed their observations, t
 
 `Experiments/ComplexTypes` checks EF Core 11 complex-member configuration against the SQL Server provider. Documentation can change between releases; the program's output shows the behavior of the packages you installed.
 
-## Validation boundaries
+## Notes on packages and tests
 
 The projects keep normal NuGet advisory auditing. A successful restore or build alone is not a vulnerability audit.
 
-The console Design/test dependency graphs explicitly pin `System.Security.Cryptography.Pkcs` to `9.0.21`. This replaces the transitive `9.0.18` flagged by Microsoft's [October 13 high-severity advisory](https://github.com/advisories/GHSA-846f-f764-76mx) and [related moderate-severity advisory](https://github.com/advisories/GHSA-2fmv-rv2c-59x7). Recheck the complete resolved graph when you update packages; a direct security patch does not certify a later package set.
+The console Design/test dependency graphs explicitly pin `System.Security.Cryptography.Pkcs` to `9.0.21`. This replaces the transitive `9.0.18` flagged by Microsoft's [October 13 high-severity advisory](https://github.com/advisories/GHSA-846f-f764-76mx) and [related moderate-severity advisory](https://github.com/advisories/GHSA-2fmv-rv2c-59x7). Recheck the complete resolved graph when you update packages; a direct security patch doesn't cover a later package set.
 
-Every primary Full Example matches its chapter exactly after line-ending normalization. Activity assertions fail the process on an incorrect observation. Their PASS labels identify grouped behavior checks, not a count of unique end-to-end scenarios. Source syntax, compilation, database execution, HTTP behavior and later production verification are separate results.
+Every primary Full Example matches its chapter exactly, apart from line endings. Activity assertions stop the process on an incorrect result, and their PASS labels name grouped behavior checks, not a count of unique end-to-end scenarios.

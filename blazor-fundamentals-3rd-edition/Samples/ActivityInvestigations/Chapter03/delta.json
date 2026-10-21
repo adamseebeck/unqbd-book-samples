@@ -1,0 +1,14 @@
+{
+  "chapter": 3,
+  "baseline": "Samples/Checkpoints/Chapter03",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/Run.razor",
+      "source_sha256": "67e47db72b483461858c09dde384f13584cd609bc37cf790b9693eabeecdd19a",
+      "before": "<h1>First run</h1>",
+      "after": "<h1>My first server counter</h1>"
+    }
+  ],
+  "expected": "The changed heading is visible and two Add one clicks show Current count: 2. A new full document load starts a new component at zero. Record whether the actual heading edit used Hot Reload or a restart; do not infer support from a compiled copy.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

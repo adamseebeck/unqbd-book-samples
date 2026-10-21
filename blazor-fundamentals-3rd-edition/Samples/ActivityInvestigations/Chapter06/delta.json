@@ -1,0 +1,14 @@
+{
+  "chapter": 6,
+  "baseline": "Samples/Checkpoints/Chapter06",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/FavoritesDemo.razor",
+      "source_sha256": "ae637b5ecb3a434070e040db8dc3609a305d1cb0f36f31cb234046f8be488034",
+      "before": "<FavoritesSummary />",
+      "after": "<button id=\"remove-csharp\" @onclick=\"() => Favorites.Remove(1)\">Remove C#</button>\n<FavoritesSummary />"
+    }
+  ],
+  "expected": "Add C# and Blazor, then remove C# through the new button. The sibling summary changes from two favorites to one and the remaining identifier is 2. A second independent scope remains empty; repeated removal leaves one.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

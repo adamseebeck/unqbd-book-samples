@@ -1,0 +1,10 @@
+@page "/modes"
+@using LibraryDesk.Client.Components
+<h1>Render mode boundaries</h1>
+<p id="static-marker">Static HTML is readable before interactivity starts.</p>
+<h2>Server island</h2>
+<ModeCounter @rendermode="InteractiveServer" />
+<h2>WebAssembly island</h2>
+<ModeCounter @rendermode="InteractiveWebAssembly" />
+<h2>Auto island</h2>
+<ModeCounter @rendermode="InteractiveAuto" />

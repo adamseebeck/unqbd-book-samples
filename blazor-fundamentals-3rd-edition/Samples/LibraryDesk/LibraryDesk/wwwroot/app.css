@@ -1,0 +1,9 @@
+body { font-family: system-ui, sans-serif; margin: 1rem auto; max-width: 75rem; padding: 0 1rem; color: #172b3a; background: #fff; }
+nav { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1rem 0; }
+main { min-width: 0; }
+label { display: block; margin-top: 0.75rem; }
+input, textarea, button { font: inherit; padding: 0.5rem; max-width: 100%; box-sizing: border-box; }
+button { margin: 0.25rem; }
+:focus-visible { outline: 3px solid #1258a4; outline-offset: 3px; }
+.validation-message, .validation-summary-errors { color: #a01515; }
+#blazor-error-ui { display: none; background: #fff4ca; padding: 1rem; }

@@ -1,0 +1,45 @@
+@page "/"
+@inject IJSRuntime JS
+<h1>Offline reading list</h1>
+<label for="reading-title">Book title</label><input id="reading-title" @bind="title" maxlength="120" />
+<button @onclick="Save" disabled="@(!ready || saving)">Save on this device</button>
+<p role="status">@status</p>
+<ul>@foreach (var item in titles) { <li>@item</li> }</ul>
+@code {
+    private string title = "";
+    private string[] titles = [];
+    private string status = "No saved list loaded.";
+    private bool ready;
+    private bool saving;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        try
+        {
+            var json = await JS.InvokeAsync<string?>("localStorage.getItem", "librarydesk.reading.v1");
+            titles = json is null ? [] : System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? [];
+            status = $"Loaded {titles.Length} local titles.";
+        }
+        catch (Exception ex) when (ex is JSException or System.Text.Json.JsonException)
+        { status = "Local storage is unavailable or invalid. Save to replace this device's list."; }
+        ready = true;
+        StateHasChanged();
+    }
+    private async Task Save()
+    {
+        if (!ready || saving) return;
+        if (string.IsNullOrWhiteSpace(title)) { status = "Enter a title."; return; }
+        if (titles.Length >= 50) { status = "This local list is limited to 50 titles."; return; }
+        var updated = titles.Append(title.Trim()).ToArray();
+        saving = true;
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "librarydesk.reading.v1", System.Text.Json.JsonSerializer.Serialize(updated));
+            titles = updated;
+            title = "";
+            status = "Saved on this device.";
+        }
+        catch (JSException) { status = "Storage failed. The list was not saved."; }
+        finally { saving = false; }
+    }
+}

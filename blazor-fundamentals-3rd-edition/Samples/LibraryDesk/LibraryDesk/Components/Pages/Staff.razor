@@ -1,0 +1,4 @@
+@page "/staff"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Staff")]
+<h1>Staff area</h1>
+<p>The endpoint policy, rather than a hidden link, protects this page.</p>

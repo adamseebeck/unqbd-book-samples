@@ -1,0 +1,11 @@
+<section>
+    <p>@(visible ? Message : HiddenText)</p>
+    <button @onclick="Toggle" aria-expanded="@visible.ToString().ToLowerInvariant()">Toggle message</button>
+</section>
+
+@code {
+    [Parameter] public string Message { get; set; } = "Book details";
+    [Parameter] public string HiddenText { get; set; } = "Details hidden";
+    private bool visible;
+    private void Toggle() => visible = !visible;
+}

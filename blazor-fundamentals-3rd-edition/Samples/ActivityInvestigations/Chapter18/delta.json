@@ -1,0 +1,20 @@
+{
+  "chapter": 18,
+  "baseline": "Samples",
+  "deltas": [
+    {
+      "file": "LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs",
+      "source_sha256": "4e491bbec0eed1ead473062985767294a935c5557074da147944d3fdd5ea1295",
+      "before": "private readonly HashSet<int> ids = [];",
+      "after": "private readonly List<int> ids = [];"
+    },
+    {
+      "file": "LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs",
+      "source_sha256": "4e491bbec0eed1ead473062985767294a935c5557074da147944d3fdd5ea1295",
+      "before": "if (ids.Add(id)) Changed?.Invoke();",
+      "after": "ids.Add(id);\n        Changed?.Invoke();"
+    }
+  ],
+  "expected": "The focused FavoritesRefreshSiblingsAndIgnoreDuplicates test must fail for the List variant and pass for the original HashSet version. The defect is in storage semantics rather than the Changed notification condition.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

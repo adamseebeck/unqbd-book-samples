@@ -1,0 +1,14 @@
+{
+  "chapter": 23,
+  "baseline": "Samples",
+  "deltas": [
+    {
+      "file": "LibraryDesk/LibraryDesk/Program.cs",
+      "source_sha256": "0767b07c032bbbb583f3ecedbec34def58d5adddffd51d84237f5967838a33ce",
+      "before": "new { Status = \"ok\" }",
+      "after": "new { Status = \"ok\", Revision = \"local-review\" }"
+    }
+  ],
+  "expected": "The changed health endpoint returns status ok and revision local-review when this built copy runs in Production. Both local sign-in roles and sign-out remain absent: GETs are404 and controls are missing. The recorded Production Debug copy returns405 for valid-token POSTs to the unknown control and all three lab paths, while the published Release package returns404. Tokenless POSTs return400 before this routing result. The explicitly approved finished server/PWA local packages are validated separately; this marker is not a deployment or a claim about those unmodified packages.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

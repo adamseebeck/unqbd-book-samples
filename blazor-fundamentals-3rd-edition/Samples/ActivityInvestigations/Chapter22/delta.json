@@ -1,0 +1,20 @@
+{
+  "chapter": 22,
+  "baseline": "Samples/Checkpoints/Chapter22",
+  "deltas": [
+    {
+      "file": "LibraryDesk/appsettings.json",
+      "source_sha256": "200332b434757a0054a3d356c91cde01f2c48712be8aa2bcb0f3e973619f06e3",
+      "before": "\"Default\": \"Information\",",
+      "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
+    },
+    {
+      "file": "LibraryDesk/appsettings.Development.json",
+      "source_sha256": "73f95f9e0ceb205fc1c4dc50c07697fcfa29d7087868c2aef1d504cb38c771ec",
+      "before": "\"Default\": \"Information\",",
+      "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
+    }
+  ],
+  "expected": "Two clicks produce sequential ReadNumber 1 and 2 and BookCount 3 in baseline server Information logs. With the category threshold Warning, UI counts still advance but those Information records are absent. Restore the original category threshold.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

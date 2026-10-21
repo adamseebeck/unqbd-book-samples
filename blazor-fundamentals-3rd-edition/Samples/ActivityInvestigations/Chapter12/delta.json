@@ -1,0 +1,14 @@
+{
+  "chapter": 12,
+  "baseline": "Samples/Checkpoints/Chapter12",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/InteropDemo.razor",
+      "source_sha256": "3834169920c791b001c7624cd29e58cc67e0df0bee7c50bbd0965ae49b7769aa",
+      "before": "\"./js/catalog.js\"",
+      "after": "\"./js/not-present.js\""
+    }
+  ],
+  "expected": "The missing module returns 404 and the component settles at Browser module unavailable. Reload to retry. Both interop buttons stay disabled. Restore the module path, reload, and invoke a fresh working instance.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

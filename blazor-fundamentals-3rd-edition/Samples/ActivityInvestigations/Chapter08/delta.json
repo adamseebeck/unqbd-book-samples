@@ -1,0 +1,14 @@
+{
+  "chapter": 8,
+  "baseline": "Samples/Checkpoints/Chapter08",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Models/FeedbackInput.cs",
+      "source_sha256": "4a35513a577c620e2b9f2e58f4fdba6058d1387f64326af9e18d8547782cc2b1",
+      "before": "MinimumLength = 5",
+      "after": "MinimumLength = 10"
+    }
+  ],
+  "expected": "The changed ten-character minimum rejects a nine-character message and accepts ten characters with otherwise valid values. Check the actual interactive component and an antiforgery-protected static form POST. Restoring the baseline returns its five-character rule.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

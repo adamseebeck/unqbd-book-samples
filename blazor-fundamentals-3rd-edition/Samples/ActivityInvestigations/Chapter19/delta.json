@@ -1,0 +1,14 @@
+{
+  "chapter": 19,
+  "baseline": "Samples/Checkpoints/Chapter19",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/LiveCatalog.razor",
+      "source_sha256": "aa8d8d2d4ba93c291ddd90f6f9026f7720db501154eb98aac8bf1f3b929138fe",
+      "before": "if (notices.Count == 20)",
+      "after": "if (notices.Count == 5)"
+    }
+  ],
+  "expected": "Send six uniquely numbered notices while two browser clients remain connected. Each client retains exactly notices2 through6, and neither shows notice1. Validation, ownership/disposal and lack of replay remain the original hub contract.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

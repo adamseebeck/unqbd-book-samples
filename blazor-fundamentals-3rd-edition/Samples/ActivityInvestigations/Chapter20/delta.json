@@ -1,0 +1,20 @@
+{
+  "chapter": 20,
+  "baseline": "Samples",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Pwa/Pages/Home.razor",
+      "source_sha256": "f3cc81e018ebf07d3d400c27bc4f58ec6e5d332e7da53a06f0d97cceb4af9d5c",
+      "before": "titles.Length >= 50",
+      "after": "titles.Length >= 3"
+    },
+    {
+      "file": "LibraryDesk.Pwa/Pages/Home.razor",
+      "source_sha256": "f3cc81e018ebf07d3d400c27bc4f58ec6e5d332e7da53a06f0d97cceb4af9d5c",
+      "before": "limited to 50 titles.",
+      "after": "limited to 3 titles."
+    }
+  ],
+  "expected": "The changed PWA stores exactly three titles. A fourth save reports the three-title limit without another localStorage write, and a fresh component reloads the same three persisted titles. This focused component proof is separate from the finished PWA published-worker offline test.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

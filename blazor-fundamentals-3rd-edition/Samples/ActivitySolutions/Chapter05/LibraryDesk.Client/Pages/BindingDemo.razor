@@ -1,0 +1,22 @@
+@page "/binding"
+@rendermode InteractiveServer
+<h1>Filter book titles</h1>
+<label for="search">Title contains</label>
+<input id="search" @bind="search" @bind:event="oninput" />
+<p id="match-count">Matches: @Matches.Length</p>
+@if (Matches.Length == 0)
+{
+    <p role="status">No matching titles.</p>
+}
+<ul>
+    @foreach (var title in Matches)
+    {
+        <li @key="title">@title</li>
+    }
+</ul>
+
+@code {
+    private string search = "";
+    private readonly string[] titles = ["C# Field Notes", "Blazor Field Notes", "Database Field Notes"];
+    private string[] Matches => titles.Where(t => t.Contains(search, StringComparison.OrdinalIgnoreCase)).ToArray();
+}

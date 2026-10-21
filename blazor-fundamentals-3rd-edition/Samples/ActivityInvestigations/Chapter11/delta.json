@@ -1,0 +1,20 @@
+{
+  "chapter": 11,
+  "baseline": "Samples/Checkpoints/Chapter11",
+  "deltas": [
+    {
+      "file": "LibraryDesk/Program.cs",
+      "source_sha256": "80114faa83089146c49ab3e45c49d23b6bbc71f27308bb52297c596a54327c9c",
+      "before": "builder.Services.AddAuthorization(options =>\n    options.AddPolicy(\"Staff\", policy => policy.RequireRole(\"Librarian\")));",
+      "after": "builder.Services.AddAuthorization(options =>\n{\n    options.AddPolicy(\"Staff\", policy => policy.RequireRole(\"Librarian\"));\n    options.AddPolicy(\"Readers\", policy => policy.RequireAuthenticatedUser());\n});"
+    },
+    {
+      "file": "LibraryDesk/Program.cs",
+      "source_sha256": "80114faa83089146c49ab3e45c49d23b6bbc71f27308bb52297c596a54327c9c",
+      "before": "app.MapGet(\"/api/staff/count\",",
+      "after": "app.MapGet(\"/api/profile\", (HttpContext context) => Results.Ok(new { Name = context.User.Identity!.Name }))\n    .RequireAuthorization(\"Readers\");\napp.MapGet(\"/api/staff/count\","
+    }
+  ],
+  "expected": "The new authenticated Readers policy returns 401 for anonymous /api/profile and the actual reader/librarian names for their signed-in requests. Reader still receives 403 for the Staff API while librarian receives 200. This tests server cookies and API authorization only.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

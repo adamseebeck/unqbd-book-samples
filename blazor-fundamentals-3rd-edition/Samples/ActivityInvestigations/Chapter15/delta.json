@@ -1,0 +1,14 @@
+{
+  "chapter": 15,
+  "baseline": "Samples/Checkpoints/Chapter15",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/VirtualDemo.razor",
+      "source_sha256": "9ef463ed2beee60ebcec4f7c5ae564c10977fe8e32033415a1751ea97dcfd7eb",
+      "before": "<Virtualize Items=\"books\" Context=\"book\" ItemSize=\"40\" OverscanCount=\"3\">\n        <div @key=\"book.Id\" style=\"height: 40px\">@book.Id: @book.Title</div>\n    </Virtualize>",
+      "after": "@foreach (var book in books)\n    {\n        <div @key=\"book.Id\" style=\"height: 40px\">@book.Id: @book.Title</div>\n    }"
+    }
+  ],
+  "expected": "The deliberate foreach variant renders all 10000 rows. The original Virtualize checkpoint renders a small visible window and later identifiers after scrolling. Record row counts, not an unsupported latency claim.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

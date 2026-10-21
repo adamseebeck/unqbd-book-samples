@@ -1,0 +1,14 @@
+{
+  "chapter": 7,
+  "baseline": "Samples/Checkpoints/Chapter07",
+  "deltas": [
+    {
+      "file": "LibraryDesk/Components/Pages/BookDetails.razor",
+      "source_sha256": "6a948c96ff93ae2a65b58a494423b3fa7b087cd226feb0ad857087be68a5ba38",
+      "before": "@page \"/books/{Id:int}\"",
+      "after": "@page \"/books/{Id:int}\"\n@page \"/catalog-item/{Id:int}\""
+    }
+  ],
+  "expected": "The new constrained alias /catalog-item/1 and /catalog-item/2 resolves the correct titles; /catalog-item/999 shows the missing-item branch. Both the original and alias routes reject a non-integer identifier through the not-found path.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

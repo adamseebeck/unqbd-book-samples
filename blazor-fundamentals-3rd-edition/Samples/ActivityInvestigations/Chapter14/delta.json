@@ -1,0 +1,14 @@
+{
+  "chapter": 14,
+  "baseline": "Samples/Checkpoints/Chapter14",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/StyleDemo.razor",
+      "source_sha256": "0373931e886c01c855e07eeb0d495f4ca5ff8a1ae6b918214b608dca7c179d00",
+      "before": "Title=\"Blazor Field Notes\"",
+      "after": "Title=\"UnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifier\""
+    }
+  ],
+  "expected": "At a recorded narrow viewport/zoom the long identifier wraps, article height increases and the document has no horizontal overflow. Restore the normal title. Emulation is not a physical-device pass.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

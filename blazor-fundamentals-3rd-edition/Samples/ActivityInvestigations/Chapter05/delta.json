@@ -1,0 +1,14 @@
+{
+  "chapter": 5,
+  "baseline": "Samples/Checkpoints/Chapter05",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/BindingDemo.razor",
+      "source_sha256": "cab281a0d3edab86fa739be1f87cf4b2562ce7042aa9441802160045ae950e12",
+      "before": "@bind=\"search\" @bind:event=\"oninput\"",
+      "after": "@bind=\"search\""
+    }
+  ],
+  "expected": "With the onchange variant, an input event alone retains three rows; committing change updates the filtered result. Restore the oninput checkpoint and its normal input behavior.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

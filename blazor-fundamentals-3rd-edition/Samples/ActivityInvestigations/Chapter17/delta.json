@@ -1,0 +1,20 @@
+{
+  "chapter": 17,
+  "baseline": "Samples/Checkpoints/Chapter17",
+  "deltas": [
+    {
+      "file": "LibraryDesk.Client/Pages/Catalog.razor",
+      "source_sha256": "cdae9cc707303915cee62f44d8d78a78e0fd79a6269ad98e40a6a0060106a31b",
+      "before": "<p role=\"status\">@status</p>",
+      "after": "<button id=\"clear-catalog-favorites\" @onclick=\"ClearFavorites\">Clear catalog favorites</button>\n<p role=\"status\">@status</p>"
+    },
+    {
+      "file": "LibraryDesk.Client/Pages/Catalog.razor",
+      "source_sha256": "cdae9cc707303915cee62f44d8d78a78e0fd79a6269ad98e40a6a0060106a31b",
+      "before": "    private void Add(int id)",
+      "after": "    private void ClearFavorites()\n    {\n        Favorites.Clear();\n        status = $\"Favorites in this runtime: {Favorites.Ids.Count}.\";\n    }\n    private void Add(int id)"
+    }
+  ],
+  "expected": "After favoriting two distinct books, the new clear button empties the injected scoped FavoritesState and updates the page status to zero. Repeating clear stays at zero. It does not save anything across runtimes or reloads.",
+  "status": "Run the copied project to confirm the expected outcome."
+}

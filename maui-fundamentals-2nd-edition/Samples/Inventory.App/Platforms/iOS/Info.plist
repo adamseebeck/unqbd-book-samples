@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+ <key>LSRequiresIPhoneOS</key><true/>
+ <key>UIDeviceFamily</key><array><integer>1</integer><integer>2</integer></array>
+ <key>NSLocationWhenInUseUsageDescription</key><string>Find your position while you use the inventory practice page.</string>
+ <key>NSPhotoLibraryUsageDescription</key><string>Choose a photo for the practice exercise without uploading it.</string>
+ <key>NSCameraUsageDescription</key><string>Capture a photo for your temporary inspection exercise list.</string>
+ <key>NSContactsUsageDescription</key><string>Count contacts only when you run the optional local contacts exercise.</string>
+ <key>CFBundleURLTypes</key><array><dict><key>CFBundleURLSchemes</key><array><string>msal00000000-0000-0000-0000-000000000000</string></array></dict></array>
+ <key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string><string>UIInterfaceOrientationLandscapeLeft</string><string>UIInterfaceOrientationLandscapeRight</string></array>
+ <key>UIApplicationSceneManifest</key><dict>
+  <key>UIApplicationSupportsMultipleScenes</key><false/>
+  <key>UISceneConfigurations</key><dict><key>UIWindowSceneSessionRoleApplication</key><array><dict>
+   <key>UISceneConfigurationName</key><string>__MAUI_DEFAULT_SCENE_CONFIGURATION__</string>
+   <key>UISceneDelegateClassName</key><string>SceneDelegate</string>
+  </dict></array></dict>
+ </dict>
+</dict></plist>

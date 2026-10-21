@@ -1,0 +1,130 @@
+[
+  {
+    "chapter": 1,
+    "title": "Gradient handler and native lifecycle",
+    "source": "Inventory.App/Controls.cs",
+    "nativeProject": "Activities/Chapter01/Activity01.csproj",
+    "manual": "Controls and platform; Android/Apple gradient and reconnect checks",
+    "checks": "InventoryTests.Route_round_trip (portable prerequisite only; no native handler claim)"
+  },
+  {
+    "chapter": 2,
+    "title": "Platform/environment verification",
+    "source": "Inventory.App/ActivityPages.cs",
+    "nativeProject": "Activities/Chapter02/Activity02.csproj",
+    "manual": "Controls and platform; background, platform/runtime labels and explicit target builds",
+    "checks": "SDK/workload/native build receipts"
+  },
+  {
+    "chapter": 3,
+    "title": "Profile navigation and theming",
+    "source": "Inventory.App/ActivityPages.cs",
+    "nativeProject": "Activities/Chapter03/Activity03.csproj",
+    "manual": "Profile and theming; route, injected theme service, platform label, return visit",
+    "checks": "ProductRoute invalid/valid cases plus native interaction"
+  },
+  {
+    "chapter": 4,
+    "title": "Adaptive settings",
+    "source": "Inventory.App/AdaptiveSettingsPage.cs",
+    "nativeProject": "Activities/Chapter04/Activity04.csproj",
+    "manual": "Adaptive settings; widths 599/600, safe area, keyboard and large text",
+    "checks": "Native width/assistive checks; no portable visual pass"
+  },
+  {
+    "chapter": 5,
+    "title": "Stock dashboard and paging",
+    "source": "Inventory.App/InventoryDashboardPage.xaml",
+    "nativeProject": "Activities/Chapter05/Activity05.csproj",
+    "manual": "Stock dashboard; 9/10/50/51 stock boundaries, threshold 8 and failed-page retry",
+    "checks": "Failed_page_retry_does_not_skip_the_page_and_final_page_stops_requests"
+  },
+  {
+    "chapter": 6,
+    "title": "MVVM detail and DI",
+    "source": "Inventory.Core/ActivityDetails.cs",
+    "nativeProject": "Activities/Chapter06/Activity06.csproj",
+    "manual": "MVVM detail; positive ID, missing/absent product, refresh and departure",
+    "checks": "Detail activity tests in ActivityTests"
+  },
+  {
+    "chapter": 7,
+    "title": "Guarded navigation and safe restart",
+    "source": "Inventory.App/WorkflowPages.cs",
+    "nativeProject": "Activities/Chapter07/Activity07.csproj",
+    "manual": "Real Shell Cart/Checkout/Confirmation; invalid totals, own confirmation/back guard, explicit reset and safe Cart restart from a non-sensitive hint",
+    "checks": "Portable parameter/dialog tests where available; actual Shell/lifecycle behavior requires its native check"
+  },
+  {
+    "chapter": 8,
+    "title": "Categories and CSV export",
+    "source": "Inventory.Core/CategoryRepository.cs",
+    "nativeProject": "Activities/Chapter08/Activity08.csproj",
+    "manual": "Categories; add/reload/reopen, escaped CSV, safe timestamp after successful export",
+    "checks": "Category/CSV tests and real SQLite reopen"
+  },
+  {
+    "chapter": 9,
+    "title": "Durable synchronization queue",
+    "source": "Inventory.Core/Activities.cs",
+    "nativeProject": "Activities/Chapter09/Activity09.csproj",
+    "manual": "Offline queue; controlled failure, due-time/backoff, pending count, newer-revision acknowledgment",
+    "checks": "Queue real SQLite persistence/backoff/revision tests"
+  },
+  {
+    "chapter": 10,
+    "title": "Order viewmodel testing",
+    "source": "Inventory.Tests/ActivityTests.cs",
+    "nativeProject": "Activities/Chapter10/Activity10.csproj",
+    "manual": "Portable project; fictional total, one overlapping save, returned ID, invalid/canceled/failure paths",
+    "checks": "Order activity tests; no claim of sequential/server idempotency or real order/payment/send"
+  },
+  {
+    "chapter": 11,
+    "title": "Metric card and scoped native shadow",
+    "source": "Inventory.App/MetricCard.cs",
+    "nativeProject": "Activities/Chapter11/Activity11.csproj",
+    "manual": "Metric cards; bindable values, independent cards, theme and current native handler types",
+    "checks": "Native build plus native rendering/assistive checks"
+  },
+  {
+    "chapter": 12,
+    "title": "Location/photo/shake confirmation",
+    "source": "Inventory.App/InspectionPage.cs",
+    "nativeProject": "Activities/Chapter12/Activity12.csproj",
+    "manual": "Site inspection; permission/capability, cancel, 2.5g peaks/500ms, 2s debounce, confirm-only list clear",
+    "checks": "ShakeDetector and LocationCoordinator portable tests plus unavailable/actual device scope"
+  },
+  {
+    "chapter": 13,
+    "title": "Public-client auth and proactive renewal",
+    "source": "Inventory.App/RenewalPracticePage.cs",
+    "nativeProject": "Activities/Chapter13/Activity13.csproj",
+    "manual": "Controlled expiry/renewal clock and failure UI plus portable session tests; real sign-in requires your own registration and native setup",
+    "checks": "Token/vault/cooldown/cancel tests and identity guide; no provider/account result"
+  },
+  {
+    "chapter": 14,
+    "title": "Localized accessible settings and public config",
+    "source": "Inventory.App/LocalizedSettingsPage.cs",
+    "nativeProject": "Activities/Chapter14/Activity14.csproj",
+    "manual": "English/Spanish settings, heading label, decorative shape, large text, keyboard, contrast",
+    "checks": "RESX/config static checks plus actual assistive matrix"
+  },
+  {
+    "chapter": 15,
+    "title": "Paging/message lifetime and measurement",
+    "source": "Inventory.App/BrowsingPage.cs",
+    "nativeProject": "Activities/Chapter15/Activity15.csproj",
+    "manual": "Browser lifetimes; 20-row pages, departure cancellation, return visit, one active message callback",
+    "checks": "Paging/cancel tests plus native lifetime/profiler limits"
+  },
+  {
+    "chapter": 16,
+    "title": "Version/pipeline/release preparation",
+    "source": "Tools/update-version.ps1",
+    "nativeProject": "Activities/Chapter16/Activity16.csproj",
+    "manual": "Disposable XML helper tests and ordinary Release build; signing/publish/store/calendar actions remain separate",
+    "checks": "Version-helper positive/negative tests and target build receipt"
+  }
+]

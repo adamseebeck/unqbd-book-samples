@@ -1,0 +1,25 @@
+# Local privacy and additional TLS checks
+
+These are bounded extension exercises. Neither an accepted local prompt nor a matched public key grants permission to a server record.
+
+## Put a local prompt behind a small contract
+
+ILocalUnlock returns a local authentication result. LocalPrivacyGate checks cancellation after the device reply so a late successful prompt cannot reveal a page after its owner has departed. The tests supply accepted, denied and canceled results. They do not emulate biometric hardware or assert that SecureStorage is bound to a biometric key.
+
+For an Android adapter, use the AndroidX BiometricPrompt API supported by the selected target rather than the deprecated FingerprintManager. Resolve the current foreground FragmentActivity and main executor, choose the intended allowed authenticators, and use BiometricManager.CanAuthenticate with that same policy. Distinguish no hardware, temporarily unavailable, no enrollment, denial and cancellation. Create one prompt per owned attempt, complete a TaskCompletionSource only once from success/error callbacks, and connect CancellationToken to prompt cancellation. The ordinary failed-match callback is a retryable prompt event, not a successful authentication and not necessarily a completed attempt. Detach/cancel when the owning page leaves.
+
+Authenticator combinations and fallback vary by OS version. A device-credential fallback changes the product policy, and some older Android versions do not support the same combinations. Do not specify a negative button together with a policy that already includes the device credential where the API forbids it. A CryptoObject/key-backed operation is a separate design if sensitive key use must be bound cryptographically to authentication. Returning bool from a prompt is only a local UI gate. See [Android biometric guidance](https://developer.android.com/identity/sign-in/biometric-auth) for the target's current API and binding requirements before adding the native adapter/package.
+
+For Apple, create a fresh LocalAuthentication.LAContext for an owned request. Call CanEvaluatePolicy with the exact LAPolicy, show a truthful reason, then use EvaluatePolicy/EvaluatePolicyAsync. Connect page departure/cancellation to Invalidate and treat its cancellation result as expected. Decide explicitly whether the policy permits a device passcode fallback. Face ID requires the app's truthful NSFaceIDUsageDescription. Do not serialize or log a biometric representation; the system owns that material. A successful policy evaluation does not automatically change a Keychain item's access-control flags. See [LocalAuthentication](https://developer.apple.com/documentation/localauthentication/).
+
+For either platform, test missing enrollment, lockout, alternate credentials, canceled prompt, repeated taps and page departure on actual devices. The extension is intentionally not registered as a working biometric adapter in Inventory.App: a test fake is not a device implementation. The contract and cancellation behavior are executable portable source, while this walkthrough names the native work needed to complete the extension honestly.
+
+## Add pins without weakening TLS
+
+SpkiPinPolicy first requires SslPolicyErrors.None. Only then does it hash the certificate's SubjectPublicKeyInfo with SHA-256 and compare the digest against the supplied current and backup pins with FixedTimeEquals. A matching pin cannot override a hostname mismatch, expired/untrusted chain or absent certificate. The test creates its own certificate solely to isolate the pin comparison and separately asserts that normal TLS errors still reject it.
+
+A real HttpClientHandler integration must limit the callback to the intended HTTPS host/port, disable automatic redirects for a credential-bearing client and preserve the normal certificate validation result. Supply pins from a separately verified source, validate their base64/32-byte shape and retain an operational backup key. Never obtain the only trusted pin by accepting whatever certificate an untrusted first connection returns. Do not use an accept-any callback while debugging. A native transport can have its own pinning API and certificate path, so confirm the selected handler's behavior on each target.
+
+Prepare rotation before enabling a pin: ship current plus next/backup public keys, verify both intended chains, change the server only after compatible clients exist, and retain a documented recovery path. Test wrong key, wrong hostname, untrusted chain, canceled request and a planned rotation. A hard pin can lock every installed client out when a certificate/key changes. The default simulated client does not need or enable certificate pinning.
+
+Primary references: [HttpClientHandler validation callback](https://learn.microsoft.com/dotnet/api/system.net.http.httpclienthandler.servercertificatecustomvalidationcallback), [X509 public keys](https://learn.microsoft.com/dotnet/api/system.security.cryptography.x509certificates.publickey.exportsubjectpublickeyinfo), and the platform references above.

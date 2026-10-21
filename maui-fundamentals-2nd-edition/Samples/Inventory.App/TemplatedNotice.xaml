@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TemplatedView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               x:Class="MauiInventory.App.TemplatedNotice">
+    <TemplatedView.ControlTemplate>
+        <ControlTemplate>
+            <Border Padding="16" Margin="8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{TemplateBinding Heading}" FontAttributes="Bold" />
+                    <Label Text="{TemplateBinding Message}" />
+                </VerticalStackLayout>
+            </Border>
+        </ControlTemplate>
+    </TemplatedView.ControlTemplate>
+</TemplatedView>

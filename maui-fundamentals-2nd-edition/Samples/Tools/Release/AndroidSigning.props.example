@@ -1,0 +1,11 @@
+<!-- Inert signing input template. Import only in an authorized target rehearsal. -->
+<Project>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0-android' and '$(Configuration)' == 'Release'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(BookSigningStore)</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias>$(BookSigningAlias)</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>file:$(BookKeyPasswordFile)</AndroidSigningKeyPass>
+    <AndroidSigningStorePass>file:$(BookStorePasswordFile)</AndroidSigningStorePass>
+    <AndroidPackageFormats>aab</AndroidPackageFormats>
+  </PropertyGroup>
+</Project>

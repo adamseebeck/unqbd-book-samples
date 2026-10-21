@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <TargetFrameworks>net11.0-android;net11.0-ios;net11.0-maccatalyst</TargetFrameworks>
+  <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net11.0-windows10.0.19041.0</TargetFrameworks>
+  <TargetFrameworks Condition="'$(BookTargetFrameworks)' != ''">$(BookTargetFrameworks)</TargetFrameworks>
+  <OutputType>Exe</OutputType><UseMaui>true</UseMaui><SingleProject>true</SingleProject><RootNamespace>MauiInventory.App</RootNamespace>
+  <EnableDefaultCompileItems>false</EnableDefaultCompileItems><EnableDefaultMauiItems>false</EnableDefaultMauiItems>
+  <ApplicationTitle>Inventory chapter 14</ApplicationTitle><ApplicationId>com.unqbd.book.inventorych14</ApplicationId>
+  <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion><ApplicationVersion>1</ApplicationVersion>
+  <WindowsPackageType>None</WindowsPackageType>
+  <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+  <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+  <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>
+  <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+  <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+  <ApplicationManifest Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">../../Inventory.App/Platforms/Windows/app.manifest</ApplicationManifest>
+  <AndroidManifest Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">../../Inventory.App/Platforms/Android/AndroidManifest.xml</AndroidManifest>
+  <CodesignEntitlements Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">../../Inventory.App/Platforms/MacCatalyst/Entitlements.plist</CodesignEntitlements>
+ </PropertyGroup>
+ <ItemGroup>
+  <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/><PackageReference Include="Microsoft.Identity.Client" Version="4.91.0"/>
+  <ProjectReference Include="../../Inventory.Core/Inventory.Core.csproj"/>
+  <Compile Include="../../Inventory.App/**/*.cs" Exclude="../../Inventory.App/bin/**;../../Inventory.App/obj/**" Link="%(RecursiveDir)%(Filename)%(Extension)"/>
+  <Compile Remove="../../Inventory.App/Platforms/**"/>
+  <Compile Include="../../Inventory.App/Platforms/Android/**/*.cs" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'"/>
+  <Compile Include="../../Inventory.App/Platforms/iOS/**/*.cs" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'"/>
+  <Compile Include="../../Inventory.App/Platforms/MacCatalyst/**/*.cs" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'"/>
+  <Compile Include="../../Inventory.App/Platforms/Windows/**/*.cs" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'"/>
+  <MauiXaml Include="../../Inventory.App/**/*.xaml" Exclude="../../Inventory.App/Platforms/**;../../Inventory.App/bin/**;../../Inventory.App/obj/**" Link="%(RecursiveDir)%(Filename)%(Extension)"/>
+  <ApplicationDefinition Include="../../Inventory.App/Platforms/Windows/App.xaml" Link="Platforms/Windows/App.xaml" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'"/>
+  <EmbeddedResource Include="../../Inventory.App/Resources/Strings/*.resx" Link="Resources/Strings/%(Filename)%(Extension)"/>
+  <None Include="../../Inventory.App/Platforms/iOS/Info.plist" LogicalName="Info.plist" Link="Platforms/iOS/Info.plist" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'"/>
+  <None Include="../../Inventory.App/Platforms/MacCatalyst/Info.plist" LogicalName="Info.plist" Link="Platforms/MacCatalyst/Info.plist" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'"/>
+  <MauiAsset Include="../../Inventory.App/Resources/Raw/**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
+  <MauiIcon Include="../../Inventory.App/Resources/AppIcon/appicon.svg" Color="#145D80"/><MauiSplashScreen Include="../../Inventory.App/Resources/Splash/splash.svg" Color="#145D80" BaseSize="128,128"/>
+ </ItemGroup>
+</Project>

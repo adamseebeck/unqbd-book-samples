@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiInventory.App.ResourcePracticePage" Title="Resources and tags" SafeAreaEdges="All" BackgroundColor="{AppThemeBinding Light=White, Dark=#121212}">
+ <ContentPage.Resources>
+  <ResourceDictionary>
+   <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="ThemeColors.xaml"/></ResourceDictionary.MergedDictionaries>
+   <Style TargetType="Label"><Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PracticeAccent}, Dark={StaticResource PracticeAccentDark}}"/></Style>
+   <Style x:Key="Tag" TargetType="Border">
+    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PracticeAccent}, Dark={StaticResource PracticeAccentDark}}"/>
+    <Setter Property="Padding" Value="8"/><Setter Property="Margin" Value="4"/>
+   </Style>
+  </ResourceDictionary>
+ </ContentPage.Resources>
+ <ScrollView>
+  <VerticalStackLayout Spacing="12">
+   <VerticalStackLayout.Padding><OnIdiom x:TypeArguments="Thickness" Phone="12" Tablet="20" Desktop="24" Default="16"/></VerticalStackLayout.Padding>
+   <Label Text="A short wrapping tag list" FontSize="24" SemanticProperties.HeadingLevel="Level1"/>
+   <Label Text="Resize this small FlexLayout. It is not a virtualized inventory list."/>
+   <Editor Placeholder="Practice notes, stored only in this page instance" AutoSize="TextChanges" MaximumHeightRequest="160"/>
+   <Image x:Name="Preview" WidthRequest="96" HeightRequest="128" Aspect="AspectFit" SemanticProperties.Description="Packaged sample book thumbnail for the image-sizing exercise"/>
+   <Button Text="Load packaged image" Clicked="LoadImage"/>
+   <Label x:Name="ImageStatus" Text="The image has not been loaded."/>
+   <FlexLayout Direction="Row" Wrap="Wrap" AlignItems="Start">
+    <Border Style="{StaticResource Tag}"><Label Text="Low stock"/></Border>
+    <Border Style="{StaticResource Tag}"><Label Text="Recently updated"/></Border>
+    <Border Style="{StaticResource Tag}"><Label Text="Needs review"/></Border>
+   </FlexLayout>
+   <Label>
+    <Label.Text><OnPlatform x:TypeArguments="x:String" Default="Inspect this target's behavior.">
+     <On Platform="WinUI" Value="Windows: resize the window and use the keyboard."/>
+     <On Platform="Android" Value="Android: test keyboard, back and system text."/>
+     <On Platform="iOS,MacCatalyst" Value="Apple: inspect safe area, keyboard and text scaling."/>
+    </OnPlatform></Label.Text>
+   </Label>
+  </VerticalStackLayout>
+ </ScrollView>
+</ContentPage>

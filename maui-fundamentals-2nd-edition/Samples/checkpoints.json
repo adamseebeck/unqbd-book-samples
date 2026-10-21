@@ -1,0 +1,98 @@
+[
+  {
+    "chapter": 1,
+    "checkpoint": "Samples/Checkpoints/Chapter01/Chapter01.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 2,
+    "checkpoint": "Samples/Checkpoints/Chapter02/Chapter02.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 3,
+    "checkpoint": "Samples/Checkpoints/Chapter03/Chapter03.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 4,
+    "checkpoint": "Samples/Checkpoints/Chapter04/Chapter04.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 5,
+    "checkpoint": "Samples/Checkpoints/Chapter05/Chapter05.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 6,
+    "checkpoint": "Samples/Checkpoints/Chapter06/Chapter06.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 7,
+    "checkpoint": "Samples/Checkpoints/Chapter07/Chapter07.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 8,
+    "checkpoint": "Samples/Checkpoints/Chapter08/Chapter08.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 9,
+    "checkpoint": "Samples/Checkpoints/Chapter09/Chapter09.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 10,
+    "checkpoint": "Samples/Checkpoints/Chapter10/Chapter10.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 11,
+    "checkpoint": "Samples/Checkpoints/Chapter11/Chapter11.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 12,
+    "checkpoint": "Samples/Checkpoints/Chapter12/Chapter12.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 13,
+    "checkpoint": "Samples/Checkpoints/Chapter13/Chapter13.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 14,
+    "checkpoint": "Samples/Checkpoints/Chapter14/Chapter14.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 15,
+    "checkpoint": "Samples/Checkpoints/Chapter15/Chapter15.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  },
+  {
+    "chapter": 16,
+    "checkpoint": "Samples/Checkpoints/Chapter16/Chapter16.csproj",
+    "sharedSource": "Samples/Inventory.App",
+    "kind": "shared-source entry configuration, not a historical snapshot"
+  }
+]

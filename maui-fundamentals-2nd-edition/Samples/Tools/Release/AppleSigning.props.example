@@ -1,0 +1,9 @@
+<!-- Inert signing input template. A real Mac/team/profile is required. -->
+<Project>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0-ios' and '$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+    <CodesignKey>$(BookAppleSigningIdentity)</CodesignKey>
+    <CodesignProvision>$(BookAppleProvisioningProfile)</CodesignProvision>
+    <ArchiveOnBuild>true</ArchiveOnBuild>
+  </PropertyGroup>
+</Project>

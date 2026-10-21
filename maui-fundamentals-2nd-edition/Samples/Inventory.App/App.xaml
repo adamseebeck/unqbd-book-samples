@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="MauiInventory.App.App">
+ <Application.Resources>
+  <ResourceDictionary>
+   <Color x:Key="Accent">#145D80</Color>
+   <Style TargetType="Button"><Setter Property="MinimumHeightRequest" Value="48"/></Style>
+   <Style TargetType="Entry"><Setter Property="MinimumHeightRequest" Value="48"/></Style>
+  </ResourceDictionary>
+ </Application.Resources>
+</Application>

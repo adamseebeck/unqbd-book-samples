@@ -1,0 +1,25 @@
+# Inert template. Move into a repository only after selecting reviewed full action SHAs.
+name: MAUI source validation
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  windows-source:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@REPLACE_WITH_REVIEWED_FULL_COMMIT_SHA
+      - uses: actions/setup-dotnet@REPLACE_WITH_REVIEWED_FULL_COMMIT_SHA
+        with:
+          dotnet-version: '11.0.x'
+      - name: Install the Windows MAUI workload
+        working-directory: Samples
+        run: dotnet workload install maui-windows
+      - name: Portable behavior
+        working-directory: Samples
+        run: dotnet test Inventory.Tests/Inventory.Tests.csproj --logger trx
+      - name: Ordinary Windows Release build
+        working-directory: Samples
+        run: dotnet build Inventory.App/Inventory.App.csproj -c Release -p:BookTargetFrameworks=net11.0-windows10.0.19041.0 -f net11.0-windows10.0.19041.0
+# A separately reviewed distribution job requires a protected environment, target host,
+# signing inputs, actual artifact inspection and an explicit release decision.
+# This file contains no publish/upload step or stored credential.

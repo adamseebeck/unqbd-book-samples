@@ -3,12 +3,11 @@
   "baseline": "Samples/Checkpoints/Chapter12",
   "deltas": [
     {
-      "file": "LibraryDesk.Client/Pages/InteropDemo.razor",
-      "source_sha256": "3834169920c791b001c7624cd29e58cc67e0df0bee7c50bbd0965ae49b7769aa",
+      "file": "LibraryDesk/LibraryDesk.Client/Pages/InteropDemo.razor",
+      "source_sha256": "a6615e977e1092315e11d349a5de0ae411d2c0d7740d0f7b58a65aa57880ec34",
       "before": "\"./js/catalog.js\"",
       "after": "\"./js/not-present.js\""
     }
   ],
-  "expected": "The missing module returns 404 and the component settles at Browser module unavailable. Reload to retry. Both interop buttons stay disabled. Restore the module path, reload, and invoke a fresh working instance.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/interop with the Network tab open. The status settles on Browser module unavailable. Reload to retry., both buttons stay disabled, and the Network tab shows not-present.js with status 404."
 }

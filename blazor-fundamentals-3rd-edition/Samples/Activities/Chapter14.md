@@ -1,30 +1,25 @@
-# Chapter 14 Activity Answer
+# Chapter 14 activity answer
 
-- Replace the card title with a long unbroken identifier and verify that it wraps without horizontal page overflow. Use browser zoom and a narrow viewport, then restore the normal title.
-- The supplied BookCard and stylesheet are the answer reference for local isolation, wrapping, and conditional width. Note the viewport and zoom you used; emulation isn't a physical-device test.
+The activity gives the book card a very long title with no spaces, in a copy, and checks that the card's scoped stylesheet keeps it inside the border on a narrow screen.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+On /style in the copy, with device emulation (Ctrl+Shift+M) at a width of 360:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter14`. Its README describes the expected result and how to start over.
+- The long title wraps inside the card's border, the card grows taller, and the page doesn't scroll sideways.
+- At 200 percent zoom (Ctrl+Plus) the title still wraps inside the card.
 
-## Reference Implementation
+After you delete `overflow-wrap: anywhere;` from BookCard.razor.css and run the copy again:
 
-- `../Checkpoints/Chapter14/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter14/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter14/LibraryDesk.Client/Components/BookCard.razor`
-- `../Checkpoints/Chapter14/LibraryDesk.Client/Components/BookCard.razor.css`
-- `../Checkpoints/Chapter14/LibraryDesk.Client/Pages/StyleDemo.razor`
+- The title runs past the border and the page scrolls sideways. Put the line back.
 
-## Expected Reasoning
+Note the width and zoom you used; the result is the same at any narrow width.
 
-Global host links, isolated component styles, and content-aware reflow work together. A static card gives a focused way to verify the asset pipeline without adding an interactive runtime.
+## Files involved
 
-## Production Notes
+- Samples/ActivityInvestigations/Chapter14: the copy's change and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/StyleDemo.razor (the long title) and LibraryDesk/LibraryDesk.Client/Components/BookCard.razor.css (the line you delete and restore).
 
-Local assets reduce third-party dependencies and make offline and privacy behavior easier to reason about. If a team adopts a CSS framework, pin its version and compile production assets through a repeatable toolchain. A playground CDN script is not the production Tailwind workflow. Do not fetch an unpinned latest stylesheet during every page load and call the result reproducible.
+## Why
 
-Verify the generated CSS in the served page.
-
-Responsive checks need real content. Long titles, translated text, zoom, and validation messages often reveal problems that a short placeholder misses. CSS isolation prevents some selector collisions, but it doesn't give you contrast, keyboard usability or semantic structure. Chapter 21 applies those additional checks to a form.
+A browser breaks text only at spaces and hyphens unless told otherwise. A word longer than its box overflows the box and widens the page. overflow-wrap: anywhere allows a break at any point when no better break exists, so the card's height grows instead of the page's width. The rule lives in the component's scoped stylesheet, so it applies to every BookCard and to nothing else. Zoom and device emulation shrink the space in CSS pixels the same way a phone does, but they don't replace a check on a real phone.

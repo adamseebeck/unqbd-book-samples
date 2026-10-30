@@ -1,0 +1,13 @@
+{
+  "chapter": 9,
+  "baseline": "Samples/Checkpoints/Chapter09",
+  "deltas": [
+    {
+      "file": "LibraryDesk/LibraryDesk/Services/MemoryCatalogQuery.cs",
+      "source_sha256": "360382059c3065b9890d0beddb6eea7e6515156e54ed3df5e2dd5bed2a824dc8",
+      "before": "public sealed class MemoryCatalogQuery : ICatalogQuery",
+      "after": "public sealed class ShortCatalogQuery : ICatalogQuery\n{\n    public Task<BookItem[]> GetAsync(\n        CancellationToken cancellationToken = default)\n    {\n        cancellationToken.ThrowIfCancellationRequested();\n        return Task.FromResult(new[]\n        {\n            new BookItem(1, \"Routing Field Notes\", 24m),\n            new BookItem(2, \"State Field Notes\", 28m)\n        });\n    }\n}\n\npublic sealed class MemoryCatalogQuery : ICatalogQuery"
+    }
+  ],
+  "expected": "After you change MemoryCatalogQuery to ShortCatalogQuery in the AddSingleton registration, http://127.0.0.1:58631/services shows Registered query returns 2 books. and the titles Routing Field Notes and State Field Notes, although ServicesDemo.razor didn't change. /books/3 shows No book has this identifier., because BookDetails uses the same registration. After you change builder.Services.AddScoped<FavoritesState>(); to builder.Services.AddSingleton<FavoritesState>();, open /favorites in two tabs and click Favorite C# in the first: the second tab changes to Favorites: 1 as well, without a reload. Every visitor would now share one favorites list."
+}

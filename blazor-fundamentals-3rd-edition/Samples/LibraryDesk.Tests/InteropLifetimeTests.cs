@@ -55,6 +55,9 @@ public sealed class InteropLifetimeTests
             return actual;
         }
     }
+    // BL0016 asks app code to guard JS interop calls with try/catch.
+    // These two classes stand in for the JavaScript runtime in tests.
+#pragma warning disable BL0016
     private sealed class PendingImport : IJSRuntime
     {
         public int Imports { get; private set; }
@@ -87,4 +90,5 @@ public sealed class InteropLifetimeTests
             return Disconnected ? ValueTask.FromException(new JSDisconnectedException("Isolated disconnected circuit.")) : ValueTask.CompletedTask;
         }
     }
+#pragma warning restore BL0016
 }

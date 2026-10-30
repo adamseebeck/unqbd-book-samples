@@ -1,29 +1,43 @@
-# Chapter 13 Activity Answer
+# Chapter 13 activity answer
 
-- Add a third BookItem and select it through the existing SelectBook component. Check that the parent status shows its numeric identifier.
-- Replace only the row fragment with a title and price layout while leaving BookList unchanged. The supplied files are the answer reference for typed composition and parent-owned selection.
+The activity makes SelectBook fail for one book, in a copy, then adds a third book and a price to the template without changing BookList.
 
-## Solved Source and Execution
+## What you should see
 
-Complete executable extension: `../ActivitySolutions/Chapter13`. Run and test commands are in that checkpoint's README.
+In the copy, where SelectBook's Select method throws for book 2:
 
-## Reference Implementation
+- Click Select C# Field Notes: the line reads Selected identifier: 1.
+- Click Select Blazor Field Notes: the fallback, The catalog component failed. Reload to retry., replaces the list, and the line still reads Selected identifier: 1.
 
-- `../Checkpoints/Chapter13/LibraryDesk.Client/Models/BookItem.cs`
-- `../Checkpoints/Chapter13/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter13/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter13/LibraryDesk.Client/Components/BookList.razor`
-- `../Checkpoints/Chapter13/LibraryDesk.Client/Components/SelectBook.razor`
-- `../Checkpoints/Chapter13/LibraryDesk.Client/Pages/TemplatesDemo.razor`
+After you add `new(3, "Database Field Notes", 26m)` to the books array in TemplatesDemo.razor (with a comma after the Blazor Field Notes line) and run the copy again:
 
-## Expected Reasoning
+- A Select Database Field Notes button appears; clicking it shows Selected identifier: 3.
 
-A typed fragment controls row markup, a typed callback reports the selection, and a local error boundary contains unexpected failures. Clear ownership removes the need for most imperative references.
+After you change the template to show the price:
 
-## Production Notes
+- Each row starts with its price: $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes, $26.00 Select Database Field Notes.
 
-Templates execute rendering logic supplied by the parent, so keep the contract narrow and avoid passing arbitrary executable fragments across a render-mode boundary. Delegate-like render content cannot be serialized as an ordinary parameter into a different runtime. Compose the BookList and SelectBook inside one interactive island.
+## The solved template
 
-Keep template composition inside one runtime boundary.
+The solved copy adds `@using System.Globalization` at the top of the page and one line at the start of the ItemTemplate:
 
-The example deliberately avoids a custom modal. A usable modal requires focus movement, focus containment, escape behavior, and a return-focus strategy; a visual overlay with a Close button is incomplete. Build and test those behaviors if the product requires a dialog, rather than advertising a decorative overlay as an accessible modal system.
+```razor
+<ItemTemplate Context="book">
+    <span>@book.Price.ToString("C", CultureInfo.GetCultureInfo("en-US"))</span>
+    <SelectBook Id="book.Id" Title="@book.Title"
+                Selected="Choose" />
+</ItemTemplate>
+```
+
+## Files involved
+
+- Samples/ActivityInvestigations/Chapter13: the copy with the failing Select method, and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Components/SelectBook.razor (the throw) and LibraryDesk/LibraryDesk.Client/Pages/TemplatesDemo.razor (your third book and price).
+- Samples/ActivitySolutions/Chapter13: the solved third book and price layout, without the throw. From that folder, dotnet test Tests/Chapter13.Tests.csproj runs its test; the last line reports Passed: 1.
+- Unchanged: LibraryDesk/LibraryDesk.Client/Components/BookList.razor.
+
+## Why
+
+The exception happens inside the ErrorBoundary, during an event in a child component, before the callback reaches TemplatesDemo. The boundary replaces its content with the fallback, and the status line, which sits outside the boundary, keeps its last value. The rest of the page and the circuit keep working.
+
+BookList knows nothing about books: it loops over Items and renders ItemTemplate for each one. The page owns the data and the row layout, so a third book or a new column needs no change to the list component. The en-US culture makes the price print in US dollars on any machine.

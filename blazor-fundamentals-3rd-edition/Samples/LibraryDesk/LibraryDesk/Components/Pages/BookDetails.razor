@@ -1,4 +1,5 @@
 @page "/books/{Id:int}"
+@using System.Globalization
 @using LibraryDesk.Client.Models
 @using LibraryDesk.Client.Services
 @inject ICatalogQuery Catalog
@@ -10,13 +11,20 @@
 else
 {
     <h2>@book.Title</h2>
-    <p>Price: @book.Price.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</p>
+    <p>Price: @book.Price.ToString("C", UsEnglish)</p>
 }
-<NavLink href="books/1">C#</NavLink> <NavLink href="books/2">Blazor</NavLink>
+<NavLink href="books/1">C#</NavLink>
+<NavLink href="books/2">Blazor</NavLink>
 
 @code {
+    private static readonly CultureInfo UsEnglish =
+        CultureInfo.GetCultureInfo("en-US");
+
     [Parameter] public int Id { get; set; }
+
     private BookItem? book;
+
     protected override async Task OnParametersSetAsync() =>
-        book = (await Catalog.GetAsync()).SingleOrDefault(b => b.Id == Id);
+        book = (await Catalog.GetAsync())
+            .SingleOrDefault(b => b.Id == Id);
 }

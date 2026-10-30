@@ -1,25 +1,30 @@
-# Chapter 1 Activity Answer
+# Chapter 1 activity answer
 
-- Open the Home component and replace the introductory paragraph with a description of your own public catalog. Keep the link as a native anchor.
-- Before adding a button, write down where its eventual handler must execute. The supplied Home file is the reference solution for a static landing page; Chapter 3 supplies the interactive counter.
+The activity has two parts: a two-sentence description of your own public catalog, and a render mode choice, from the rows of Figure 1.1, for three features.
 
-## Solved Source and Execution
+## Your catalog description
 
-Exact static-copy delta: `../ActivitySolutions/Chapter01/Home.razor`; its README names the target project.
+Any two sentences that describe a catalog you would like to build are right. For example:
 
-## Reference Implementation
+> A small catalog of the field guides in our team library, with the price and a short note for each. Anyone can browse it; only staff can change it.
 
-- `../global.json`
-- `../LibraryDesk/LibraryDesk/Components/Pages/Home.razor`
+Keep the text. In Chapter 3 you replace the first paragraph of LibraryDesk's Home page with it, inside the same `<p>` element. The rest of the page stays as Chapter 1 printed it.
 
-## Expected Reasoning
+## Which row each feature needs
 
-A component model and an execution model answer different questions. LibraryDesk will use static pages for content and explicit interactive boundaries for behavior, while keeping private decisions on the server.
+| Feature | Row in Figure 1.1 | Why |
+|---|---|---|
+| A link to the catalog page | Static SSR | Following a link is something plain HTML does. The browser requests the new address and the server renders it, so no C# needs to run after the page arrives. |
+| A Favorite button that updates a count on the page | An interactive row: Interactive Server, Interactive WebAssembly or Interactive Auto | A click must run C# to add the book and change the count. With static SSR the button would appear, but clicking it would do nothing, because nothing stays running after the HTML is sent. |
+| A search box that filters the book list as you type | An interactive row, as for the Favorite button | Every keystroke must run C# to filter the list and render the new result. Static SSR could only filter after a full form post. |
 
-## Production Notes
+Any of the three interactive rows works for the button and the search box. The choice between them is about where the code runs: on the server over a circuit (Interactive Server), in the browser after a download (Interactive WebAssembly), or first one and then the other (Interactive Auto). LibraryDesk uses Interactive Server for its first interactive page in Chapter 3, and Chapter 16 compares all four modes side by side.
 
-Server interactivity requires server memory and an active network path for each connected circuit. WebAssembly moves component work to the browser but adds startup downloads and exposes its assemblies and configuration to the user. Static rendering avoids an interactive runtime for content that needs only links and form posts. None of these choices is always faster. Measure the real page in your deployment environment before you choose one for speed.
+## Files involved
 
-Never put secrets in downloadable client code.
+- Samples/LibraryDesk/LibraryDesk/Components/Pages/Home.razor: the Home page from Chapter 1, the page your description goes into.
+- Samples/global.json: the SDK pin from Chapter 1.
 
-The examples target .NET 11 and use the .NET 11 SDK, version 11.0.100 or later.
+## Why
+
+The render mode decides where a component's C# runs. Make a component interactive only when a click or a keystroke must run C#; everything else can stay static, which costs no server memory and downloads nothing extra.

@@ -3,18 +3,17 @@
   "baseline": "Samples/Checkpoints/Chapter22",
   "deltas": [
     {
-      "file": "LibraryDesk/appsettings.json",
-      "source_sha256": "200332b434757a0054a3d356c91cde01f2c48712be8aa2bcb0f3e973619f06e3",
+      "file": "LibraryDesk/LibraryDesk/appsettings.json",
+      "source_sha256": "2d8bb40059df22089b94c025be8baad5a869b72d4d755d199c872f03bfe6f225",
       "before": "\"Default\": \"Information\",",
       "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
     },
     {
-      "file": "LibraryDesk/appsettings.Development.json",
-      "source_sha256": "73f95f9e0ceb205fc1c4dc50c07697fcfa29d7087868c2aef1d504cb38c771ec",
+      "file": "LibraryDesk/LibraryDesk/appsettings.Development.json",
+      "source_sha256": "817db0bf2ecca78364c41dbaf7949bf2504cf47a1c3d0d54f3be8178fefc030b",
       "before": "\"Default\": \"Information\",",
       "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
     }
   ],
-  "expected": "Two clicks produce sequential ReadNumber 1 and 2 and BookCount 3 in the server's Information logs. With the category threshold Warning, UI counts still advance but those Information records are absent. Restore the original category threshold.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/diagnostics and click twice. The page shows Reads recorded: 2, but the terminal shows no CatalogRead entries: the category now starts at Warning, and the entries are Information. After you change \"Warning\" back to \"Information\" in both files and run the copy again, each click writes an info: LibraryDesk.Components.Pages.Diagnostics[0] line followed by its CatalogRead line."
 }

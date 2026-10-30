@@ -1,31 +1,21 @@
-# Chapter 2 Activity Answer
+# Chapter 2 activity answer
 
-- Create the clean template in a new directory. Record dotnet --version, both project paths, and the first build result.
-- Change the SDK version to a deliberately unavailable value in a disposable copy, observe the resolution failure, and restore the correct value. Compare the resulting project structure with the supplied server/client sample; later service references are added in their own chapters.
-- After noting the clean results, change the static Home heading to LibraryDesk setup verified and run the checkpoint. Check that the returned page shows that exact heading.
+The activity checks two things in a copy of the Chapter 2 project: what the SDK pin in global.json does when it asks for a version you don't have, and that the copy runs with the command from Chapter 2.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+- With "version": "11.0.999" in the copy's global.json, dotnet --version fails. The error says A compatible .NET SDK was not found., then Requested SDK version: 11.0.999 and global.json file: followed by the full path of the copy's global.json. It also lists the installed SDKs.
+- With "11.0.100" back, dotnet --version prints 11.0.100 or a later 11.0 version again.
+- Run with the command from Chapter 2, the copy shows the heading LibraryDesk setup verified at http://127.0.0.1:58631. The copy's Home page has that heading in place of the template's Hello, world!
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter02`. Its README describes the expected result and how to start over.
+## Files involved
 
-## Reference Implementation
+- Samples/ActivityInvestigations/Chapter02: the copy's change and its README.
+- In the copy: global.json (you edit it) and LibraryDesk/LibraryDesk/Components/Pages/Home.razor (the changed heading).
+- Samples/Checkpoints/Chapter02: the project the copy starts from.
 
-- `../Checkpoints/Chapter02/global.json`
-- `../Checkpoints/Chapter02/LibraryDesk/LibraryDesk.csproj`
-- `../Checkpoints/Chapter02/LibraryDesk.Client/LibraryDesk.Client.csproj`
-- `../Checkpoints/Chapter02/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter02/LibraryDesk.Client/Program.cs`
+## Why
 
-## Expected Reasoning
+Every dotnet command looks for a global.json file in the current folder and its parents, and uses the SDK version it asks for. "rollForward": "latestFeature" lets a newer feature band of .NET 11 stand in, but no installed SDK can stand in for 11.0.999, so the command stops and tells you which file asked for it. That message is the one to look for when a project suddenly refuses to build on a new machine: check the version in global.json against dotnet --list-sdks.
 
-The project baseline consists of a selected SDK, matching target frameworks, explicit package versions, and a generated server/client layout. Verify that baseline before diagnosing application behavior.
-
-## Production Notes
-
-The supplied sample projects include exact package versions. Restore resolves their transitive dependencies, so record the resolved package graph when you ship a reproducible build. A network or vulnerability-feed failure is not a compiler error, so read the actual message before you change code. A clean build also doesn't mean your packages are free of known vulnerabilities; check advisories separately.
-
-Build the clean template before changing it.
-
-Use a dedicated working copy for compilation. Generated bin and obj directories are disposable build state, while your source files and configuration are the material to preserve. The companion code ships without those outputs. The full sample contains later chapters' registrations; the initial template command intentionally starts with fewer services.
+The copy also has a component test, Tests/Chapter02.Tests.csproj, that checks the changed heading. Run it from the copy's folder with dotnet test Tests/Chapter02.Tests.csproj.

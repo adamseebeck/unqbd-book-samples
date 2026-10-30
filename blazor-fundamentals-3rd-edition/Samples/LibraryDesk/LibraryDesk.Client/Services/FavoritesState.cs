@@ -8,7 +8,8 @@ public sealed class FavoritesState
 
     public void Add(int id)
     {
-        if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id));
+        if (id <= 0)
+            throw new ArgumentOutOfRangeException(nameof(id));
         if (ids.Add(id)) Changed?.Invoke();
     }
 

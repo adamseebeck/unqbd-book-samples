@@ -3,12 +3,11 @@
   "baseline": "Samples/Checkpoints/Chapter10",
   "deltas": [
     {
-      "file": "LibraryDesk.Client/Services/HttpCatalogQuery.cs",
-      "source_sha256": "de30977557c1a84c3c3db23ce2a93c6edfceedcc63cfaad7e339da8dca02f52e",
+      "file": "LibraryDesk/LibraryDesk.Client/Services/HttpCatalogQuery.cs",
+      "source_sha256": "33a9dedbd6cbbfd87f5c6b1e90a1f41d6b46d1f954fcfe6b87c2b929505afe4c",
       "before": "http.GetAsync(\"api/books\", cancellationToken)",
       "after": "http.GetAsync(\"api/not-present\", cancellationToken)"
     }
   ],
-  "expected": "The browser requests the deliberately missing same-origin path, receives 404, then shows the recoverable catalog-unavailable status with an enabled Load books button. Restore api/books and load three books.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it."
 }

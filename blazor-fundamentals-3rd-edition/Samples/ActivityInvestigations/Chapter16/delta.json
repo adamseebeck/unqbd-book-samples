@@ -3,30 +3,29 @@
   "baseline": "Samples/Checkpoints/Chapter16",
   "deltas": [
     {
-      "file": "LibraryDesk.Client/Components/ModeCounter.razor",
-      "source_sha256": "feb56e477b49edffae161c9e57307262d1004b6b08d3f6b4ccf247eab7fe018c",
+      "file": "LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor",
+      "source_sha256": "6ae405cba2fde4fb0e564a2e1de1986fe7f4e3e61458ab77c1fb4f56d9ce5f7d",
       "before": "<button @onclick=\"() => count++\">Increment mode counter</button>\n@code { private int count; }",
       "after": "<button @onclick=\"() => count += Step\">Increment mode counter</button>\n@code {\n    [Parameter] public int Step { get; set; } = 1;\n    private int count;\n}"
     },
     {
-      "file": "LibraryDesk/Components/Pages/Modes.razor",
-      "source_sha256": "bb8b91c8c1d19db2c14478dc65a27bf08140297327ef4ede0a4ebc2d36c52db3",
+      "file": "LibraryDesk/LibraryDesk/Components/Pages/Modes.razor",
+      "source_sha256": "e9ea8fc7e09e95281a7efa897a2311d408249ccd2032fa86f06d9f383e9b5744",
       "before": "<ModeCounter @rendermode=\"InteractiveServer\" />",
       "after": "<ModeCounter Step=\"2\" @rendermode=\"InteractiveServer\" />"
     },
     {
-      "file": "LibraryDesk/Components/Pages/Modes.razor",
-      "source_sha256": "bb8b91c8c1d19db2c14478dc65a27bf08140297327ef4ede0a4ebc2d36c52db3",
+      "file": "LibraryDesk/LibraryDesk/Components/Pages/Modes.razor",
+      "source_sha256": "e9ea8fc7e09e95281a7efa897a2311d408249ccd2032fa86f06d9f383e9b5744",
       "before": "<ModeCounter @rendermode=\"InteractiveWebAssembly\" />",
       "after": "<ModeCounter Step=\"3\" @rendermode=\"InteractiveWebAssembly\" />"
     },
     {
-      "file": "LibraryDesk/Components/Pages/Modes.razor",
-      "source_sha256": "bb8b91c8c1d19db2c14478dc65a27bf08140297327ef4ede0a4ebc2d36c52db3",
+      "file": "LibraryDesk/LibraryDesk/Components/Pages/Modes.razor",
+      "source_sha256": "e9ea8fc7e09e95281a7efa897a2311d408249ccd2032fa86f06d9f383e9b5744",
       "before": "<ModeCounter @rendermode=\"InteractiveAuto\" />",
       "after": "<ModeCounter Step=\"4\" @rendermode=\"InteractiveAuto\" />"
     }
   ],
-  "expected": "The new scalar Step parameter changes one-click counts to 2 for Server, 3 for WebAssembly and 4 for Auto. Component tests check parameter behavior; run the page in a browser to see each island's renderer and count. Full reload recreates their state.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/modes, wait until no counter reads Static, and click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4. After F5, all three counts return to 0, because the reload created new instances."
 }

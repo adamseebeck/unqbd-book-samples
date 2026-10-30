@@ -1,33 +1,28 @@
-# Chapter 19 Activity Answer
+# Chapter 19 activity answer
 
-- Use the supplied hub and LiveCatalog as the answer reference. Connect two tabs, send a valid notice, and check that both display it.
-- Send whitespace and check for a stable validation message. Navigate one tab away and return to verify a new owned connection.
-- Notice that the returned tab shows no history until another connected client sends a new notice.
-- Change only the client-side retained notice limit from twenty to five.
-- Keep two clients connected while sending six numbered notices. Check that both lists show exactly the last five, then repeat the existing validation and connection-lifetime checks.
+The task is to keep only the latest five notices instead of twenty, and to see the hub reject a notice that is too long. The copy already has the five-notice limit.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the copy's LibraryDesk/LibraryDesk.Client/Pages/LiveCatalog.razor, the line that drops the oldest notice reads:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter19`. Its README describes the expected result and how to start over.
+```csharp
+if (notices.Count == 5) notices.RemoveAt(0);
+```
 
-## Reference Implementation
+## What you should see
 
-- `../Checkpoints/Chapter19/LibraryDesk/Hubs/CatalogHub.cs`
-- `../Checkpoints/Chapter19/LibraryDesk.Client/LibraryDesk.Client.csproj`
-- `../Checkpoints/Chapter19/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter19/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter19/LibraryDesk.Client/Pages/LiveCatalog.razor`
+- Open http://127.0.0.1:58631/live in two tabs. From the first tab, broadcast Notice 1, Notice 2 and so on up to Notice 6. Both lists show Notice 2 to Notice 6; Notice 1 has been dropped.
+- Stop the copy, delete maxlength="120" from the input, and run it again. In the Console, copy("x".repeat(121)) puts a 121-character text on the clipboard. Paste it into the Notice box with Ctrl+V and click Broadcast locally: the status says Use a message from 1 to 120 characters.
 
-## Expected Reasoning
+## Files involved
 
-The hub validates and broadcasts, the browser owns its connection, and callbacks enter the renderer. Connection recovery and message persistence remain separate contracts.
+- Samples/ActivityInvestigations/Chapter19: the copy's change and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/LiveCatalog.razor (the limit, and the maxlength you delete).
+- Unchanged: LibraryDesk/LibraryDesk/Hubs/CatalogHub.cs, whose Announce method checks the length.
 
-## Production Notes
+## Why
 
-A public hub is unsuitable for private notifications until the server enforces access and group membership. Rate limits, payload limits, authenticated connection expiry, scale-out, and backpressure need a design tied to the deployment. This local example demonstrates broadcast behavior and validation; it isn't an internet-scale chat system.
+Each page keeps its own list of notices. Before it adds a new one, it removes the oldest when the list is full, so the list never grows past the limit. Both tabs receive the same six notices from the hub, so both drop Notice 1.
 
-Reconnection is not message durability.
-
-Dispose the owned HubConnection when the component leaves the page. Avoid performing UI mutations directly on a transport callback context. Under load, bound the callback work and batch renders. A two-client local test can't tell you production throughput or latency, so load-test before you rely on it. When you test, note which transport the connection actually used.
+maxlength only stops typing in the browser, and anyone can remove it, as you did. CatalogHub checks the length again on the server and throws a HubException. The page's Send method catches it and shows Use a message from 1 to 120 characters. as the status. Keep every rule that protects the server on the server.

@@ -3,12 +3,11 @@
   "baseline": "Samples/Checkpoints/Chapter08",
   "deltas": [
     {
-      "file": "LibraryDesk.Client/Models/FeedbackInput.cs",
-      "source_sha256": "4a35513a577c620e2b9f2e58f4fdba6058d1387f64326af9e18d8547782cc2b1",
+      "file": "LibraryDesk/LibraryDesk.Client/Models/FeedbackInput.cs",
+      "source_sha256": "73cf9dc4c2e389866d30c7fde2f62275e2aee571b404bb3c259fc49e9e4dae39",
       "before": "MinimumLength = 5",
       "after": "MinimumLength = 10"
     }
   ],
-  "expected": "The changed ten-character minimum rejects a nine-character message and accepts ten characters with otherwise valid values. Check both the interactive component and an antiforgery-protected static form POST. A fresh copy brings back the five-character rule.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "On http://127.0.0.1:58631/feedback, with Ada, ada@example.com and the nine-character message 123456789, Save shows The field Message must be a string with a minimum length of 10 and a maximum length of 300. and Nothing saved. With 1234567890, the status reads Feedback accepted locally for Ada. No account was created. On /static-feedback with JavaScript disabled, nine characters show the same message and No submission.; ten characters show Static form accepted locally. One change to the shared model changed both forms."
 }

@@ -4,18 +4,34 @@
 <a href="@SkipTarget" data-enhance-nav="false">Skip to content</a>
 <header><a href="/">LibraryDesk</a></header>
 <nav aria-label="Examples">
-    <a href="/run">Run</a> <a href="/components">Components</a>
-    <a href="/binding">Binding</a> <a href="/favorites">Favorites</a>
-    <a href="/books/1">Routes</a> <a href="/feedback">Forms</a>
-    <a href="/services">Services</a> <a href="/api-demo">API</a>
-    <a href="/security">Security</a> <a href="/interop">Interop</a>
-    <a href="/templates">Templates</a> <a href="/style">Style</a>
-    <a href="/virtual">Virtualize</a> <a href="/modes">Modes</a>
-    <a href="/catalog">Catalog</a> <a href="/live">Live</a>
-    <a href="/accessibility">Accessibility</a> <a href="/diagnostics">Diagnostics</a>
+    <a href="/run">Run</a>
+    <a href="/components">Components</a>
+    <a href="/binding">Binding</a>
+    <a href="/favorites">Favorites</a>
+    <a href="/books/1">Book details</a>
+    <a href="/feedback">Feedback</a>
+    <a href="/services">Services</a>
+    <a href="/api-demo">API</a>
+    <a href="/security">Security</a>
+    <a href="/interop">Interop</a>
+    <a href="/templates">Templates</a>
+    <a href="/style">Style</a>
+    <a href="/virtual">Virtualize</a>
+    <a href="/modes">Modes</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/live">Live</a>
+    <a href="/accessibility">Accessibility</a>
+    <a href="/diagnostics">Diagnostics</a>
 </nav>
 <main id="main" tabindex="-1">@Body</main>
-@code { private string SkipTarget => Navigation.Uri.Split('#')[0] + "#main"; }
+
+@code {
+    private string SkipTarget =>
+        Navigation.Uri.Split('#')[0] + "#main";
+}
+
 <div id="blazor-error-ui" data-nosnippet>
-    The app encountered an error. <a href=".">Reload</a>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
 </div>

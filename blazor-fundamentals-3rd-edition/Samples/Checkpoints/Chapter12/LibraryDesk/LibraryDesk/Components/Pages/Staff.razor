@@ -1,0 +1,6 @@
+@page "/staff"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "Staff")]
+
+<h1>Staff area</h1>
+<p>Only an identity that passes the Staff policy sees this.</p>

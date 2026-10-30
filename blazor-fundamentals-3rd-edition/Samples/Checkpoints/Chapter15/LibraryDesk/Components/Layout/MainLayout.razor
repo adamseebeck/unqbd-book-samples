@@ -1,7 +1,0 @@
-@inherits LayoutComponentBase
-@inject NavigationManager Navigation
-<a href="@SkipTarget" data-enhance-nav="false">Skip to content</a>
-<nav aria-label="Chapter examples"><a href="/virtual">/virtual</a></nav>
-<main id="main" tabindex="-1">@Body</main>
-@code { private string SkipTarget => Navigation.Uri.Split('#')[0] + "#main"; }
-<div id="blazor-error-ui">An error occurred. Reload this page.</div>

@@ -1,5 +1,31 @@
-# Chapter 19 Executable Checkpoint
+# LibraryDesk at the end of Chapter 19
 
-Copy this complete directory to a working folder, keep its global.json active, and run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631`. Use one host at a time or choose a different port. The generated App shell and client assembly are included; focused files are listed in the chapter. Data Protection keys in this local example are ephemeral; a real deployment needs durable key storage.
+This folder is the LibraryDesk project as it stands at the end of Chapter 19, laid out like your own working folder: global.json, the LibraryDesk solution folder (LibraryDesk.sln, the LibraryDesk server project and the LibraryDesk.Client project) and LibraryDesk.Tests.
 
-This checkpoint is the Chapter 2 project plus Chapter 19's files only; it doesn't include earlier chapters' pages. Samples/LibraryDesk combines all chapters.
+## Catch up from here
+
+If you skipped Chapter 19, or your project stopped working and you can't find why, copy this whole folder to a new working folder, such as C:/BookExercises/LibraryDesk, and continue with Chapter 20 there. Work in the copy, so this folder stays as it is.
+
+## Run it
+
+From the working folder, run this command, typed as one line:
+
+```powershell
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
+```
+
+The terminal shows Now listening on: http://127.0.0.1:58631. Open that address in your browser. Press Ctrl+C in the terminal to stop the app.
+
+## What Chapter 19 added
+
+Chapter 19 added http://127.0.0.1:58631/live (Live in the menu): catalog notices sent through the CatalogHub SignalR hub at /hubs/catalog. LibraryDesk.Tests also holds LiveTransportTests.cs.
+
+## Run the tests
+
+Stop the app first, then run this from the working folder:
+
+```powershell
+dotnet test LibraryDesk.Tests
+```
+
+The last line starts with Passed! and reports Failed: 0, Passed: 23, Skipped: 0, Total: 23.

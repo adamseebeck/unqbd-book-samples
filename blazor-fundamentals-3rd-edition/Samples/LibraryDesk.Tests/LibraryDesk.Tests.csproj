@@ -1,17 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net11.0</TargetFramework>
-        <IsTestProject>true</IsTestProject>
-        <IsPackable>false</IsPackable>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="bunit" Version="2.9.0" />
-        <PackageReference Include="xunit" Version="2.9.3" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-        <ProjectReference Include="../LibraryDesk/LibraryDesk.Client/LibraryDesk.Client.csproj" />
-    </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ClientFolder>../LibraryDesk/LibraryDesk.Client</ClientFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="2.9.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio"
+        Version="3.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk"
+        Version="18.0.1" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference
+        Include="$(ClientFolder)/LibraryDesk.Client.csproj" />
+  </ItemGroup>
+
 </Project>

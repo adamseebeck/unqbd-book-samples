@@ -5,9 +5,16 @@
 @inject ICatalogQuery Catalog
 <h1>Catalog service</h1>
 <p>Registered query returns @books.Length books.</p>
-<ul>@foreach (var book in books) { <li @key="book.Id">@book.Title</li> }</ul>
+<ul>
+    @foreach (var book in books)
+    {
+        <li @key="book.Id">@book.Title</li>
+    }
+</ul>
 
 @code {
     private BookItem[] books = [];
-    protected override async Task OnInitializedAsync() => books = await Catalog.GetAsync();
+
+    protected override async Task OnInitializedAsync() =>
+        books = await Catalog.GetAsync();
 }

@@ -1,5 +1,27 @@
-# Chapter 5 Activity Solution
+# Chapter 5 activity: solved copy
 
-This complete source checkpoint implements the chapter's code extension. Run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631` from this directory, with the SDK that global.json selects. Use one host at a time. Run `dotnet test Tests/Chapter05.Tests.csproj` to check the extension's component behavior.
+This folder is Samples/Checkpoints/Chapter05, the LibraryDesk project at the end of Chapter 5, with the activity solved. Compare it with your own copy. You can run the app and its test from this folder; dotnet adds bin and obj folders here as it builds.
 
-Changed implementation: `LibraryDesk.Client/Pages/BindingDemo.razor`. All other prerequisites and startup files are included. Everything runs locally, and nothing is written outside the app.
+## The solved change
+
+LibraryDesk/LibraryDesk.Client/Pages/BindingDemo.razor keeps @bind:event="oninput" on the input and has a new line under it, `<p id="match-count">Matches: @Matches.Length</p>`, above the Search text line.
+
+## Run it
+
+From the folder, run the command from Chapter 2, typed as one line:
+
+```powershell
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
+```
+
+Open http://127.0.0.1:58631/binding. The list changes as you type, and the new line shows Matches: 3 for an empty box, Matches: 1 for BLAZOR and Matches: 0 for xyz. Press Ctrl+C in the terminal to stop the app.
+
+## Run its test
+
+Stop the app, then run this from the folder:
+
+```powershell
+dotnet test Tests/Chapter05.Tests.csproj
+```
+
+The last line starts with Passed! and reports Failed: 0, Passed: 1, Skipped: 0, Total: 1. Samples/Activities/Chapter05.md explains the answer.

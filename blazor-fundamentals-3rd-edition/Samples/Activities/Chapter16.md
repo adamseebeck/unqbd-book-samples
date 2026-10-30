@@ -1,32 +1,32 @@
-# Chapter 16 Activity Answer
+# Chapter 16 activity answer
 
-- Use the supplied Modes page as the answer reference. Record each renderer after startup, increment each counter once, and reload.
-- Then visit /auto-counter twice after allowing the client assets to download, recording its actual renderer on each visit. Explain any state reset rather than treating it as a defect in the counter.
-- Add a serializable int Step parameter, defaulting to 1, to ModeCounter and increment count by Step.
-- Set the Server, WebAssembly and Auto island parameters to 2, 3 and 4. Click each once, record the actual renderers and resulting counts, then explain the full-reload reset.
+The activity gives ModeCounter a Step parameter, in a copy, and passes a different step to each island on /modes.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the copy's LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter16`. Its README describes the expected result and how to start over.
+```razor
+<button @onclick="() => count += Step">Increment mode counter</button>
+@code {
+    [Parameter] public int Step { get; set; } = 1;
+    private int count;
+}
+```
 
-## Reference Implementation
+In the copy's LibraryDesk/LibraryDesk/Components/Pages/Modes.razor, the three islands set Step="2" (Server), Step="3" (WebAssembly) and Step="4" (Auto).
 
-- `../Checkpoints/Chapter16/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter16/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter16/LibraryDesk.Client/Components/ModeCounter.razor`
-- `../Checkpoints/Chapter16/LibraryDesk/Components/Pages/Modes.razor`
-- `../Checkpoints/Chapter16/LibraryDesk.Client/Pages/AutoCounter.razor`
+## What you should see
 
-## Expected Reasoning
+- Open /modes and wait until no counter reads Static. Click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4.
+- Press F5. All three counts return to 0.
+- Chapter 18 shows how to check a parameter like Step with a component test. The copy already has one: from the copy's folder, dotnet test Tests/Chapter16.Tests.csproj checks one click with Step 2, 3 and 4, and the last line reports Passed: 3.
 
-A static parent can host explicit interactive islands, while prerender and runtime activation have different instances. Renderer identity and actual clicks make those boundaries observable.
+## Files involved
 
-## Production Notes
+- Samples/ActivityInvestigations/Chapter16: the copy's changes, its README and its Tests folder.
+- In the copy: the two files above.
 
-Server-rendered HTML is generated for a request, not automatically at application build time. A Blazor Web App with Server interactivity still needs an ASP.NET Core host even when some routes are static. Copying its initial HTML to static storage does not preserve server endpoints or circuits. Standalone WebAssembly has a different deployment artifact, discussed in Chapter 23.
+## Why
 
-Test each runtime you support.
-
-The .NET 11 template uses BasePath in the document head and includes a reconnection component for Server circuits. Having them doesn't mean subdirectory hosting or reconnection after circuit expiry works. Check asset URLs, direct routes, transport recovery and fresh state in your real deployment. Shared components that compile still need a browser test to show that WebAssembly starts and the page is interactive.
+A parameter that crosses into an island must be serializable data, because the island runs in another runtime: on the server over a circuit, or in the browser. A plain int is data, so it can cross into every island. Each island is a separate instance with its own count, so the steps never mix. Auto shows WebAssembly here by rule 1: the page also has a WebAssembly island. The reload creates new instances, so every count starts again at 0.

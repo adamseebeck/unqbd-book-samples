@@ -1,29 +1,33 @@
-# Chapter 22 Activity Answer
+# Chapter 22 activity answer
 
-- Run /diagnostics, click twice, and find the matching server events with BookCount=3 and sequential ReadNumber values. Change the category threshold in a disposable copy so Information is suppressed, then restore it.
-- The supplied Diagnostics and appsettings files are the answer reference. Do not create a remote telemetry resource or send real user data.
+The activity raises the log threshold for the Diagnostics category to Warning, in a copy, and sees the entries disappear from the terminal while the page keeps counting.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+The copy adds this line to the LogLevel section of both appsettings.json and appsettings.Development.json:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter22`. Its README describes the expected result and how to start over.
+```json
+      "LibraryDesk.Components.Pages.Diagnostics": "Warning",
+```
 
-## Reference Implementation
+## What you should see
 
-- `../Checkpoints/Chapter22/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter22/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter22/LibraryDesk/Components/Pages/Diagnostics.razor`
-- `../Checkpoints/Chapter22/LibraryDesk/appsettings.json`
+- Open /diagnostics and click twice. The page shows Reads recorded: 2, but the terminal shows no CatalogRead entries.
+- Change "Warning" back to "Information" in both files and run the copy again. Each click writes the entry again, as in the chapter:
 
-## Expected Reasoning
+```text
+info: LibraryDesk.Components.Pages.Diagnostics[0]
+      CatalogRead 3 1
+```
 
-The logger category, message template, execution host, and provider determine what a log means. The local event demonstrates that path without implying an unconfigured monitoring service exists.
+- From the copy's folder, dotnet test Tests/Chapter22.Tests.csproj checks the copy as created: two clicks count 2, and no entry is written. Its last line reports Passed: 1.
 
-## Production Notes
+## Files involved
 
-Structured logs should use bounded property names and values. A raw URL, arbitrary search string, or user identifier can create high cardinality, sensitive content, and high storage cost. Correlation identifiers are useful when their lifecycle and exposure are controlled. Never log authentication cookies, bearer tokens, passwords, or an entire configuration object.
+- Samples/ActivityInvestigations/Chapter22: the copy's change, its README and its Tests folder.
+- In the copy: LibraryDesk/LibraryDesk/appsettings.json and LibraryDesk/LibraryDesk/appsettings.Development.json.
+- Unchanged: LibraryDesk/LibraryDesk/Components/Pages/Diagnostics.razor, which still calls LogInformation on each click.
 
-Check the receiver before you rely on monitoring.
+## Why
 
-Metrics and traces complement logs but do not replace error handling. A production collector needs delivery, sampling, retention, and access decisions. The local example verifies a structured server event only. It does not measure a production error rate or promise durable telemetry after the process exits.
+The category of an ILogger<Diagnostics> is the class's full name, LibraryDesk.Components.Pages.Diagnostics. The most specific LogLevel entry that matches a category wins over Default. With Warning, the logger drops Information entries before any provider writes them, so the terminal stays quiet, while the page's own count, which doesn't depend on logging, still goes up. The app runs in Development, which reads appsettings.Development.json on top of appsettings.json, so the line must change in both files.

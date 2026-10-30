@@ -1,29 +1,28 @@
-# Chapter 12 Activity Answer
+# Chapter 12 activity answer
 
-- Use the supplied module and component as the answer reference. Focus the input by keyboard activation of the button, request the browser time, navigate away, and return.
-- Check that you get a fresh working instance with no duplicated callbacks. In a disposable copy, break the module path and verify the visible import-failure state, then restore the correct path.
+The activity has two parts: the keyboard path on /interop in your running project, and a broken module path in a copy.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In your running project:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter12`. Its README describes the expected result and how to start over.
+- Press Tab until Focus input is highlighted and press Enter: the cursor moves into the text box and the status reads Input focused.
+- Click Read browser time, click another menu link and come back with Interop. Both buttons become active again after a moment, and one click on Read browser time updates the time once.
 
-## Reference Implementation
+In the copy, where InteropDemo imports ./js/not-present.js:
 
-- `../Checkpoints/Chapter12/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter12/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter12/LibraryDesk.Client/wwwroot/js/catalog.js`
-- `../Checkpoints/Chapter12/LibraryDesk.Client/Pages/InteropDemo.razor`
+- The status settles on Browser module unavailable. Reload to retry.
+- Both buttons stay disabled.
+- The Network tab shows not-present.js with status 404.
 
-## Expected Reasoning
+## Files involved
 
-The module, element, callback reference, and component each have a lifetime. Placing work after render and disposing the references keeps those lifetimes aligned.
+- Samples/ActivityInvestigations/Chapter12: the copy's change and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/InteropDemo.razor, with the module path ./js/not-present.js.
+- Unchanged: LibraryDesk/LibraryDesk.Client/wwwroot/js/catalog.js, the module your project loads.
 
-## Production Notes
+## Why
 
-An interop boundary serializes values and can be expensive when invoked repeatedly. Batch related work instead of calling JavaScript once per cell in a large table. Keep the JavaScript contract small and explicit. Do not pass a broad component object into JavaScript when a narrow value or method reference is enough.
+Coming back to /interop creates a new InteropDemo with its own module and .NET object reference; the old instance released both when you left, so the time updates once, not twice. In the copy the browser can't load the module, so the import call fails with a JSException. The page catches it, shows the message, and leaves module null. Both buttons are disabled while module is null, so the visitor can't call into a module that never loaded.
 
-Dispose every object reference you create.
-
-DOM cleanup after a node disappears can require a JavaScript MutationObserver rather than a late server interop call. This example only owns a module and instance reference, so its disposal does not attempt to manipulate removed elements. A disconnected page can't tell you whether browser cleanup ran; check cleanup in the running host.
+The copy also has a component test, Tests/Chapter12.Tests.csproj, that gives InteropDemo a stand-in JavaScript runtime whose import fails and checks the path, the message and the disabled buttons.

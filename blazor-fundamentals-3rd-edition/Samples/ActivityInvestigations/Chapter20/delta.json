@@ -1,20 +1,19 @@
 {
   "chapter": 20,
-  "baseline": "Samples",
+  "baseline": "Samples/Checkpoints/Chapter20",
   "deltas": [
     {
       "file": "LibraryDesk.Pwa/Pages/Home.razor",
-      "source_sha256": "f3cc81e018ebf07d3d400c27bc4f58ec6e5d332e7da53a06f0d97cceb4af9d5c",
+      "source_sha256": "a402077b9fe763655a82e4c8b410604d8e70671803a1f934aa2d888bda6b73cc",
       "before": "titles.Length >= 50",
       "after": "titles.Length >= 3"
     },
     {
       "file": "LibraryDesk.Pwa/Pages/Home.razor",
-      "source_sha256": "f3cc81e018ebf07d3d400c27bc4f58ec6e5d332e7da53a06f0d97cceb4af9d5c",
+      "source_sha256": "a402077b9fe763655a82e4c8b410604d8e70671803a1f934aa2d888bda6b73cc",
       "before": "limited to 50 titles.",
       "after": "limited to 3 titles."
     }
   ],
-  "expected": "The changed PWA stores exactly three titles. A fourth save reports the three-title limit without another localStorage write, and a fresh component reloads the same three persisted titles. This component test is separate from the finished PWA's offline test with the published worker.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Save titles until the list has three, then try a fourth: the status reads This local list is limited to 3 titles. and the list still has three. Reload: the same three titles load."
 }

@@ -1,6 +1,7 @@
 @page "/diagnostics"
 @rendermode InteractiveServer
 @inject ILogger<Diagnostics> Logger
+<PageTitle>Catalog diagnostics</PageTitle>
 <h1>Catalog diagnostics</h1>
 <button @onclick="Record">Record catalog read</button>
 <p role="status">Reads recorded: @reads</p>
@@ -9,6 +10,7 @@
     private void Record()
     {
         reads++;
-        Logger.LogInformation("CatalogRead {BookCount} {ReadNumber}", 3, reads);
+        Logger.LogInformation(
+            "CatalogRead {BookCount} {ReadNumber}", 3, reads);
     }
 }

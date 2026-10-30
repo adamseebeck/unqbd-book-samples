@@ -1,42 +1,32 @@
-# Chapter 20 Activity Answer
+# Chapter 20 activity answer
 
-- Use the supplied PWA Home and generated worker files as the answer reference. Publish locally, save one title, wait for worker control, stop the local server, and reload the same URL.
-- Check that the title is still visible. Restore the server afterward.
-- Installation and physical-device testing are separate checks; this activity doesn't deploy anything.
-- Change the local reading-list limit and its message from fifty to three titles in a disposable PWA copy.
-- Save three titles, try a fourth, and check that the stored list still has three after reloading. This changed copy is separate from the published offline check above.
+The activity lowers the reading list's limit from 50 titles to 3, in a copy, and checks that the limit holds and the list survives a reload.
 
 ## Commands
 
-In a working copy of Samples, publish and serve the PWA from the folder that holds LibraryDesk.Pwa:
+From the copy's folder, run the offline app with the dotnet run command from Chapter 20, typed as one line:
 
 ```powershell
-dotnet publish LibraryDesk.Pwa/LibraryDesk.Pwa.csproj -c Release -o artifacts/pwa
-python -m http.server 58632 --bind 127.0.0.1 --directory artifacts/pwa/wwwroot
+dotnet run --project LibraryDesk.Pwa/LibraryDesk.Pwa.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58634
 ```
 
-Open http://127.0.0.1:58632/ and wait a few seconds for the service worker to install. Add a title and reload, so the worker controls the page. Stop the server with Ctrl+C in its terminal and reload the same address: the shell and the saved title are still there.
+Run the copy's test, with the app stopped:
 
-## Solved Source and Execution
+```powershell
+dotnet test Tests/Chapter20.Tests.csproj
+```
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+## What you should see
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter20`. Its README describes the expected result and how to start over.
+- Open http://127.0.0.1:58634. Save titles until the list has three, then try a fourth: the status reads This local list is limited to 3 titles. and the list still has three.
+- Reload: the same three titles load.
+- The test saves three titles, tries a fourth, and checks that only three writes reached localStorage. Its last line starts with Passed! and reports Passed: 1.
 
-## Reference Implementation
+## Files involved
 
-- `../LibraryDesk.Pwa/Pages/Home.razor`
-- `../LibraryDesk.Pwa/wwwroot/manifest.webmanifest`
-- `../LibraryDesk.Pwa/wwwroot/service-worker.published.js`
+- Samples/ActivityInvestigations/Chapter20: the copy's change, its README and its Tests folder.
+- In the copy: LibraryDesk.Pwa/Pages/Home.razor, where both the check (titles.Length >= 3) and the message (limited to 3 titles.) change.
 
-## Expected Reasoning
+## Why
 
-The PWA shell and device-local list use different browser stores. Published-worker activation, same-origin reloads and storage failure handling make up the offline behavior this chapter teaches.
-
-## Production Notes
-
-Service workers have an update lifecycle, and an old worker can continue serving an old shell while pages remain open. Test upgrade behavior with two distinct published versions before relying on a rollout. Cache storage can fail or be evicted. Present recovery and export options for valuable offline work rather than treating browser storage as a permanent backup.
-
-Keep offline data ownership explicit.
-
-The sample has no offline mutation queue and no conflict resolution, so a saved title doesn't mean it can sync. An online synchronization feature would require authenticated ownership, idempotent writes, version handling, and a visible recovery path. A local offline reload of the published app is also different from installing it on a physical device or running a hosted deployment, so test each one you need.
+Save checks the limit before it builds the new list or calls localStorage, so the fourth title never reaches the browser's storage and the list on screen stays at three. The list in localStorage belongs to the origin, http://127.0.0.1:58634, so a reload reads the same three titles back. Change the number in both places, the check and the message, or the page reports a limit it doesn't enforce.

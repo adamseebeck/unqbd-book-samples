@@ -1,9 +1,11 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-string directory = Path.Combine(Path.GetTempPath(), $"csharp-school-{Guid.NewGuid():N}");
+string directory = Path.Combine(
+    Path.GetTempPath(), $"csharp-school-{Guid.NewGuid():N}");
 Directory.CreateDirectory(directory);
-using SchoolContext db = new(Path.Combine(directory, "school.db"));
+using SchoolContext db =
+    new(Path.Combine(directory, "school.db"));
 db.Database.EnsureCreated();
 db.Students.AddRange(
     new Student { Name = "Maria", Score = 95 },
@@ -40,15 +42,18 @@ public class Student
 public class SchoolContext : DbContext
 {
     private readonly string _databasePath;
-    public SchoolContext(string databasePath) => _databasePath = databasePath;
+    public SchoolContext(string databasePath)
+        => _databasePath = databasePath;
     public DbSet<Student> Students => Set<Student>();
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    protected override void OnConfiguring(
+        DbContextOptionsBuilder options)
     {
-        string connectionString = new SqliteConnectionStringBuilder
-        {
-            DataSource = _databasePath
-        }.ToString();
+        string connectionString =
+            new SqliteConnectionStringBuilder
+            {
+                DataSource = _databasePath
+            }.ToString();
         options.UseSqlite(connectionString);
     }
 }

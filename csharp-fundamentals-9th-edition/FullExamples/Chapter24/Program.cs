@@ -3,7 +3,8 @@ int notifications = 0;
 EventHandler<ThresholdReachedEventArgs> handler = (_, data) =>
 {
     notifications++;
-    Console.WriteLine($"Threshold reached: {data.SensorName} = {data.Reading}");
+    Console.WriteLine(
+        $"Threshold reached: {data.SensorName} = {data.Reading}");
 };
 
 sensor.ThresholdReached += handler;
@@ -16,13 +17,15 @@ Console.WriteLine($"Notifications: {notifications}");
 public partial class Sensor
 {
     public partial Sensor(string name);
-    public partial event EventHandler<ThresholdReachedEventArgs>? ThresholdReached;
+    public partial event
+        EventHandler<ThresholdReachedEventArgs>? ThresholdReached;
     public string Name { get; }
 }
 
 public partial class Sensor
 {
-    private EventHandler<ThresholdReachedEventArgs>? _thresholdReached;
+    private EventHandler<ThresholdReachedEventArgs>?
+        _thresholdReached;
 
     public partial Sensor(string name)
     {
@@ -31,7 +34,8 @@ public partial class Sensor
         Console.WriteLine($"Sensor initialized: {Name}");
     }
 
-    public partial event EventHandler<ThresholdReachedEventArgs>? ThresholdReached
+    public partial event
+        EventHandler<ThresholdReachedEventArgs>? ThresholdReached
     {
         add => _thresholdReached += value;
         remove => _thresholdReached -= value;
@@ -50,7 +54,8 @@ public sealed class ThresholdReachedEventArgs : EventArgs
     public string SensorName { get; }
     public int Reading { get; }
 
-    public ThresholdReachedEventArgs(string sensorName, int reading)
+    public ThresholdReachedEventArgs(
+        string sensorName, int reading)
     {
         SensorName = sensorName;
         Reading = reading;

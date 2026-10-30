@@ -28,7 +28,7 @@ From this folder:
 
 ```powershell
 cd FullExamples/Chapter19
-dotnet test --project SimpleCalculator.Tests/SimpleCalculator.Tests.csproj
+dotnet test --project SimpleCalculator.Tests
 ```
 
 The local global.json selects Microsoft.Testing.Platform. The test project uses xunit.v3.mtp-v2 4.0.1 and references the actual SimpleCalculator library. Its 11 tests should pass. Return to this folder before using other commands from this page.

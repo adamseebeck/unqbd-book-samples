@@ -7,10 +7,12 @@ for (int i = 0; i < numbers.Length; i++)
         string? input = Console.ReadLine();
         if (input is null)
         {
-            Console.WriteLine("Input ended before all ten numbers were read.");
+            Console.WriteLine(
+                "Input ended before all ten numbers were read.");
             return;
         }
-        if (double.TryParse(input, out double value) && double.IsFinite(value))
+        if (double.TryParse(input, out double value)
+            && double.IsFinite(value))
         {
             numbers[i] = value;
             break;

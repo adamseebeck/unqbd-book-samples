@@ -45,11 +45,13 @@ int ReadInteger(string prompt)
 void CheckAge(int age)
 {
     if (age < 0)
-        throw new ArgumentOutOfRangeException(nameof(age), "Age cannot be negative.");
+        throw new ArgumentOutOfRangeException(
+            nameof(age), "Age cannot be negative.");
     Console.WriteLine($"Age is {age}");
 }
 
 class InvalidScoreException : Exception
 {
-    public InvalidScoreException(string message) : base(message) { }
+    public InvalidScoreException(string message)
+        : base(message) { }
 }

@@ -32,7 +32,8 @@ public class AppSettings
     public string Theme
     {
         get;
-        set => field = string.IsNullOrWhiteSpace(value) ? "Light" : value;
+        set => field = string.IsNullOrWhiteSpace(value)
+            ? "Light" : value;
     } = "Light";
 
     public int Saves { get; set; }

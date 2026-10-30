@@ -14,12 +14,18 @@ Console.WriteLine($"Method: {string.Join(", ", methodResult)}");
 Console.WriteLine($"Query: {string.Join(", ", queryResult)}");
 
 string[] names = { "Anna", "Ben", "Clara", "David" };
-Console.WriteLine($"Short: {string.Join(", ", names.Where(n => n.Length <= 4))}");
-Console.WriteLine($"Upper: {string.Join(", ", names.Select(n => n.ToUpperInvariant()))}");
+var shortNames = names.Where(n => n.Length <= 4);
+var upperNames = names.Select(n => n.ToUpperInvariant());
+Console.WriteLine($"Short: {string.Join(", ", shortNames)}");
+Console.WriteLine($"Upper: {string.Join(", ", upperNames)}");
 
 int[] values = { 10, 4, 7, 2, 9 };
-Console.WriteLine($"Sorted: {string.Join(", ", values.OrderBy(v => v))}");
-Console.WriteLine($"Max: {values.Max()}, Min: {values.Min()}, Average: {values.Average().ToString("0.0", CultureInfo.InvariantCulture)}");
+var sorted = values.OrderBy(v => v);
+string average = values.Average()
+    .ToString("0.0", CultureInfo.InvariantCulture);
+Console.WriteLine($"Sorted: {string.Join(", ", sorted)}");
+Console.WriteLine($"Max: {values.Max()}, Min: {values.Min()}, " +
+    $"Average: {average}");
 
 List<int> data = new() { 1, 2, 3 };
 var query = data.Where(x => x > 1);

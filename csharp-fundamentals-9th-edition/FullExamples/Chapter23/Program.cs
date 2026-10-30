@@ -4,7 +4,8 @@ Console.WriteLine($"Words: {sentence.WordCount()}");
 Console.WriteLine($"Question: {"Is it clear?".IsQuestion}");
 
 DateTime monday = new(2026, 10, 12);
-Console.WriteLine($"Days until weekend: {monday.DaysUntilWeekend}");
+Console.WriteLine(
+    $"Days until weekend: {monday.DaysUntilWeekend}");
 Console.WriteLine($"Square: {int.Square(5)}");
 
 IEnumerable<string> words = sentence.Split(
@@ -22,20 +23,23 @@ public static class DemoExtensions
 
     extension(string? text)
     {
-        public bool IsQuestion => text?.TrimEnd().EndsWith('?') == true;
+        public bool IsQuestion =>
+            text?.TrimEnd().EndsWith('?') == true;
     }
 
     extension(DateTime date)
     {
         public int DaysUntilWeekend =>
-            date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday
+            date.DayOfWeek is DayOfWeek.Saturday
+                    or DayOfWeek.Sunday
                 ? 0
                 : (int)DayOfWeek.Saturday - (int)date.DayOfWeek;
     }
 
     extension(int)
     {
-        public static int Square(int value) => checked(value * value);
+        public static int Square(int value)
+            => checked(value * value);
     }
 }
 

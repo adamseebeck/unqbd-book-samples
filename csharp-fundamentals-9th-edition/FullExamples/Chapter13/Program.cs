@@ -34,7 +34,9 @@ if (history.TryPop(out string? page))
     Console.WriteLine(page);
 
 string[] values = { "Hello", "HELLO" };
-List<string> presized = [with(capacity: values.Length * 2), .. values];
-HashSet<string> unique = [with(StringComparer.OrdinalIgnoreCase), .. values];
+List<string> presized =
+    [with(capacity: values.Length * 2), .. values];
+HashSet<string> unique =
+    [with(StringComparer.OrdinalIgnoreCase), .. values];
 Console.WriteLine($"Constructed count: {presized.Count}");
 Console.WriteLine($"Unique count: {unique.Count}");

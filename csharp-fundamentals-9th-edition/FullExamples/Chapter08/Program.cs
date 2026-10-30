@@ -1,9 +1,11 @@
 Person person = new Person("Maria", 30);
 person.Introduce();
 
-Car car1 = new Car { Make = "Toyota", Model = "Camry", Year = 2024 };
+Car car1 =
+    new Car { Make = "Toyota", Model = "Camry", Year = 2024 };
 car1.DisplayInfo();
-Car car2 = new Car { Make = "Ford", Model = "Mustang", Year = 2023 };
+Car car2 =
+    new Car { Make = "Ford", Model = "Mustang", Year = 2023 };
 car2.DisplayInfo();
 
 Account account = new Account();
@@ -21,7 +23,8 @@ class Person
     }
     public void Introduce()
     {
-        Console.WriteLine($"Hi, my name is {Name} and I am {Age} years old.");
+        Console.WriteLine(
+            $"Hi, my name is {Name} and I am {Age} years old.");
     }
 }
 

@@ -14,17 +14,21 @@ Console.WriteLine(DescribeState(registered));
 Console.WriteLine(DescribeState(waitlisted));
 Console.WriteLine(DescribeState(absent));
 
-static string DescribeResult(EnrollmentResult result) => result switch
+static string DescribeResult(
+    EnrollmentResult result) => result switch
 {
-    Enrolled(var student, var seat) => $"Enrolled: {student}, seat {seat}",
+    Enrolled(var student, var seat) =>
+        $"Enrolled: {student}, seat {seat}",
     Rejected(var reason) => $"Rejected: {reason}",
     null => "No result"
 };
 
-static string DescribeState(EnrollmentState? state) => state switch
+static string DescribeState(
+    EnrollmentState? state) => state switch
 {
     Registered(var student) => $"Registered: {student}",
-    Waitlisted(var position) => $"Waitlisted: position {position}",
+    Waitlisted(var position) =>
+        $"Waitlisted: position {position}",
     null => "No status"
 };
 

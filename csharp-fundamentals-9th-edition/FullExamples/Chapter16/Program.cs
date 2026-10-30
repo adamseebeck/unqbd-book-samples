@@ -24,7 +24,8 @@ try
 {
     await GetDataAsync(cancellation.Token);
 }
-catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+catch (OperationCanceledException)
+    when (cancellation.IsCancellationRequested)
 {
     Console.WriteLine("Operation canceled.");
 }

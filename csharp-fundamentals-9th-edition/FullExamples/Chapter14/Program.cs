@@ -1,7 +1,8 @@
 MessageHandler showMessage = ShowMessage;
 showMessage("Hello from a delegate!");
 
-Action<string> log = message => Console.WriteLine($"Log: {message}");
+Action<string> log =
+    message => Console.WriteLine($"Log: {message}");
 Func<int, int> square = x => x * x;
 Predicate<int> isEven = x => x % 2 == 0;
 log("Delegates make code flexible!");

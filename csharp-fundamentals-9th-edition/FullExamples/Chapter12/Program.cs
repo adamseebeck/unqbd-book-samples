@@ -14,7 +14,8 @@ wordBox.Pack("Generics preserve types.");
 Console.WriteLine(wordBox.Unpack());
 
 Repository<int> repository = new Repository<int>();
-Console.WriteLine($"Created integer: {repository.CreateInstance()}");
+Console.WriteLine(
+    $"Created integer: {repository.CreateInstance()}");
 
 void DisplayItem<T>(T item)
 {

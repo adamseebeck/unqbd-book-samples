@@ -2,26 +2,31 @@ namespace WarehouseApi.Services;
 
 public class StockAlertService : IStockAlertService, IDisposable
 {
-    private readonly HttpClient _httpClient;
-    private bool _disposed;
+    private readonly StreamWriter _writer;
+    private readonly Lock _lock = new();
 
-    public StockAlertService(HttpClient httpClient)
+    public StockAlertService(string filePath)
     {
-        _httpClient = httpClient;
+        // The file stays open until the container disposes the service
+        _writer = new StreamWriter(filePath, append: true) { AutoFlush = true };
     }
 
-    public async Task SendAlertAsync(string message)
+    public Task SendAlertAsync(string message)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        using var response = await _httpClient.PostAsJsonAsync("/alerts", new { Message = message });
-        response.EnsureSuccessStatusCode();
+        // One Singleton serves every request, so concurrent alerts take turns writing
+        lock (_lock)
+        {
+            _writer.WriteLine($"{DateTimeOffset.UtcNow:O} {message}");
+        }
+
+        return Task.CompletedTask;
     }
 
-    // The factory registration creates the client for this service alone, so the service owns it
-    // and disposes it; a client shared with other services would have to outlive them all
     public void Dispose()
     {
-        _disposed = true;
-        _httpClient.Dispose();
+        lock (_lock)
+        {
+            _writer.Dispose();
+        }
     }
 }

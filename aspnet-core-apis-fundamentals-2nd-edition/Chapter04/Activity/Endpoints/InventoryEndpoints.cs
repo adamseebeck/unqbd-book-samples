@@ -57,7 +57,7 @@ public static class InventoryEndpoints
             IInventoryService inventoryService,
             CancellationToken cancellationToken) =>
         {
-            // The URL and the body must name the same product, in any case
+            // The URL and the body must name the same product, ignoring letter case
             if (!string.Equals(sku, product.Sku, StringComparison.OrdinalIgnoreCase))
             {
                 return Results.BadRequest(new { Error = "SKU mismatch" });

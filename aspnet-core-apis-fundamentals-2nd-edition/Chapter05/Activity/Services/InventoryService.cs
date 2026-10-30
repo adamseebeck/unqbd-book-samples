@@ -1,39 +1,48 @@
-using System.Collections.Concurrent;
 using WarehouseApi.Contracts;
 
 namespace WarehouseApi.Services;
 
 public class InventoryService : IInventoryService
 {
-    // One Singleton instance serves every request, so the store must be safe for concurrent access
-    private readonly ConcurrentDictionary<(string WarehouseCode, string Sku), StockLevelResponse> _stock = new()
+    // One Singleton instance serves every request, so one lock guards the store, as in Chapter 4
+    private readonly Dictionary<(string WarehouseCode, string Sku), StockLevelResponse> _stock = new()
     {
         [("WH-001", "SKU-001")] = new StockLevelResponse("SKU-001", "WH-001", 150, 20, 130),
         [("WH-001", "SKU-002")] = new StockLevelResponse("SKU-002", "WH-001", 75, 10, 65)
     };
 
+    private readonly Lock _lock = new();
+
     public Task<StockLevelResponse?> GetStockLevelAsync(string warehouseCode, string sku, CancellationToken cancellationToken = default)
     {
-        _stock.TryGetValue(Key(warehouseCode, sku), out var stock);
-        return Task.FromResult(stock);
+        lock (_lock)
+        {
+            _stock.TryGetValue(Key(warehouseCode, sku), out var stock);
+            return Task.FromResult(stock);
+        }
     }
 
     public Task<StockAdjustmentResult> AdjustStockAsync(StockAdjustmentRequest request, CancellationToken cancellationToken = default)
     {
-        var key = Key(request.WarehouseCode, request.Sku);
-
-        while (_stock.TryGetValue(key, out var current))
+        lock (_lock)
         {
+            var key = Key(request.WarehouseCode, request.Sku);
+
+            if (!_stock.TryGetValue(key, out var current))
+            {
+                return Task.FromResult(new StockAdjustmentResult(StockAdjustmentStatus.StockItemNotFound));
+            }
+
             var newOnHand = current.OnHand + request.Quantity;
             if (newOnHand < current.Reserved)
+            {
                 return Task.FromResult(new StockAdjustmentResult(StockAdjustmentStatus.InsufficientStock, current));
+            }
 
             var updated = current with { OnHand = newOnHand, Available = newOnHand - current.Reserved };
-            if (_stock.TryUpdate(key, updated, current))
-                return Task.FromResult(new StockAdjustmentResult(StockAdjustmentStatus.Applied, updated));
+            _stock[key] = updated;
+            return Task.FromResult(new StockAdjustmentResult(StockAdjustmentStatus.Applied, updated));
         }
-
-        return Task.FromResult(new StockAdjustmentResult(StockAdjustmentStatus.StockItemNotFound));
     }
 
     // Warehouse codes still compare without regard to case, so the keys hold them in uppercase;

@@ -29,14 +29,12 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 // CORRECT: Singleton depending on Singleton
 builder.Services.AddSingleton<FixedWarehouseService>();
 
-// Factory registration for complex initialization
+// Factory registration: the container cannot supply a file path, so the lambda builds the service
 // The container tracks the returned instance for disposal
 builder.Services.AddSingleton<IStockAlertService>(serviceProvider =>
 {
-    // A client that lives as long as the application must still pick up DNS changes
-    var handler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) };
-    var client = new HttpClient(handler) { BaseAddress = new Uri("https://alerts.example.com") };
-    return new StockAlertService(client);
+    var environment = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+    return new StockAlertService(Path.Combine(environment.ContentRootPath, "stock-alerts.log"));
 });
 
 // ANTI-PATTERN: Singleton depending on Scoped
@@ -55,10 +53,6 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-// Behind a reverse proxy, UseForwardedHeaders() restores the client's scheme and IP address only
-// after ForwardedHeadersOptions names the headers (XForwardedFor, XForwardedProto) and the proxy's
-// address; by default it processes no headers. Chapter 16 configures it.
-
 // API endpoints
 app.MapGet("/api/warehouses/{code}", async (string code, IWarehouseService service) =>
 {
@@ -76,7 +70,6 @@ app.MapGet("/api/health/config", (
 
     return Results.Ok(new
     {
-        DatabaseConfigured = !string.IsNullOrEmpty(db.ConnectionString),
         CommandTimeout = db.CommandTimeoutSeconds,
         RealTimeInventoryEnabled = features.EnableRealTimeInventory,
         DefaultPageSize = features.DefaultPageSize,

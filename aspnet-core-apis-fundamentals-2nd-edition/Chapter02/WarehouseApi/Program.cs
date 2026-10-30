@@ -21,10 +21,6 @@ builder.Services.AddOptions<WarehouseFeatureOptions>()
 
 var app = builder.Build();
 
-// Behind a reverse proxy, UseForwardedHeaders() restores the client's scheme and IP address only
-// after ForwardedHeadersOptions names the headers (XForwardedFor, XForwardedProto) and the proxy's
-// address; by default it processes no headers. Chapter 16 configures it.
-
 // API endpoints
 app.MapGet("/api/warehouses/{code}", async (string code, IWarehouseService service) =>
 {
@@ -42,7 +38,6 @@ app.MapGet("/api/health/config", (
 
     return Results.Ok(new
     {
-        DatabaseConfigured = !string.IsNullOrEmpty(db.ConnectionString),
         CommandTimeout = db.CommandTimeoutSeconds,
         RealTimeInventoryEnabled = features.EnableRealTimeInventory,
         DefaultPageSize = features.DefaultPageSize,

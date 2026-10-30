@@ -4,10 +4,6 @@ builder.Services.AddSingleton<IWarehouseService, WarehouseService>();
 
 var app = builder.Build();
 
-// Behind a reverse proxy, UseForwardedHeaders() restores the client's scheme and IP address only
-// after ForwardedHeadersOptions names the headers (XForwardedFor, XForwardedProto) and the proxy's
-// address; by default it processes no headers. Chapter 16 configures it.
-
 // API endpoints
 app.MapGet("/api/warehouses/{code}", async (string code, IWarehouseService service) =>
 {

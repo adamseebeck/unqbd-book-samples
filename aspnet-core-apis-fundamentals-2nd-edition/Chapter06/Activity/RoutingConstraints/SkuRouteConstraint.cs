@@ -4,7 +4,9 @@ namespace WarehouseApi.RoutingConstraints;
 
 public partial class SkuRouteConstraint : IRouteConstraint
 {
-    // The regular expression source generator writes the matching code at build time
+    // The source generator writes the matching code at build time.
+    // [0-9] accepts ASCII digits only, unlike \d, and \z ends the
+    // value, because $ also matches before a final newline
     [GeneratedRegex(@"^[A-Z]{2,4}-[0-9]{3,8}\z")]
     private static partial Regex SkuPattern();
 

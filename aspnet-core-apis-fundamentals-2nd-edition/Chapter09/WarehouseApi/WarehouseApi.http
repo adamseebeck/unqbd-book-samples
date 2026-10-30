@@ -1,0 +1,73 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Create an order: it starts Pending and reserves nothing yet
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 7a8b87e0-ccf7-560a-af76-e2c1324f5231
+
+{
+    "customerReference": "CUST-2001",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 10 },
+        { "sku": "SKU-002", "quantity": 5 }
+    ]
+}
+
+###
+
+# Copy the id from the response above
+@orderId = 00000000-0000-0000-0000-000000000000
+
+# Reserve stock for every line in WH-001: 200 with the Allocated order, 409 if stock is short
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# The reserved units now show in the stock level
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001
+
+###
+
+# Only the order workflows change reserved units: a PUT that changes them is 409
+PUT {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001
+Content-Type: application/json
+
+{
+    "onHand": 150,
+    "reserved": 0,
+    "reorderThreshold": 40
+}
+
+###
+
+# Ship the reserved units: on-hand and reserved stock both go down
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/fulfill
+
+###
+
+# A fulfilled order cannot be cancelled: 409
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/cancel
+
+###
+
+# A product that does not exist: 422
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 54e93f8d-f734-5284-9e35-471db1b1592f
+
+{
+    "customerReference": "CUST-2002",
+    "lines": [ { "sku": "SKU-999", "quantity": 1 } ]
+}
+
+###
+
+# The OpenAPI document (Development)
+GET {{WarehouseApi_HostAddress}}/openapi/v1.json
+
+###

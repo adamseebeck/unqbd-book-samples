@@ -1,0 +1,21 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/MAIN
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/health/config
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/inventory/stock-status?sku=SKU-001&quantity=3
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/inventory/stock-status?sku=SKU-002&quantity=50
+Accept: application/json
+
+###

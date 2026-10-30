@@ -1,0 +1,64 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Tokens from dotnet user-jwts, as in Chapter 13:
+#   dotnet user-jwts create --role Supervisor --output token
+@supervisorToken = paste-the-supervisor-token-here
+
+# V1 still works and announces its retirement: Deprecation, Sunset and Link headers
+GET {{WarehouseApi_HostAddress}}/api/v1/warehouses/1
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# The Chapter 13 URL without a version segment answers as 1.0 until the sunset
+GET {{WarehouseApi_HostAddress}}/api/warehouses/1
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# V2 identifies warehouses by code and sends no deprecation headers
+GET {{WarehouseApi_HostAddress}}/api/v2/warehouses/WH-001
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# V1 lists orders as a plain array...
+GET {{WarehouseApi_HostAddress}}/api/v1/orders?page=1&pageSize=10
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# ...V2 as a paged result with totals
+GET {{WarehouseApi_HostAddress}}/api/v2/orders?pageNumber=1&pageSize=10
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# The controllers answer in XML when the client asks for it
+GET {{WarehouseApi_HostAddress}}/api/v2/orders?pageNumber=1&pageSize=10
+Authorization: Bearer {{supervisorToken}}
+Accept: application/xml
+
+###
+
+# Minimal API endpoints always answer in JSON
+GET {{WarehouseApi_HostAddress}}/api/v2/products/SKU-001
+Authorization: Bearer {{supervisorToken}}
+Accept: application/xml
+
+###
+
+# A version the API does not have: 404
+GET {{WarehouseApi_HostAddress}}/api/v3/products
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# One OpenAPI document per version (Development only); Swagger UI is at /swagger
+GET {{WarehouseApi_HostAddress}}/openapi/v1.json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/openapi/v2.json
+
+###

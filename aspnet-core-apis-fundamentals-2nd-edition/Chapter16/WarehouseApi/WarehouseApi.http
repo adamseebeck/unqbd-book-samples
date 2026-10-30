@@ -1,0 +1,39 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Tokens from dotnet user-jwts, as in Chapter 13:
+#   dotnet user-jwts create --role WarehouseStaff --claim WarehouseId=WH-001 --output token
+#   dotnet user-jwts create --role IntegrationClient --claim WarehouseId=WH-001 --output token
+@staffToken = paste-the-staff-token-here
+@integrationToken = paste-the-integration-client-token-here
+
+# Readiness: the database and the fulfillment queue, as JSON; 503 when a check is Unhealthy
+GET {{WarehouseApi_HostAddress}}/health
+
+###
+
+# Liveness: no checks, only proof that the process answers
+GET {{WarehouseApi_HostAddress}}/health/live
+
+###
+
+# The catalog is cached for five minutes: send this twice; the second response carries an Age header
+GET {{WarehouseApi_HostAddress}}/api/v2/products?pageSize=5
+Authorization: Bearer {{staffToken}}
+
+###
+
+# Order submissions are limited per client: the eleventh within a minute gets 429 with Retry-After.
+# Each order needs a new Idempotency-Key; a retry of one order sends the same key again
+POST {{WarehouseApi_HostAddress}}/api/v2/orders
+Authorization: Bearer {{integrationToken}}
+Idempotency-Key: 9e41c7a2-order-9301
+Content-Type: application/json
+
+{
+    "customerReference": "ERP-9301",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 1 }
+    ]
+}
+
+###

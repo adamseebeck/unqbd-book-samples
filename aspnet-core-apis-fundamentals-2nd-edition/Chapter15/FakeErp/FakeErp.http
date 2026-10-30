@@ -1,0 +1,40 @@
+@FakeErp_HostAddress = http://localhost:5090
+
+# The ERP expects an API key and an idempotency key
+POST {{FakeErp_HostAddress}}/api/shipments
+X-API-Key: local-development-key
+Idempotency-Key: order-3f2b7c1e-5d4a-4e8f-9b0c-1a2b3c4d5e6f
+Content-Type: application/json
+
+{
+    "orderId": "3f2b7c1e-5d4a-4e8f-9b0c-1a2b3c4d5e6f",
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# The same request again: 200 with the same shipment, not a second one
+POST {{FakeErp_HostAddress}}/api/shipments
+X-API-Key: local-development-key
+Idempotency-Key: order-3f2b7c1e-5d4a-4e8f-9b0c-1a2b3c4d5e6f
+Content-Type: application/json
+
+{
+    "orderId": "3f2b7c1e-5d4a-4e8f-9b0c-1a2b3c4d5e6f",
+    "warehouseCode": "WH-001"
+}
+
+###
+
+GET {{FakeErp_HostAddress}}/api/shipments
+
+###
+
+# The next two shipment requests answer 503, and /health reports the outage meanwhile
+POST {{FakeErp_HostAddress}}/fake/outage?requests=2
+
+###
+
+GET {{FakeErp_HostAddress}}/health
+
+###

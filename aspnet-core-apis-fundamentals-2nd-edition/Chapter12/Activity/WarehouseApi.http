@@ -1,0 +1,43 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# More units than WH-001 has: 409 with sku, warehouseCode, requestedQuantity and availableQuantity
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: c7f8e922-d45e-5678-a4b4-04b5af18eaf0
+
+{
+    "customerReference": "CUST-6001",
+    "lines": [ { "sku": "SKU-001", "quantity": 500 } ]
+}
+
+###
+
+# Copy the id from the response above
+@orderId = 00000000-0000-0000-0000-000000000000
+
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+X-Correlation-ID: portal-6001
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# An order that does not exist: 404 with resourceType and resourceId
+POST {{WarehouseApi_HostAddress}}/api/orders/7d1f3a52-9c4e-4b8a-a0f6-2e5d8c9b1a47/cancel
+
+###
+
+# A product that does not exist: 422 with an errors object keyed like validation errors
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 40e56ade-aa23-5d54-85c2-8775903b5ae8
+
+{
+    "customerReference": "CUST-6002",
+    "lines": [ { "sku": "SKU-999", "quantity": 1 } ]
+}
+
+###

@@ -1,0 +1,78 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock?pageNumber=1&pageSize=10&sortBy=available&sortDescending=true
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001
+Accept: application/json
+
+###
+
+# Send this request twice: both answers are 200 OK with the same stock item,
+# and the stock changes only once
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001/adjustments
+Content-Type: application/json
+Idempotency-Key: 3f2b8c1e-6d4a-4e9b-a7c5-1b2d3e4f5a6b
+
+{
+    "quantityChange": 10,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+# Same key, different payload: 422 Unprocessable Content
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001/adjustments
+Content-Type: application/json
+Idempotency-Key: 3f2b8c1e-6d4a-4e9b-a7c5-1b2d3e4f5a6b
+
+{
+    "quantityChange": 99,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+# Unknown reason code: 400 Bad Request, because the request is wrong on its own
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001/adjustments
+Content-Type: application/json
+Idempotency-Key: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+
+{
+    "quantityChange": 5,
+    "reasonCode": "LOST"
+}
+
+###
+
+PUT {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-002
+Content-Type: application/json
+
+{
+    "onHand": 120,
+    "reserved": 10,
+    "reorderThreshold": 100
+}
+
+###
+
+DELETE {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock/SKU-001
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/products?searchTerm=sku&pageNumber=1&pageSize=1
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/health
+Accept: application/json
+
+###

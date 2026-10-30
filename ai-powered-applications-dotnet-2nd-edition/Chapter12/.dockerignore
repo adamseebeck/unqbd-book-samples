@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/TestResults/
+**/evaluation-results/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/appsettings.*.local.json
+**/secrets.json
+.git/
+.vs/
+.vscode/
+ContosoSupportCopilot.Tests/
+deploy/

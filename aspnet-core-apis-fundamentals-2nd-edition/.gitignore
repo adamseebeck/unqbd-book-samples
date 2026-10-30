@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+publish/
+TestResults/
+
+# Editor and IDE state
+.vs/
+*.user
+*.suo
+
+# Local databases the samples create
+*.db
+*.db-shm
+*.db-wal
+*.mdf
+*.ldf
+
+# Secrets belong in the user secrets store or in environment variables, never in these folders
+secrets.json
+*.pfx
+.env

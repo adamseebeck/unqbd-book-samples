@@ -1,0 +1,17 @@
+# The build context is the repository root (docker build -f Chapter16/Dockerfile .)
+**/bin/
+**/obj/
+**/.vs/
+**/TestResults/
+**/publish/
+**/*.user
+
+# Development settings and local secrets stay out of the image
+**/appsettings.Development.json
+**/secrets.json
+**/*.pfx
+**/.env
+**/*.db
+**/*.mdf
+**/*.ldf
+.git/

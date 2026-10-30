@@ -1,0 +1,11 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/MAIN
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/health/config
+Accept: application/json
+
+###

@@ -1,0 +1,27 @@
+# Copy to .github/workflows/ in the repository that holds this folder.
+# The job only reads the repository: the tests and the check run on the offline provider, and the image is
+# built but not pushed, so no secret, AI credential, or registry login is involved.
+name: Contoso Support Copilot
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # The path of this folder in your repository.
+        working-directory: Chapter12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '11.0.x'
+      - name: Build
+        run: dotnet build ContosoSupportCopilot.slnx -c Release
+      - name: Test on the offline provider
+        run: dotnet test ContosoSupportCopilot.slnx -c Release --no-build
+      - name: Run the chapter check
+        run: dotnet run --project ContosoSupportCopilot.Api -c Release --no-build -- --check
+      - name: Build the container image
+        run: docker build -t contoso-support-copilot:${{ github.sha }} .

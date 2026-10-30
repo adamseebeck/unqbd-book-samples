@@ -1,0 +1,56 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+@FakeErp_HostAddress = http://localhost:5090
+
+# Run the fake ERP (Chapter15/FakeErp) next to the API. The API needs the ERP key in user secrets:
+#   dotnet user-secrets set "ExternalShipmentService:ApiKey" "local-development-key"
+# Tokens from dotnet user-jwts, as in Chapter 13:
+#   dotnet user-jwts create --role Supervisor --output token
+#   dotnet user-jwts create --role IntegrationClient --claim WarehouseId=WH-001 --output token
+@supervisorToken = paste-the-supervisor-token-here
+@integrationToken = paste-the-integration-client-token-here
+
+# An integration client submits an order; copy its id into @orderId
+POST {{WarehouseApi_HostAddress}}/api/v2/orders
+Authorization: Bearer {{integrationToken}}
+Idempotency-Key: 4b8d3f10-order-9001
+Content-Type: application/json
+
+{
+    "customerReference": "ERP-9001",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 5 }
+    ]
+}
+
+###
+
+@orderId = paste-the-order-id-here
+
+# V2 shipment request: the stock is reserved, the shipment request is queued: 202 with Location pointing
+# to the status monitor. POST /api/v2/orders/{{orderId}}/allocate would answer 200 with the order and queue it too
+POST {{WarehouseApi_HostAddress}}/api/v2/orders/{{orderId}}/shipment
+Authorization: Bearer {{supervisorToken}}
+X-Correlation-ID: allocation-9001
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# The status monitor: Pending, then Registered with the ERP's shipment ID and tracking number
+GET {{WarehouseApi_HostAddress}}/api/v2/orders/{{orderId}}/shipment
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# What the fake ERP received: one shipment per order, however many requests arrived
+GET {{FakeErp_HostAddress}}/api/shipments
+
+###
+
+# Make the next three shipment requests fail with 503; the resilience handler retries them
+POST {{FakeErp_HostAddress}}/fake/outage?requests=3
+
+###

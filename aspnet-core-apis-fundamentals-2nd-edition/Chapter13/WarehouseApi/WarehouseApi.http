@@ -1,0 +1,103 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Create development tokens in the project folder and paste them below:
+#   dotnet user-jwts create --role Supervisor --output token
+#   dotnet user-jwts create --role WarehouseStaff --claim WarehouseId=WH-001 --output token
+#   dotnet user-jwts create --name atlanta-storefront --role IntegrationClient --claim WarehouseId=WH-002 --output token
+@supervisorToken = paste-the-supervisor-token-here
+@staffToken = paste-the-WH-001-staff-token-here
+@integrationToken = paste-the-WH-002-integration-token-here
+
+# No token: 401 with a WWW-Authenticate header and a Problem Details body
+GET {{WarehouseApi_HostAddress}}/api/products
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/products
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# Staff of WH-001 read their own warehouse's stock
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock
+Authorization: Bearer {{staffToken}}
+
+###
+
+# ...but not another warehouse's: 403
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Authorization: Bearer {{staffToken}}
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001/adjustments
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+Idempotency-Key: 8c6f1f7e-4a1b-4c2d-9e3f-5a6b7c8d9e01
+
+{
+    "quantityChange": 25,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+# Integration clients submit orders; staff cannot (403). A retry sends the same key and gets the same order;
+# another client that sends this key gets 422
+POST {{WarehouseApi_HostAddress}}/api/orders
+Authorization: Bearer {{integrationToken}}
+Idempotency-Key: 7c2e9a41-order-7001
+Content-Type: application/json
+
+{
+    "customerReference": "ERP-7001",
+    "lines": [ { "sku": "SKU-001", "quantity": 5 } ]
+}
+
+###
+
+# Copy the id from the response above
+@orderId = 00000000-0000-0000-0000-000000000000
+
+# Only supervisors allocate
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Authorization: Bearer {{supervisorToken}}
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# Staff fulfill orders allocated to their own warehouse
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/fulfill
+Authorization: Bearer {{staffToken}}
+
+###
+
+# The stock list follows the warehouse rule: this integration client reads WH-002 only...
+GET {{WarehouseApi_HostAddress}}/api/stock
+Authorization: Bearer {{integrationToken}}
+
+###
+
+# ...and receives 403 for another warehouse; supervisors read every warehouse
+GET {{WarehouseApi_HostAddress}}/api/stock?warehouseCode=WH-001
+Authorization: Bearer {{integrationToken}}
+
+###
+
+# The client that created an order reads it; another client receives 404, as for an order that does not exist
+GET {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}
+Authorization: Bearer {{integrationToken}}
+
+###
+
+# A browser preflight from an allowed origin
+OPTIONS {{WarehouseApi_HostAddress}}/api/products
+Origin: https://warehouse-portal.example.com
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: authorization
+
+###

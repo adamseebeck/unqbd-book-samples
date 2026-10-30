@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ContosoSupportCopilot.Api/ContosoSupportCopilot.Api.csproj" />
+  <Project Path="ContosoSupportCopilot.Domain/ContosoSupportCopilot.Domain.csproj" />
+  <Project Path="ContosoSupportCopilot.Infrastructure/ContosoSupportCopilot.Infrastructure.csproj" />
+  <Project Path="ContosoSupportCopilot.Tests/ContosoSupportCopilot.Tests.csproj" />
+</Solution>

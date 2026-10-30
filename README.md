@@ -9,6 +9,8 @@ Example code and activity solutions for the unQbd technical books by Adam Seebec
 | [Entity Framework Core Fundamentals, Second Edition](efcore-fundamentals-2nd-edition/) | Building Data-Driven Applications with .NET 11 |
 | [Blazor Fundamentals, Third Edition](blazor-fundamentals-3rd-edition/) | Building Modern Web Applications with .NET 11 |
 | [.NET MAUI Fundamentals, Second Edition](maui-fundamentals-2nd-edition/) | Building Cross-Platform Applications with .NET 11 |
+| [ASP.NET Core APIs Fundamentals, Second Edition](aspnet-core-apis-fundamentals-2nd-edition/) | Building Modern Web APIs with .NET 11 |
+| [AI-Powered Applications with .NET Fundamentals, Second Edition](ai-powered-applications-dotnet-2nd-edition/) | Building Intelligent Applications with .NET 11 |
 
 You can read and copy any file in your browser. To run the examples, clone this repository or download it as a ZIP with the green **Code** button, then follow the book folder's README.
 

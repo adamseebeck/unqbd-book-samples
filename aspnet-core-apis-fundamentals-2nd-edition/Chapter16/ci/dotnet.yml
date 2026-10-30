@@ -1,0 +1,143 @@
+# Copy to .github/workflows/dotnet.yml in a repository whose root holds global.json and Chapter16/.
+# Repository variables (Settings, Secrets and variables, Actions, Variables): AZURE_CLIENT_ID,
+# AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID, RESOURCE_GROUP, ACR_NAME, WEBAPP_NAME. deploy/README.md
+# creates the Azure resources and the federated credential these jobs sign in with.
+name: Warehouse API
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up .NET 11
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '11.0.x'
+
+      # The integration tests need SQL Server: a throwaway container with a password made for this run
+      - name: Start SQL Server
+        run: |
+          password="$(openssl rand -base64 18)Aa1!"
+          echo "::add-mask::$password"
+          docker run -d --name sql -p 1433:1433 -e ACCEPT_EULA=Y -e "MSSQL_SA_PASSWORD=$password" \
+            mcr.microsoft.com/mssql/server:2022-latest
+          echo "WAREHOUSE_TEST_SQLSERVER=Server=localhost,1433;User ID=sa;Password=$password;Encrypt=true;TrustServerCertificate=true" >> "$GITHUB_ENV"
+          for attempt in $(seq 1 30); do
+            if docker exec sql /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$password" -Q "SELECT 1" > /dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "SQL Server did not start" >&2
+          exit 1
+
+      - name: Restore
+        run: dotnet restore Chapter16/WarehouseApi.Tests/WarehouseApi.Tests.csproj
+
+      - name: Build
+        run: dotnet build Chapter16/WarehouseApi.Tests/WarehouseApi.Tests.csproj --no-restore -c Release
+
+      - name: Test
+        run: dotnet test Chapter16/WarehouseApi.Tests/WarehouseApi.Tests.csproj --no-build -c Release --logger trx --results-directory TestResults
+
+      - name: Build the container image
+        run: docker build -f Chapter16/Dockerfile --build-arg SOURCE_REVISION=${{ github.sha }} -t "warehouse-api:${{ github.sha }}" .
+
+  deploy-staging:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    # One deployment at a time: a later run waits instead of changing the staging slot during this one
+    concurrency:
+      group: warehouse-api-deployment
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write   # OpenID Connect: azure/login trades a GitHub token for an Azure token, no stored password
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # The same Dockerfile and commit as the test job; the commit SHA tags the image and is built into it
+      - name: Build and push the image
+        run: |
+          az acr login --name "${{ vars.ACR_NAME }}"
+          image="${{ vars.ACR_NAME }}.azurecr.io/warehouse-api:${{ github.sha }}"
+          docker build -f Chapter16/Dockerfile --build-arg SOURCE_REVISION=${{ github.sha }} -t "$image" .
+          docker push "$image"
+
+      - name: Point the staging slot at the new image
+        run: |
+          az webapp config container set \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --name "${{ vars.WEBAPP_NAME }}" \
+            --slot staging \
+            --container-image-name "${{ vars.ACR_NAME }}.azurecr.io/warehouse-api:${{ github.sha }}" \
+            --container-registry-url "https://${{ vars.ACR_NAME }}.azurecr.io"
+
+      # The previous container can answer as well: wait until the readiness report names this commit
+      - name: Wait until the staging slot runs this commit and is ready
+        run: |
+          host="$(az webapp show --resource-group "${{ vars.RESOURCE_GROUP }}" --name "${{ vars.WEBAPP_NAME }}" \
+            --slot staging --query defaultHostName --output tsv)"
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent "https://$host/health" | grep --quiet "${{ github.sha }}\""; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "The staging slot did not report ${{ github.sha }} as ready" >&2
+          exit 1
+
+  swap-to-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production   # give this environment required reviewers: a person approves the swap
+    concurrency:
+      group: warehouse-api-deployment
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # The approval can come late: swap only if staging still runs the image of this commit
+      - name: Check the image in the staging slot
+        run: |
+          image="$(az webapp config show --resource-group "${{ vars.RESOURCE_GROUP }}" --name "${{ vars.WEBAPP_NAME }}" \
+            --slot staging --query linuxFxVersion --output tsv)"
+          expected="DOCKER|${{ vars.ACR_NAME }}.azurecr.io/warehouse-api:${{ github.sha }}"
+          if [ "$image" != "$expected" ]; then
+            echo "The staging slot runs $image, not $expected" >&2
+            exit 1
+          fi
+
+      # The warmed-up staging instances become production; the previous version waits in staging for a swap back
+      - name: Swap staging into production
+        run: |
+          az webapp deployment slot swap \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --name "${{ vars.WEBAPP_NAME }}" \
+            --slot staging \
+            --target-slot production

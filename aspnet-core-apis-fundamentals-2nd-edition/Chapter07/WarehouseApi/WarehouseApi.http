@@ -1,0 +1,86 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 3576cf51-fbd4-5780-86d5-8c7ce4dfb185
+
+{
+    "customerReference": "CUST-1001",
+    "fulfillmentWarehouseCode": "WH-001",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 5 },
+        { "sku": "SKU-002", "quantity": 2 }
+    ]
+}
+
+###
+
+# A retry with the same key and body returns the order the first request created: 201,
+# the same id, and the same Location. The same key with another body returns 422.
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 3576cf51-fbd4-5780-86d5-8c7ce4dfb185
+
+{
+    "customerReference": "CUST-1001",
+    "fulfillmentWarehouseCode": "WH-001",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 5 },
+        { "sku": "SKU-002", "quantity": 2 }
+    ]
+}
+
+###
+
+# Copy the id from the Location header of the previous response
+@orderId = 00000000-0000-0000-0000-000000000000
+
+GET {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}
+Accept: application/json
+
+###
+
+PUT {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/status
+Content-Type: application/json
+
+{
+    "newStatus": "Allocated"
+}
+
+###
+
+# Allocated cannot go back to Pending: 409 with Problem Details
+PUT {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/status
+Content-Type: application/json
+
+{
+    "newStatus": "Pending"
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/orders?status=Allocated&page=1&pageSize=10
+Accept: application/json
+
+###
+
+# An empty customer reference and no lines: 400 with validation errors
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 386cca95-7ebd-5474-afb6-014aaa94a945
+
+{
+    "customerReference": "",
+    "lines": []
+}
+
+###
+
+DELETE {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock
+Accept: application/json
+
+###

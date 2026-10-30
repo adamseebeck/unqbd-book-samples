@@ -1,0 +1,11 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+GET {{WarehouseApi_HostAddress}}/api/alerts/low-stock?threshold=10
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/alerts/low-stock?threshold=50
+Accept: application/json
+
+###

@@ -1,0 +1,64 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Invalid SKU format: 400 with a validation problem (Minimal API, AddValidation)
+POST {{WarehouseApi_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+    "sku": "WIDGET",
+    "name": "Widget",
+    "unitPrice": 9.99
+}
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/products
+Content-Type: application/json
+X-Correlation-ID: portal-7f3a9c
+
+{
+    "sku": "SKU-003",
+    "name": "Pallet Label Printer",
+    "description": "Thermal printer for pallet labels",
+    "unitPrice": 289.00
+}
+
+###
+
+# Invalid line SKU: 400 with a validation problem (controller, [ApiController])
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: 90e2ce97-cab6-5a08-a7ee-b3634731a427
+
+{
+    "customerReference": "CUST-1001",
+    "lines": [ { "sku": "sku 1", "quantity": 5 } ]
+}
+
+###
+
+# Unknown reason code: the attribute rejects it before the handler runs
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001/adjustments
+Content-Type: application/json
+Idempotency-Key: 6a5b4c3d-2e1f-4a0b-9c8d-7e6f5a4b3c2d
+
+{
+    "quantityChange": 5,
+    "reasonCode": "LOST"
+}
+
+###
+
+# The response echoes this X-Correlation-ID header
+GET {{WarehouseApi_HostAddress}}/health
+X-Correlation-ID: erp-sync-20261026-0001
+
+###
+
+# A CORS preflight from an allowed origin
+OPTIONS {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001/adjustments
+Origin: https://warehouse-portal.example.com
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type, idempotency-key
+
+###

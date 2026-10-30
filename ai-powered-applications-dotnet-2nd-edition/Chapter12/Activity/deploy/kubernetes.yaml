@@ -1,0 +1,158 @@
+# Replace the <...> placeholders before you apply this file. Secrets never go in this file:
+# the connection strings come from the contoso-support-copilot Secret, and every Azure call
+# uses the workload identity named in the service account.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contoso-support-copilot
+  annotations:
+    azure.workload.identity/client-id: "<managed-identity-client-id>"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contoso-support-copilot
+  labels:
+    app: contoso-support-copilot
+spec:
+  # No replicas field: the HorizontalPodAutoscaler below owns the count, and a value here would reset it on every apply.
+  selector:
+    matchLabels:
+      app: contoso-support-copilot
+  template:
+    metadata:
+      labels:
+        app: contoso-support-copilot
+        # The webhook injects AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_FEDERATED_TOKEN_FILE.
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: contoso-support-copilot
+      # What the restricted Pod Security Standard requires (no root, the runtime's default seccomp profile,
+      # no capabilities, no privilege escalation), plus a read-only root file system with a writable /tmp.
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: api
+          # A version tag, never latest: every rollout and rollback names exactly what runs.
+          image: <registry>.azurecr.io/contoso-support-copilot:1.0.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: AI__Provider
+              value: Foundry
+            - name: AI__Endpoint
+              value: https://<resource>.openai.azure.com/openai/v1/
+            - name: AI__ChatDeployment
+              value: <chat-deployment-name>
+            - name: AI__EmbeddingDeployment
+              value: <embedding-deployment-name>
+            - name: AI__UseEntraId
+              value: "true"
+            - name: Database__Provider
+              value: SqlServer
+            # The initialize-database job prepares the schema; the replicas never change it at startup.
+            - name: Database__InitializeOnStartup
+              value: "false"
+            - name: ConnectionStrings__SupportDb
+              valueFrom:
+                secretKeyRef:
+                  name: contoso-support-copilot
+                  key: support-db
+            - name: ConnectionStrings__CopilotDb
+              valueFrom:
+                secretKeyRef:
+                  name: contoso-support-copilot
+                  key: copilot-db
+            - name: VectorStore__Provider
+              value: AzureAISearch
+            - name: VectorStore__Dimensions
+              value: "1536"
+            - name: Search__Endpoint
+              value: https://<service>.search.windows.net
+            - name: Search__UseEntraId
+              value: "true"
+            # The engineer behind a request is the oid claim of a validated Microsoft Entra ID access token that
+            # grants the Copilot.Use scope. The API's app registration sets requestedAccessTokenVersion to 2, so
+            # its tokens are v2.0: iss is the issuer below and aud is the API's client ID, never its application
+            # ID URI. Rag__ProductAreasByEngineer maps object IDs to product areas, from Key Vault or a ConfigMap.
+            - name: Authentication__Schemes__Bearer__Authority
+              value: https://login.microsoftonline.com/<tenant-id>/v2.0
+            - name: Authentication__Schemes__Bearer__ValidIssuer
+              value: https://login.microsoftonline.com/<tenant-id>/v2.0
+            - name: Authentication__Schemes__Bearer__ValidAudiences__0
+              value: <api-client-id>
+            - name: Telemetry__Exporter
+              value: Otlp
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://<collector>:4317
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          # Startup allows 60 seconds before liveness counts. Liveness only asks whether the process answers.
+          # Readiness checks the dependencies: an AI outage reports Degraded (status 200), a database Unhealthy (503).
+          # It never waits for a model, and its check gives up after 2 seconds, inside the 3 seconds allowed here.
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            periodSeconds: 10
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contoso-support-copilot
+spec:
+  selector:
+    app: contoso-support-copilot
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: contoso-support-copilot
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: contoso-support-copilot
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

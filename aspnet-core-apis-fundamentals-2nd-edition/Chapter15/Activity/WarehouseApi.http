@@ -1,0 +1,40 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+@FakeErp_HostAddress = http://localhost:5090
+
+# Tokens from dotnet user-jwts, as in Chapter 13:
+#   dotnet user-jwts create --role Supervisor --output token
+@supervisorToken = paste-the-supervisor-token-here
+
+# Make the ERP fail long enough for a shipment request to use up its attempts
+POST {{FakeErp_HostAddress}}/fake/outage?requests=20
+
+###
+
+@orderId = paste-the-id-of-a-pending-order-here
+
+POST {{WarehouseApi_HostAddress}}/api/v2/orders/{{orderId}}/shipment
+Authorization: Bearer {{supervisorToken}}
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# The dead-letter queue: depth, oldest failure and the retry success rate of the last hour (supervisors, V2 only)
+GET {{WarehouseApi_HostAddress}}/api/v2/admin/dead-letter/status
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# Healthy, Degraded above 50 failed requests, Unhealthy above 100
+GET {{WarehouseApi_HostAddress}}/health/fulfillment
+
+###
+
+# After the outage, the retry service sends the failed request again
+GET {{WarehouseApi_HostAddress}}/api/v2/orders/{{orderId}}/shipment
+Authorization: Bearer {{supervisorToken}}
+
+###

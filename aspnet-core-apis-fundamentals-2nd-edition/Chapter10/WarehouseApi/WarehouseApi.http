@@ -1,0 +1,48 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# The seeded stock, now read from SQL Server
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock?sortBy=available&sortDescending=true
+
+###
+
+# The stored result survives a restart: send this twice, restart the app, send it again
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-002/adjustments
+Content-Type: application/json
+Idempotency-Key: 3f2b8c1d-4e5a-4b6c-9d7e-8f9a0b1c2d3e
+
+{
+    "quantityChange": 25,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: a4220f09-d037-58ff-8960-6d0ac84ce825
+
+{
+    "customerReference": "CUST-4001",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 10 },
+        { "sku": "SKU-002", "quantity": 5 }
+    ]
+}
+
+###
+
+# Copy the id from the response above
+@orderId = 00000000-0000-0000-0000-000000000000
+
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/fulfill
+
+###

@@ -1,0 +1,45 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Tokens from dotnet user-jwts, as in Chapter 13:
+#   dotnet user-jwts create --role Supervisor --output token
+#   dotnet user-jwts create --role WarehouseStaff --claim WarehouseId=WH-001 --output token
+@supervisorToken = paste-the-supervisor-token-here
+@staffToken = paste-the-WH-001-staff-token-here
+
+# Record an adjustment to read back
+POST {{WarehouseApi_HostAddress}}/api/v2/warehouses/WH-001/stock/SKU-001/adjustments
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+Idempotency-Key: 5b2c9d41-7e3a-4f60-8c1d-2a9e6f3b7c10
+
+{
+    "quantityChange": 12,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/v2/stock-adjustments?warehouseCode=WH-001
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# Copy an adjustmentId from the response above
+@adjustmentId = 00000000-0000-0000-0000-000000000000
+
+# V1: the basic fields, with the deprecation headers
+GET {{WarehouseApi_HostAddress}}/api/v1/stock-adjustments/{{adjustmentId}}
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# V2: the audit fields as well, in XML when the client asks for it
+GET {{WarehouseApi_HostAddress}}/api/v2/stock-adjustments/{{adjustmentId}}
+Authorization: Bearer {{supervisorToken}}
+Accept: application/xml
+
+###
+
+GET {{WarehouseApi_HostAddress}}/openapi/v2.json
+
+###

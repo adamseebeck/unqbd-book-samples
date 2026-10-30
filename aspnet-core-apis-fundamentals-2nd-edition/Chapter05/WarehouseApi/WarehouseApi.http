@@ -1,0 +1,79 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+GET {{WarehouseApi_HostAddress}}/api/products?searchTerm=caster&pageNumber=1&pageSize=20
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/products/SKU-001
+Accept: application/json
+
+###
+
+# Fails the route constraint, so the response is 404
+GET {{WarehouseApi_HostAddress}}/api/products/sku001
+Accept: application/json
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+    "sku": "SKU-003",
+    "name": "Pallet Label Printer",
+    "description": "Thermal printer for pallet labels",
+    "unitPrice": 289.00
+}
+
+###
+
+PUT {{WarehouseApi_HostAddress}}/api/products/SKU-003
+Content-Type: application/json
+
+{
+    "name": "Thermal Pallet Label Printer",
+    "description": "Thermal printer for pallet labels",
+    "unitPrice": 299.00,
+    "isActive": true
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/1
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001
+Accept: application/json
+
+###
+
+# Warehouse codes compare without regard to case, so wh-001 finds the same stock
+GET {{WarehouseApi_HostAddress}}/api/warehouses/wh-001/stock/SKU-001
+Accept: application/json
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/inventory/adjustments
+Content-Type: application/json
+
+{
+    "sku": "SKU-001",
+    "warehouseCode": "WH-001",
+    "quantity": 10,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/health
+Accept: application/json
+
+###

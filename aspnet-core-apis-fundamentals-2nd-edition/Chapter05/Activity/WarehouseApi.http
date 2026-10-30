@@ -1,0 +1,51 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock-adjustments
+Content-Type: application/json
+
+{
+    "productSku": "SKU-001",
+    "quantityChange": 25,
+    "reasonCode": "Receipt"
+}
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock-adjustments
+Content-Type: application/json
+
+{
+    "productSku": "SKU-002",
+    "quantityChange": -3,
+    "reasonCode": "Damage"
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock-adjustments/1
+Accept: application/json
+
+###
+
+# Enum names in the query string are case-sensitive: Damage, not damage
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock-adjustments?reasonCode=Damage&dateFrom=2026-01-01
+Accept: application/json
+
+###
+
+# No reasonCode: 400, instead of a Receipt that nobody reported
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock-adjustments
+Content-Type: application/json
+
+{
+    "productSku": "SKU-001",
+    "quantityChange": 5
+}
+
+###
+
+# Not a warehouse code, so no route matches and the response is 404
+GET {{WarehouseApi_HostAddress}}/api/warehouses/INVALID/stock-adjustments
+Accept: application/json
+
+###

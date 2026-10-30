@@ -1,0 +1,45 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Create development tokens in the project folder and paste them below:
+#   dotnet user-jwts create --role Supervisor --output token
+#   dotnet user-jwts create --role InventoryAuditor --claim AuditClearance=3 --output token
+#   dotnet user-jwts create --role InventoryAuditor --claim AuditClearance=1 --output token
+#   dotnet user-jwts create --role WarehouseStaff --claim WarehouseId=WH-001 --output token
+@supervisorToken = paste-the-supervisor-token-here
+@auditorToken = paste-the-clearance-3-auditor-token-here
+@juniorAuditorToken = paste-the-clearance-1-auditor-token-here
+@staffToken = paste-the-WH-001-staff-token-here
+
+# No token: 401 with WWW-Authenticate and a Problem Details body
+GET {{WarehouseApi_HostAddress}}/api/stock-adjustments/audit
+
+###
+
+# Staff, and auditors below clearance 2: 403 Problem Details
+GET {{WarehouseApi_HostAddress}}/api/stock-adjustments/audit
+Authorization: Bearer {{staffToken}}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/stock-adjustments/audit
+Authorization: Bearer {{juniorAuditorToken}}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/stock-adjustments/audit?pageSize=5
+Authorization: Bearer {{auditorToken}}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/stock-adjustments/audit
+Authorization: Bearer {{supervisorToken}}
+
+###
+
+# The new partner origin passes the CORS preflight
+OPTIONS {{WarehouseApi_HostAddress}}/api/stock-adjustments/audit
+Origin: https://partner-portal.example.com
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: authorization
+
+###

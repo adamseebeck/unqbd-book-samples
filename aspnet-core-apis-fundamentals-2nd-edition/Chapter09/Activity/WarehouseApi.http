@@ -1,0 +1,42 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# The order routes are now Minimal API endpoints; the requests are the same
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: fe50d368-2a61-51d9-ac28-ed48133c986b
+
+{
+    "customerReference": "CUST-3001",
+    "lines": [ { "sku": "SKU-001", "quantity": 4 } ]
+}
+
+###
+
+# Copy the id from the response above
+@orderId = 00000000-0000-0000-0000-000000000000
+
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/fulfill
+
+###
+
+# Minimal API validation rejects a missing warehouse code before the handler runs
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+
+{
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/orders?status=Fulfilled
+
+###

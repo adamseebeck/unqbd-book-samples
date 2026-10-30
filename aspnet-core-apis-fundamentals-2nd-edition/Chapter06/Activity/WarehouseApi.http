@@ -1,0 +1,76 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Creates a stock item that does not exist yet: 201 Created with a Location
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Content-Type: application/json
+Idempotency-Key: 0c6f1d2e-3a4b-4c5d-8e9f-a0b1c2d3e4f5
+
+{
+    "productSku": "SKU-002",
+    "onHand": 40,
+    "reserved": 5,
+    "reorderThreshold": 30
+}
+
+###
+
+# The same request again: the stored 201 response, and nothing changes
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Content-Type: application/json
+Idempotency-Key: 0c6f1d2e-3a4b-4c5d-8e9f-a0b1c2d3e4f5
+
+{
+    "productSku": "SKU-002",
+    "onHand": 40,
+    "reserved": 5,
+    "reorderThreshold": 30
+}
+
+###
+
+# Same key, different payload: 422 Unprocessable Content
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Content-Type: application/json
+Idempotency-Key: 0c6f1d2e-3a4b-4c5d-8e9f-a0b1c2d3e4f5
+
+{
+    "productSku": "SKU-002",
+    "onHand": 45,
+    "reserved": 5,
+    "reorderThreshold": 30
+}
+
+###
+
+# A new key for a stock item that already exists: 409 Conflict
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Content-Type: application/json
+Idempotency-Key: 5b4a3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d
+
+{
+    "productSku": "SKU-002",
+    "onHand": 40,
+    "reserved": 5,
+    "reorderThreshold": 30
+}
+
+###
+
+# Fewer units on hand than reserved: 400 Bad Request, because the two values contradict each other
+POST {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Content-Type: application/json
+Idempotency-Key: 7e6d5c4b-3a2f-4e1d-9c8b-7a6f5e4d3c2b
+
+{
+    "productSku": "SKU-003",
+    "onHand": 5,
+    "reserved": 20,
+    "reorderThreshold": 40
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/stock
+Accept: application/json
+
+###

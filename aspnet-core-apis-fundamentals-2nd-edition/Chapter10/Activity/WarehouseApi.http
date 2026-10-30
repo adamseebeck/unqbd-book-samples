@@ -1,0 +1,10 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# The seed data has one low item in WH-001: SKU-002, 75 on hand with a threshold of 100
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/low-stock
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-002/low-stock?pageNumber=1&pageSize=5
+
+###

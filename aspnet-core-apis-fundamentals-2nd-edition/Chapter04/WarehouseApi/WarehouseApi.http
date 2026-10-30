@@ -1,0 +1,110 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+GET {{WarehouseApi_HostAddress}}/health
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/products/SKU-001
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/products?search=caster&isActive=true
+Accept: application/json
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+    "sku": "SKU-003",
+    "name": "Pallet Label Printer",
+    "unitPrice": 289.00,
+    "isActive": true
+}
+
+###
+
+# The same POST again: 409 Conflict, because SKU-003 exists
+POST {{WarehouseApi_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+    "sku": "SKU-003",
+    "name": "Pallet Label Printer",
+    "unitPrice": 289.00,
+    "isActive": true
+}
+
+###
+
+PUT {{WarehouseApi_HostAddress}}/api/products/SKU-003
+Content-Type: application/json
+
+{
+    "sku": "SKU-003",
+    "name": "Thermal Pallet Label Printer",
+    "unitPrice": 299.00,
+    "isActive": true
+}
+
+###
+
+PUT {{WarehouseApi_HostAddress}}/api/products/SKU-003
+Content-Type: application/json
+
+{
+    "sku": "SKU-003",
+    "name": "Thermal Pallet Label Printer",
+    "unitPrice": 299.00,
+    "isActive": false
+}
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/products?isActive=false
+Accept: application/json
+
+###
+
+DELETE {{WarehouseApi_HostAddress}}/api/products/SKU-003
+
+###
+
+# After the DELETE: 404 Not Found
+GET {{WarehouseApi_HostAddress}}/api/products/SKU-003
+Accept: application/json
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/warehouses/WH-001/stock/SKU-001
+Accept: application/json
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/inventory/adjustments
+Content-Type: application/json
+
+{
+    "sku": "SKU-001",
+    "warehouseCode": "WH-001",
+    "quantity": 10,
+    "reasonCode": "RECEIPT"
+}
+
+###
+
+# WH-002 holds no stock of SKU-001: 422 Unprocessable Content
+POST {{WarehouseApi_HostAddress}}/api/inventory/adjustments
+Content-Type: application/json
+
+{
+    "sku": "SKU-001",
+    "warehouseCode": "WH-002",
+    "quantity": 10,
+    "reasonCode": "RECEIPT"
+}
+
+###

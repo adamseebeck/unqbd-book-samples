@@ -1,0 +1,39 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+# Stock across every warehouse: a no-tracking projection with the product name
+GET {{WarehouseApi_HostAddress}}/api/stock
+
+###
+
+GET {{WarehouseApi_HostAddress}}/api/stock?belowReorderThreshold=true
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+X-Correlation-ID: portal-reserve-0001
+Idempotency-Key: c2e66901-2c98-55d2-ba11-49e7bd855de2
+
+{
+    "customerReference": "CUST-5001",
+    "lines": [
+        { "sku": "SKU-001", "quantity": 10 },
+        { "sku": "SKU-002", "quantity": 5 }
+    ]
+}
+
+###
+
+# Copy the id from the response above
+@orderId = 00000000-0000-0000-0000-000000000000
+
+# One transaction reserves every line; watch the console for the ReserveStock span
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+X-Correlation-ID: portal-reserve-0002
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###

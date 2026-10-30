@@ -1,0 +1,38 @@
+@WarehouseApi_HostAddress = http://localhost:5080
+
+POST {{WarehouseApi_HostAddress}}/api/orders
+Content-Type: application/json
+Idempotency-Key: a3db986f-38a7-51d2-946e-11e2bbde8280
+
+{
+    "customerReference": "CUST-5501",
+    "lines": [ { "sku": "SKU-001", "quantity": 10 } ]
+}
+
+###
+
+@orderId = 00000000-0000-0000-0000-000000000000
+
+POST {{WarehouseApi_HostAddress}}/api/orders/{{orderId}}/allocate
+Content-Type: application/json
+
+{
+    "warehouseCode": "WH-001"
+}
+
+###
+
+# The customer now needs 7 units: release 3 of the 10 reserved
+# A release is not idempotent: a retry sends the same key and gets the stored order back
+POST {{WarehouseApi_HostAddress}}/api/releases
+Content-Type: application/json
+Idempotency-Key: 2f6c1d0e-release-0001
+X-Correlation-ID: portal-release-0001
+
+{
+    "orderId": "{{orderId}}",
+    "sku": "SKU-001",
+    "quantity": 3
+}
+
+###

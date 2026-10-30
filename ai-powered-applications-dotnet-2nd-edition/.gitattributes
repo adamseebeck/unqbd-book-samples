@@ -1,0 +1,2 @@
+# Every text file in the companion code uses LF line endings, on every platform.
+* text=auto eol=lf

@@ -1,0 +1,52 @@
+# Run once per release, before the Deployment rolls out:
+#   kubectl apply -f deploy/initialize-database-job.yaml
+#   kubectl wait --for=condition=complete --timeout=10m job/contoso-support-copilot-initialize-database-1-0-0
+# A first image pull can take minutes, so wait longer than kubectl's 30-second default. If the wait fails,
+# read the job's output with kubectl logs job/contoso-support-copilot-initialize-database-1-0-0 before you roll out.
+# It runs the same image with --initialize-database, which creates the databases and any missing tables and
+# exits. It never changes an existing table, and in Production it adds no sample data. Its connection strings
+# use a login that may create tables; the app's own login needs no such right.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # One job per image version: a finished job does not run again under the same name.
+  name: contoso-support-copilot-initialize-database-1-0-0
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: initialize-database
+          image: <registry>.azurecr.io/contoso-support-copilot:1.0.0
+          args: ["--initialize-database"]
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: Database__Provider
+              value: SqlServer
+            - name: ConnectionStrings__SupportDb
+              valueFrom:
+                secretKeyRef:
+                  name: contoso-support-copilot-schema
+                  key: support-db
+            - name: ConnectionStrings__CopilotDb
+              valueFrom:
+                secretKeyRef:
+                  name: contoso-support-copilot-schema
+                  key: copilot-db
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp

@@ -33,6 +33,22 @@ dotnet test --project SimpleCalculator.Tests/SimpleCalculator.Tests.csproj
 
 The local global.json selects Microsoft.Testing.Platform. The test project uses xunit.v3.mtp-v2 4.0.1 and references the actual SimpleCalculator library. Its 11 tests should pass. Return to this folder before using other commands from this page.
 
+## Student Tracker project
+
+The book builds one program, the Student Tracker, a step at a time from Chapter 3 to Chapter 22. `StudentTracker/ChapterNN` holds the program as it stands at the end of that chapter (Chapters 12, 16 and 17 add nothing to it), so you can compare your copy or pick up from any chapter. From this folder:
+
+```powershell
+dotnet run --project StudentTracker/Chapter05/StudentTracker
+```
+
+From Chapter 19, each folder also has the tests:
+
+```powershell
+dotnet run --project StudentTracker/Chapter19/StudentTracker.Tests
+```
+
+Chapters 20 to 22 save students.json or students.db in the folder you run from; delete that file to start with an empty class. Chapter 22 uses Microsoft.EntityFrameworkCore.Sqlite 11.0.0 and needs an internet connection the first time.
+
 ## Package contents
 
-There are 48 lesson/activity groups containing 51 projects, including libraries, tests and the separate migration experiment. This folder contains source and configuration files, with build outputs, generated databases and the SDK excluded. These examples are companions to the book; intermediate snippets and intentional compiler-error demonstrations remain in the chapters.
+There are 48 lesson/activity groups containing 51 projects, including libraries, tests and the separate migration experiment, plus the Student Tracker's 17 chapter versions (21 projects). This folder contains source and configuration files, with build outputs, generated databases and the SDK excluded. These examples are companions to the book; intermediate snippets and intentional compiler-error demonstrations remain in the chapters.

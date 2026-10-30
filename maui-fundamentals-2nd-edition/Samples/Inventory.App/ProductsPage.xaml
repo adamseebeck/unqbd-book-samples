@@ -10,21 +10,19 @@
    <Entry Text="{Binding Query}" Placeholder="Search names or SKUs"/>
    <Button Grid.Column="1" Text="Search" Command="{Binding LoadCommand}"/>
   </Grid>
-  <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy, Mode=OneWay}" Command="{Binding LoadCommand}">
-   <CollectionView ItemsSource="{Binding Products}" SelectionMode="Single" SelectionChanged="OnSelected">
-    <CollectionView.EmptyView><Label Text="No products to show. Clear the search and try again."/></CollectionView.EmptyView>
-    <CollectionView.ItemTemplate>
-     <DataTemplate x:DataType="core:Product">
-      <Border Padding="12" Margin="0,4" Stroke="#A0A0A0">
-       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-        <Label Text="{Binding Name}" LineBreakMode="TailTruncation"/>
-        <Label Grid.Column="1" Text="{Binding Quantity,StringFormat='Stock {0}'}"/>
-       </Grid>
-      </Border>
-     </DataTemplate>
-    </CollectionView.ItemTemplate>
-   </CollectionView>
-  </RefreshView>
+  <CollectionView Grid.Row="2" ItemsSource="{Binding Products}" SelectionMode="Single" SelectionChanged="OnSelected">
+   <CollectionView.EmptyView><Label Text="No products to show. Clear the search and try again."/></CollectionView.EmptyView>
+   <CollectionView.ItemTemplate>
+    <DataTemplate x:DataType="core:Product">
+     <Border Padding="12" Margin="0,4" Stroke="#A0A0A0">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+       <Label Text="{Binding Name}" LineBreakMode="TailTruncation"/>
+       <Label Grid.Column="1" Text="{Binding Quantity,StringFormat='Stock {0}'}"/>
+      </Grid>
+     </Border>
+    </DataTemplate>
+   </CollectionView.ItemTemplate>
+  </CollectionView>
   <VerticalStackLayout Grid.Row="3" Spacing="8">
    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
    <Label Text="{Binding ErrorMessage}" TextColor="#A01010"/>

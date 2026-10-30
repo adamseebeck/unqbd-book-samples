@@ -1,0 +1,101 @@
+# Chapter 5 Full Example requests. Start the app first: dotnet run (https://localhost:7001, Development).
+# Send the requests in order. Each "Expect" line is the status you should see.
+# The in-memory store starts with product 1 (AdventureWorks Helmet): restart the app to start over.
+
+@host = https://localhost:7001
+
+###
+# The v1 controller lists the starting product. Expect 200 with "id": 1
+GET {{host}}/api/v1/products
+
+###
+# Create a product through v1. Expect 201 with "id": 2 and a Location header
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "price": 24.99, "sku": "TRL-0001" }
+
+###
+# The same singleton store serves v2. Expect 200 with "id": 2
+GET {{host}}/api/v2/products/2
+
+###
+# Create a product through v2. Expect 201 with "id": 3
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Camp Mug", "price": 12.50, "sku": "CMP-0002" }
+
+###
+# v1 lists all three products. Expect 200
+GET {{host}}/api/v1/products
+
+###
+# Update through v1. Expect 204
+PUT {{host}}/api/v1/products/2
+Content-Type: application/json
+
+{ "name": "Trail Bottle XL", "price": 27.99 }
+
+###
+# Update through v2. Expect 204
+PUT {{host}}/api/v2/products/3
+Content-Type: application/json
+
+{ "name": "Camp Mug Large", "price": 14.00 }
+
+###
+# A name shorter than 3 characters fails validation in v1. Expect 400
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "AB", "price": 5, "sku": "ABC-0003" }
+
+###
+# A zero price fails validation in v2. Expect 400
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Free Sample", "price": 0, "sku": "FRE-0004" }
+
+###
+# A lowercase SKU fails the pattern in v1. Expect 400
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "Lantern", "price": 30, "sku": "lan-0005" }
+
+###
+# The same lowercase SKU fails in v2. Expect 400
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Lantern", "price": 30, "sku": "lan-0005" }
+
+###
+# Nothing invalid was stored. Expect 200 with only ids 1, 2 and 3
+GET {{host}}/api/v2/products
+
+###
+# Paging outside the allowed range. Expect 400
+GET {{host}}/api/v2/products?page=0
+
+###
+# Delete through v1. Expect 204
+DELETE {{host}}/api/v1/products/2
+
+###
+# Gone from v2 as well. Expect 404
+GET {{host}}/api/v2/products/2
+
+###
+# Delete through v2. Expect 204
+DELETE {{host}}/api/v2/products/3
+
+###
+# Deleting again finds nothing. Expect 404
+DELETE {{host}}/api/v2/products/3
+
+###
+# The OpenAPI document (Development only). Expect 200
+GET {{host}}/openapi/v1.json

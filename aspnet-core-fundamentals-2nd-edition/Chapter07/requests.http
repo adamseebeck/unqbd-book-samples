@@ -1,0 +1,34 @@
+# Chapter 7 requests for the JSON validation route. Start the app first:
+#   dotnet run --urls http://127.0.0.1:42107
+# Each "Expect" line is the status you should see. The order form itself is a browser page:
+# open http://127.0.0.1:42107/Orders/Create to try it.
+
+@host = http://127.0.0.1:42107
+
+###
+# The one available SKU and a quantity in range. Expect 200 {"sku":"NOTEBOOK-101","quantity":2}
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "NOTEBOOK-101", "quantity": 2 }
+
+###
+# The asynchronous availability check rejects an unknown SKU. Expect 400 with a validation problem
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "PEN-202", "quantity": 1 }
+
+###
+# Quantity above 20. Expect 400
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "NOTEBOOK-101", "quantity": 25 }
+
+###
+# A missing SKU fails Required. Expect 400
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "quantity": 1 }

@@ -42,4 +42,6 @@ app.MapPut("/api/orders/{id:guid}", async (Guid id, UpdateOrderRequest request, 
     try { await db.SaveChangesAsync(ct); return Results.Ok(new { order.Id, order.Version }); }
     catch (DbUpdateConcurrencyException) { return Results.Conflict(new { Error = "Reload the order before retrying." }); }
 }).RequireAuthorization();
+app.MapDevelopmentSignIn(); // Development-only test users: DevSignIn.cs
+await app.SeedDevelopmentDataAsync(); // Development-only sample data: DevSeed.cs
 app.Run();

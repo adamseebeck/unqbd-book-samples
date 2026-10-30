@@ -1,0 +1,108 @@
+# Chapter 9 requests. Start the app first: dotnet run (https://localhost:42109, Development).
+# Send the requests in order. Each "Expect" line is the status you should see.
+# Signing in sets this host's cookie. VS Code REST Client keeps it for the next requests; if your
+# client does not keep cookies, use the curl.exe commands in README.md instead.
+# Restart the app to reset the document store before you repeat the checks.
+
+@host = https://localhost:42109
+
+###
+# Public page. Expect 200: "Public AdventureWorks documentation"
+GET {{host}}/
+
+###
+# Anonymous request to a protected document. Expect 401
+GET {{host}}/api/documents/1
+
+###
+# Anonymous archive request. Expect 401
+POST {{host}}/api/documents/1/archive
+
+###
+# Sign in as owner: owner-1, no Department, under 21. Expect 200
+POST {{host}}/dev/sign-in/owner
+
+###
+# The age policy rejects this user. Expect 403
+GET {{host}}/restricted-content
+
+###
+# The owner can read the document. Expect 200 with "archived": false
+GET {{host}}/api/documents/1
+
+###
+# Antiforgery token for this user. Expect 200
+# @name ownerToken
+GET {{host}}/csrf
+
+###
+# Not in Finance, so the Department:Finance policy rejects the archive. Expect 403
+POST {{host}}/api/documents/1/archive
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+###
+# Sign in as finance-nonowner: owner-2, Department Finance. Expect 200
+POST {{host}}/dev/sign-in/finance-nonowner
+
+###
+# Expect 200
+# @name nonOwnerToken
+GET {{host}}/csrf
+
+###
+# In Finance but not the owner, so the ownership check rejects it. Expect 403
+POST {{host}}/api/documents/1/archive
+X-CSRF-TOKEN: {{nonOwnerToken.response.body.$.token}}
+
+###
+# Sign in as finance-owner: owner-1, Department Finance, born 1990. Expect 200
+POST {{host}}/dev/sign-in/finance-owner
+
+###
+# The age policy accepts this user. Expect 200: "Age policy accepted"
+GET {{host}}/restricted-content
+
+###
+# Expect 200
+# @name financeOwnerToken
+GET {{host}}/csrf
+
+###
+# Without the antiforgery token the archive is rejected. Expect 400
+POST {{host}}/api/documents/1/archive
+
+###
+# Finance membership and ownership both succeed. Expect 204
+POST {{host}}/api/documents/1/archive
+X-CSRF-TOKEN: {{financeOwnerToken.response.body.$.token}}
+
+###
+# The document is now archived. Expect 200 with "archived": true
+GET {{host}}/api/documents/1
+
+###
+# Sign in as admin: role Admin. Expect 200
+POST {{host}}/dev/sign-in/admin
+
+###
+# Expect 200
+# @name adminToken
+GET {{host}}/csrf
+
+###
+# Admins can delete. Expect 204
+DELETE {{host}}/api/documents/1
+X-CSRF-TOKEN: {{adminToken.response.body.$.token}}
+
+###
+# The document is gone. Expect 404
+DELETE {{host}}/api/documents/1
+X-CSRF-TOKEN: {{adminToken.response.body.$.token}}
+
+###
+# Unknown test users do not exist. Expect 404
+POST {{host}}/dev/sign-in/someone-else
+
+###
+# Sign out. Expect 204
+POST {{host}}/dev/sign-out

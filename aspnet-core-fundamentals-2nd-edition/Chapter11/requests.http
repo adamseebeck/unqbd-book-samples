@@ -1,0 +1,86 @@
+# Chapter 11 requests. First create and apply the migration (see README.md), then: dotnet run
+# (https://localhost:42111, Development). DevSeed.cs adds product 1 (Notebook, 1200 cents) on startup.
+# Send the requests in order. Each "Expect" line is the status you should see.
+# Signing in sets this host's cookie. VS Code REST Client keeps it for the next requests; if your
+# client does not keep cookies, use the curl.exe commands in README.md instead.
+# Order numbers are unique: change @orderNumber before you create the order again.
+
+@host = https://localhost:42111
+@orderNumber = AW-1001
+
+###
+# Sign in as owner-1. Expect 200
+POST {{host}}/dev/sign-in/owner-1
+
+###
+# Antiforgery token for this user. Expect 200
+# @name ownerToken
+GET {{host}}/csrf
+
+###
+# Create an order for two of product 1. Expect 201 with "succeeded": true and the new orderId
+# @name created
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "orderNumber": "{{orderNumber}}", "items": [ { "productId": 1, "quantity": 2 } ] }
+
+###
+# Read it back. Expect 200 with unitPriceCents 1200, the stored product price
+GET {{host}}/api/orders/{{created.response.body.$.orderId}}
+
+###
+# The same order number again. Expect 400 "The order could not be created with that number."
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "orderNumber": "{{orderNumber}}", "items": [ { "productId": 1, "quantity": 1 } ] }
+
+###
+# No lines. Expect 400 "Use 1-20 lines with quantities from 1 to 20."
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "orderNumber": "AW-EMPTY", "items": [] }
+
+###
+# A quantity of zero. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "orderNumber": "AW-ZERO", "items": [ { "productId": 1, "quantity": 0 } ] }
+
+###
+# Duplicate product lines. Expect 400 "Combine duplicate product lines."
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "orderNumber": "AW-DUP", "items": [ { "productId": 1, "quantity": 1 }, { "productId": 1, "quantity": 2 } ] }
+
+###
+# An unknown product. Expect 400 "A selected product is unavailable."
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "orderNumber": "AW-UNKNOWN", "items": [ { "productId": 99, "quantity": 1 } ] }
+
+###
+# Without the antiforgery token. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "orderNumber": "AW-NOTOKEN", "items": [ { "productId": 1, "quantity": 1 } ] }
+
+###
+# Sign in as owner-2. Expect 200
+POST {{host}}/dev/sign-in/owner-2
+
+###
+# Another owner cannot load owner-1's order. Expect 404
+GET {{host}}/api/orders/{{created.response.body.$.orderId}}

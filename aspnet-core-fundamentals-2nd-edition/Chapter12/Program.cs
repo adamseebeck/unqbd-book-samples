@@ -98,4 +98,5 @@ app.MapPost("/api/inventory/webhook", async (HttpContext context, IAntiforgery a
     await output.EvictByTagAsync("products", ct);
     return Results.NoContent();
 }).RequireAuthorization(policy => policy.RequireRole("Admin")).RequireRateLimiting("webhook");
+app.MapDevelopmentSignIn(); // Development-only test users: DevSignIn.cs
 app.Run();

@@ -1,0 +1,61 @@
+# Chapter 13 requests. Start the app first: dotnet run --urls http://127.0.0.1:42141
+# Send the requests in order. Each "Expect" line is the status you should see.
+# Orders live in memory: restart the app to clear them.
+
+@host = http://127.0.0.1:42141
+
+###
+# Create an order. Expect 201 with a Location header pointing at the new order
+# @name created
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "customerName": "Ada Lovelace", "items": [ { "productId": 1, "quantity": 2 } ] }
+
+###
+# Follow the Location header. Expect 200
+GET {{created.response.headers.Location}}
+
+###
+# A second order, so paging has two pages. Expect 201
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "customerName": "Grace Hopper", "items": [ { "productId": 2, "quantity": 1 } ] }
+
+###
+# One order per page. Expect 200 with X-Total-Count: 2 and a Link header to the next page
+GET {{host}}/api/orders?pageSize=1
+
+###
+# A page size above 100. Expect 400 "Invalid pagination"
+GET {{host}}/api/orders?pageSize=500
+
+###
+# Change the customer name. Expect 204
+PATCH {{host}}/api/orders/{{created.response.body.$.id}}
+Content-Type: application/json
+
+{ "customerName": "Ada King" }
+
+###
+# A blank customer name. Expect 400
+PATCH {{host}}/api/orders/{{created.response.body.$.id}}
+Content-Type: application/json
+
+{ "customerName": "  " }
+
+###
+# An order with no items. Expect 400 with a validation problem
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "customerName": "Empty", "items": [] }
+
+###
+# Delete the first order. Expect 204
+DELETE {{host}}/api/orders/{{created.response.body.$.id}}
+
+###
+# It is gone. Expect 404 "Order not found"
+GET {{host}}/api/orders/{{created.response.body.$.id}}

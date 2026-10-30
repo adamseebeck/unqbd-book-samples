@@ -11,7 +11,7 @@ app.UseRouting();
 app.Use(async (context, next) =>
 {
     var name = context.GetEndpoint()?.DisplayName;
-    app.Logger.LogDebug("Selected endpoint {Endpoint}", name);
+    app.Logger.LogInformation("Selected endpoint {Endpoint}", name);
     await next();
 });
 if (app.Environment.IsDevelopment()) app.MapOpenApi();

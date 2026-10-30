@@ -1,0 +1,141 @@
+# Chapter 12 requests. Start two terminals:
+#   1. In InventoryFixture: dotnet run   (the loopback inventory service, http://127.0.0.1:42132)
+#   2. In this folder:      dotnet run   (https://localhost:42112, Development)
+# Send the requests in order. Each "Expect" line is the status you should see.
+# Signing in sets this host's cookie. VS Code REST Client keeps it for the next requests; if your
+# client does not keep cookies, use the curl.exe commands in README.md instead.
+
+@host = https://localhost:42112
+@fixture = http://127.0.0.1:42132
+
+###
+# The first read fills the cache. Expect 200 with "generation": 1
+GET {{host}}/api/products/1
+
+###
+# A cache hit returns the same generation. Expect 200 with "generation": 1
+GET {{host}}/api/products/1
+
+###
+# Only product 1 exists. Expect 404
+GET {{host}}/api/products/2
+
+###
+# The "public" limiter allows 3 requests a minute per client (wait a minute before you repeat these). Expect 200
+GET {{host}}/limited
+
+###
+# Expect 200
+GET {{host}}/limited
+
+###
+# Expect 200
+GET {{host}}/limited
+
+###
+# The fourth request in the same minute is rejected. Expect 429
+GET {{host}}/limited
+
+###
+# Resilience checks. The circuit breaker counts failures over a 10-second window, so the
+# checks below say when to wait; without the waits, failures from one check carry into the next.
+# A healthy upstream. Expect 200 {"quantity":7}
+GET {{host}}/api/stock
+
+###
+# Retry: reset the fixture, then queue two failures (500). Expect 204
+POST {{fixture}}/control/reset
+
+###
+# Expect 204
+POST {{fixture}}/control/fail/2
+
+###
+# Two retries absorb the failures. Expect 200 {"quantity":7}
+GET {{host}}/api/stock
+
+###
+# Three attempts reached the fixture. Expect 200 {"attempts":3}
+GET {{fixture}}/control/attempts
+
+###
+# No retry for a client error. Wait 15 seconds, then reset. Expect 204
+POST {{fixture}}/control/reset
+
+###
+# A permanent 400. Expect 204
+POST {{fixture}}/control/status/400
+
+###
+# The 400 is not transient, so the call fails at once. Expect 503
+GET {{host}}/api/stock
+
+###
+# One attempt only. Expect 200 {"attempts":1}
+GET {{fixture}}/control/attempts
+
+###
+# Timeouts. Wait 15 seconds, then reset. Expect 204
+POST {{fixture}}/control/reset
+
+###
+# Delay every response past the 1-second attempt timeout. Expect 204
+POST {{fixture}}/control/delay/1500
+
+###
+# Each attempt times out and is retried. Expect 503 after about 3 seconds
+GET {{host}}/api/stock
+
+###
+# Three attempts reached the fixture. Expect 200 {"attempts":3}
+GET {{fixture}}/control/attempts
+
+###
+# Circuit breaker. Wait 15 seconds, then reset. Expect 204
+POST {{fixture}}/control/reset
+
+###
+# Keep failing. Expect 204
+POST {{fixture}}/control/fail/1000
+
+###
+# Three failed attempts. Expect 503
+GET {{host}}/api/stock
+
+###
+# Two more failed attempts reach MinimumThroughput (5) and open the breaker. Expect 503
+GET {{host}}/api/stock
+
+###
+# The open breaker rejects the call without reaching the fixture. Expect 503
+GET {{host}}/api/stock
+
+###
+# The count stopped at 5 while the breaker was open. Expect 200 {"attempts":5}
+GET {{fixture}}/control/attempts
+
+###
+# Clear the failures. The breaker closes again after its 5-second break. Expect 204
+POST {{fixture}}/control/reset
+
+###
+# Sign in as the Admin test user. Expect 200
+POST {{host}}/dev/sign-in/admin
+
+###
+# Expect 200 {"name":"Admin"}; authenticated responses are not output-cached
+GET {{host}}/profile
+
+###
+# Antiforgery token for this user. Expect 200
+# @name adminToken
+GET {{host}}/csrf
+
+###
+# Invalidate the product cache as Admin. Expect 204
+POST {{host}}/api/inventory/webhook
+X-CSRF-TOKEN: {{adminToken.response.body.$.token}}
+
+###
+# The next read rebuilds the entry. Expect 200 with "generation": 2
+GET {{host}}/api/products/1

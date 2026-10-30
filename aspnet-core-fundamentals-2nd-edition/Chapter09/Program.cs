@@ -60,4 +60,5 @@ app.MapPost("/api/documents/{id:int}/archive", async (int id, DocumentRepository
     if (!(await authorization.AuthorizeAsync(user, document, "DocumentOwner")).Succeeded) return Results.Forbid();
     return repository.Archive(id) ? Results.NoContent() : Results.NotFound();
 }).RequireAuthorization("Department:Finance");
+app.MapDevelopmentSignIn(); // Development-only test users: DevSignIn.cs
 app.Run();

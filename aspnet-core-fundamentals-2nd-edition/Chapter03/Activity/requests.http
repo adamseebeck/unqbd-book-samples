@@ -1,0 +1,37 @@
+# Chapter 3 Activity requests. Start the app first: dotnet run (https://localhost:7001, Development).
+# A browser address bar sends only GET requests, so send these POST requests and headers from here.
+# Each "Expect" line is the status you should see. Every response, from both route families, carries
+# X-Content-Type-Options: nosniff and X-Frame-Options: DENY.
+
+@host = https://localhost:7001
+
+###
+# The main path without the exercise identity. Expect 401
+POST {{host}}/api/payments
+Idempotency-Key: order-1001
+
+###
+# The main path with the local test identity. Expect 200 {"key":"order-1001"}
+POST {{host}}/api/payments
+Idempotency-Key: order-1001
+X-Exercise-Identity: developer
+
+###
+# The mock webhook branch needs no exercise identity. Expect 200 {"key":"hook-2001"}
+POST {{host}}/webhooks/demo
+Idempotency-Key: hook-2001
+
+###
+# A missing key fails before any route runs. Expect 400
+POST {{host}}/api/payments
+X-Exercise-Identity: developer
+
+###
+# An invalid key (a space and "!" are not allowed). Expect 400
+POST {{host}}/api/payments
+Idempotency-Key: bad key!
+X-Exercise-Identity: developer
+
+###
+# The branch accepts only POST /webhooks/demo. Expect 404
+GET {{host}}/webhooks/demo

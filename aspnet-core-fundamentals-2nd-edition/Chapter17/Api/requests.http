@@ -1,0 +1,32 @@
+# Chapter 17 requests. From the Chapter17 folder, start the API first:
+#   dotnet run --project Api --urls http://127.0.0.1:42149
+# Each "Expect" line is the status you should see.
+
+@host = http://127.0.0.1:42149
+
+###
+# One record with three fields (the last one empty). Expect 200 {"records":1,"fields":3}
+POST {{host}}/api/ingestion/batch
+Content-Type: text/plain
+
+a,b,
+
+###
+# Two records. Expect 200 {"records":2,"fields":5}
+POST {{host}}/api/ingestion/batch
+Content-Type: text/plain
+
+id,name
+1,Trail Bottle,24.99
+
+###
+# Quoted fields are outside this lab's narrow format. Expect 400
+POST {{host}}/api/ingestion/batch
+Content-Type: text/plain
+
+"a,b",c
+
+###
+# The sample response, compressed because the client accepts gzip (Content-Encoding: gzip). Expect 200 {"records":1000,"fields":3000}
+GET {{host}}/api/ingestion/sample
+Accept-Encoding: gzip

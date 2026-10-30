@@ -1,0 +1,50 @@
+# Chapter 8 token requests. Start the app first (see README.md): set Training__Password, then
+# dotnet run (https://localhost:42108, Development). Use the same password here.
+# Send the requests in order. Each "Expect" line is the status you should see.
+
+@host = https://localhost:42108
+@password = Learner-Pass-2026!
+
+###
+# The API requires a Bearer token. Expect 401
+GET {{host}}/api/books/available
+
+###
+# A wrong password. Expect 401
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "learner@example.test", "password": "not-the-password" }
+
+###
+# Sign in for tokens. Expect 200 with accessToken and refreshToken
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "learner@example.test", "password": "{{password}}" }
+
+###
+# Call the API with the access token. Expect 200
+GET {{host}}/api/books/available
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Exchange the refresh token for a new pair. Expect 200
+# @name refreshed
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{ "token": "{{login.response.body.$.refreshToken}}" }
+
+###
+# The first refresh token is now consumed. Expect 401
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{ "token": "{{login.response.body.$.refreshToken}}" }
+
+###
+# The new access token works. Expect 200
+GET {{host}}/api/books/available
+Authorization: Bearer {{refreshed.response.body.$.accessToken}}

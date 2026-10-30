@@ -1,0 +1,83 @@
+# Chapter 10 requests. First create and apply the migration (see README.md), then: dotnet run
+# (https://localhost:42110, Development). DevSeed.cs fills the empty database on startup.
+# Send the requests in order. Each "Expect" line is the status you should see.
+# Signing in sets this host's cookie. VS Code REST Client keeps it for the next requests; if your
+# client does not keep cookies, use the curl.exe commands in README.md instead.
+# To start over, delete orders-training.db, run dotnet ef database update again and restart the app.
+
+@host = https://localhost:42110
+@firstOrder = 10000000-0000-0000-0000-000000000001
+
+###
+# Sign in as owner-1, who has 25 seeded orders. Expect 200
+POST {{host}}/dev/sign-in/owner-1
+
+###
+# Report page 1. Expect 200 with 20 orders, newest first: AW-0001 to AW-0020
+GET {{host}}/api/orders/report
+
+###
+# Report page 2. Expect 200 with the last 5 orders: AW-0021 to AW-0025
+GET {{host}}/api/orders/report?page=2
+
+###
+# Pages outside 1 to 10000 are rejected. Expect 400
+GET {{host}}/api/orders/report?page=0
+
+###
+# Antiforgery token for this user. Expect 200
+# @name ownerToken
+GET {{host}}/csrf
+
+###
+# Update AW-0001 with the version the client last saw. Expect 200 with a new version
+# @name firstUpdate
+PUT {{host}}/api/orders/{{firstOrder}}
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "notes": "Leave at the front desk.", "version": "a0000000-0000-0000-0000-000000000001" }
+
+###
+# The same old version again: someone else's save won. Expect 409 "Reload the order before retrying."
+PUT {{host}}/api/orders/{{firstOrder}}
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "notes": "A stale edit.", "version": "a0000000-0000-0000-0000-000000000001" }
+
+###
+# With the version returned by the first update. Expect 200
+PUT {{host}}/api/orders/{{firstOrder}}
+Content-Type: application/json
+X-CSRF-TOKEN: {{ownerToken.response.body.$.token}}
+
+{ "notes": "Ring the bell.", "version": "{{firstUpdate.response.body.$.version}}" }
+
+###
+# Without the antiforgery token. Expect 400
+PUT {{host}}/api/orders/{{firstOrder}}
+Content-Type: application/json
+
+{ "notes": "No token.", "version": "a0000000-0000-0000-0000-000000000001" }
+
+###
+# Sign in as owner-2, who has one order. Expect 200
+POST {{host}}/dev/sign-in/owner-2
+
+###
+# The report shows only owner-2's order. Expect 200 with AW-0026 only
+GET {{host}}/api/orders/report
+
+###
+# Expect 200
+# @name otherToken
+GET {{host}}/csrf
+
+###
+# owner-2 cannot update owner-1's order: the ownership filter finds nothing. Expect 404
+PUT {{host}}/api/orders/{{firstOrder}}
+Content-Type: application/json
+X-CSRF-TOKEN: {{otherToken.response.body.$.token}}
+
+{ "notes": "Not my order.", "version": "a0000000-0000-0000-0000-000000000001" }

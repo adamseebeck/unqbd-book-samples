@@ -41,4 +41,6 @@ app.MapGet("/api/orders/{id:guid}", async (Guid id, IOrderService service, Claim
     return order is null ? Results.NotFound() : Results.Ok(new { order.Id, order.OrderNumber, order.Status,
         Items = order.Items.Select(i => new { i.ProductId, i.Quantity, i.UnitPriceCents }) });
 }).RequireAuthorization();
+app.MapDevelopmentSignIn(); // Development-only test users: DevSignIn.cs
+await app.SeedDevelopmentDataAsync(); // Development-only sample data: DevSeed.cs
 app.Run();

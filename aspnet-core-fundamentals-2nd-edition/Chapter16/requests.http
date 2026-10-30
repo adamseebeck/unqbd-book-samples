@@ -1,0 +1,41 @@
+# Chapter 16 requests. Start the app first: dotnet run --urls http://127.0.0.1:42148
+# The app's /catalog route stands in for the downstream catalog, so the order route calls the same host.
+# Each "Expect" line is the status you should see. Watch the console for the JSON log line, the
+# trace and the orders.created metric after each order.
+
+@host = http://127.0.0.1:42148
+
+###
+# Liveness only. Expect 200 "Healthy"
+GET {{host}}/health/live
+
+###
+# Readiness includes the catalog check. Expect 200 "Healthy"
+GET {{host}}/health/ready
+
+###
+# Create an order. Expect 201 and the same X-Correlation-ID response header
+POST {{host}}/api/orders
+Content-Type: application/json
+X-Correlation-ID: order-lab-1
+
+{ "region": "east" }
+
+###
+# An unsafe correlation ID is replaced with the trace ID. Expect 201 and a different X-Correlation-ID
+POST {{host}}/api/orders
+Content-Type: application/json
+X-Correlation-ID: bad id with spaces
+
+{ "region": "west" }
+
+###
+# Regions other than east and west are rejected. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "region": "north" }
+
+###
+# The stand-in catalog can fail on request. Expect 503
+GET {{host}}/catalog?status=503

@@ -6,6 +6,17 @@
 - Change the local reading-list limit and its message from fifty to three titles in a disposable PWA copy.
 - Save three titles, try a fourth, and check that the stored list still has three after reloading. This changed copy is separate from the published offline check above.
 
+## Commands
+
+In a working copy of Samples, publish and serve the PWA from the folder that holds LibraryDesk.Pwa:
+
+```powershell
+dotnet publish LibraryDesk.Pwa/LibraryDesk.Pwa.csproj -c Release -o artifacts/pwa
+python -m http.server 58632 --bind 127.0.0.1 --directory artifacts/pwa/wwwroot
+```
+
+Open http://127.0.0.1:58632/ and wait a few seconds for the service worker to install. Add a title and reload, so the worker controls the page. Stop the server with Ctrl+C in its terminal and reload the same address: the shell and the saved title are still there.
+
 ## Solved Source and Execution
 
 The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.

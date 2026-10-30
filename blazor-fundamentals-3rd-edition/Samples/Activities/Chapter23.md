@@ -6,6 +6,20 @@
 - Add a fixed Revision = "local-review" field to the health endpoint in a disposable finished-server copy.
 - Build and run that copy in Production. Check for the marker from /healthz, a 404 for GET requests to the lab paths, and no local sign-in controls. For POSTs with a valid token, check that all three lab paths return the same status as the unrelated missing-route control (404 or 405), with no redirect or success. Get the token from /static-feedback in the same session; POSTs without a token return 400 under this .NET 11 CSRF pipeline, even for unrelated unknown routes. This copy is separate from the published packages you built above.
 
+## Commands
+
+In a working copy of Samples, publish both projects, start the server from its artifact folder, and serve the PWA in a second terminal opened in the Samples copy:
+
+```powershell
+dotnet publish LibraryDesk/LibraryDesk/LibraryDesk.csproj -c Release -o artifacts/server
+dotnet publish LibraryDesk.Pwa/LibraryDesk.Pwa.csproj -c Release -o artifacts/pwa
+cd artifacts/server
+dotnet LibraryDesk.dll --contentRoot . --urls http://127.0.0.1:58633 --environment Production
+python -m http.server 58632 --bind 127.0.0.1 --directory artifacts/pwa/wwwroot
+```
+
+The server prints Now listening on: http://127.0.0.1:58633, and /healthz returns {"status":"ok"}. Its content root is . (the current folder), which holds appsettings.json and wwwroot. The warning Failed to determine the https port for redirect is expected on this HTTP-only run.
+
 ## Solved Source and Execution
 
 The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.

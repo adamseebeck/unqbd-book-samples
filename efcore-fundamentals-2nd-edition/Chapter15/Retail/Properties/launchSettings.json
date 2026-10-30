@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Retail": {
+      "commandName": "Project",
+      "applicationUrl": "http://127.0.0.1:5072",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

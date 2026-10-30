@@ -16,16 +16,11 @@ The local `dotnet-ef` tool needs a compatible .NET runtime in addition to the SD
 
 The `ChapterNN` directories are complete replacement checkpoints of the same retail domain. Their duplicate type names are intentional. Do not combine their Program.cs files in one project. Activity directories are independent solutions; an activity's extra supplier or description does not silently become a prerequisite for the next main chapter.
 
-SQL Server Express LocalDB on Windows is the primary runtime prerequisite. Confirm the instance with `SqlLocalDB info`. The default is `(localdb)\MSSQLLocalDB`; `EFCORE_BOOK_LOCALDB` may name another already available LocalDB instance. A lab creates its own `EfCoreBook_ChNN_` database with a random suffix and removes that database on normal disposal. Do not modify its connection guard or turn it into cleanup for another database.
+SQL Server Express LocalDB on Windows is the primary runtime prerequisite. Visual Studio 2026 installs LocalDB with its ASP.NET and web development workload; with VS Code, install SQL Server Express LocalDB from Microsoft's SQL Server downloads. Then run `SqlLocalDB info` in a terminal; the list should include `MSSQLLocalDB`. The default is `(localdb)\MSSQLLocalDB`; `EFCORE_BOOK_LOCALDB` may name another already available LocalDB instance. A lab creates its own `EfCoreBook_ChNN_` database with a random suffix and removes that database on normal disposal. Do not modify its connection guard or turn it into cleanup for another database.
 
-Chapters 1 and 2 inspect SQL or web configuration without initializing a database. Supply the chapter 2 setting to the current process, then run its host:
+Chapters 1 and 2 inspect SQL or web configuration without initializing a database. `dotnet run --project Chapter02` uses `Chapter02/Properties/launchSettings.json`: the host starts in Development on http://127.0.0.1:5072, so `appsettings.Development.json` supplies the LocalDB setting. Open http://127.0.0.1:5072/configuration, then press Ctrl+C. `dotnet run --project Chapter02 --no-launch-profile` starts it without that profile and shows the missing-setting failure.
 
-```powershell
-$env:ConnectionStrings__DefaultConnection = 'Server=(localdb)\MSSQLLocalDB;Database=EfCoreBook_Config;Integrated Security=true;Encrypt=true;TrustServerCertificate=true'
-dotnet run --project Chapter02 -- --urls http://127.0.0.1:50702
-```
-
-Request `/configuration`, then stop that local process. `Activities/Chapter02` starts its own bounded loopback host and checks staging retry selection, the provider response and missing configuration. It contacts no staging service.
+`Activities/Chapter02` starts its own bounded loopback host and checks staging retry selection, the provider response and missing configuration. It contacts no staging service.
 
 For the missing-setting check, remove the connection setting from every active configuration source. Removing only an environment variable still leaves appsettings.Development.json available under Development. The supplied separate-process check uses a dedicated environment with no matching settings file and removes inherited connection environment keys.
 
@@ -48,12 +43,21 @@ Chapters 4 and 15, and activities 4, 7 and 15, use an operator-controlled migrat
 
 ```powershell
 $env:EFCORE_BOOK_MIGRATION_CONNECTION = 'Server=(localdb)\MSSQLLocalDB;Database=EfCoreBook_Migrations_Chapter04;Integrated Security=true;Encrypt=true;TrustServerCertificate=true'
+dotnet restore Chapter04
 dotnet ef migrations add InitialRetail --project Chapter04 --startup-project Chapter04
 dotnet ef migrations script --idempotent --project Chapter04 --startup-project Chapter04 --output Chapter04/retail-idempotent.sql
 dotnet run --project Chapter04
 ```
 
-The generated migrations and snapshots included here are the inputs for each checkpoint. Inspect them and run the checkpoint; do not generate a second InitialRetail with the same role. Activity 4 adds Description after its initial snapshot, activity 7 adds Supplier after the relationship snapshot, and activity 15 adds ExternalReference after the final model snapshot.
+```powershell
+$env:EFCORE_BOOK_MIGRATION_CONNECTION = 'Server=(localdb)\MSSQLLocalDB;Database=EfCoreBook_Migrations_Chapter15;Integrated Security=true;Encrypt=true;TrustServerCertificate=true'
+dotnet restore Chapter15
+dotnet ef migrations add InitialRetail --project Chapter15 --startup-project Chapter15
+dotnet ef migrations script --idempotent --project Chapter15 --startup-project Chapter15 --output Chapter15/retail-idempotent.sql
+dotnet run --project Chapter15
+```
+
+Chapter04 and Chapter15 ship without migrations; the commands above generate them. `dotnet ef` reads the project before building it, so restore a project once (`dotnet restore ChapterNN`) before its first `dotnet ef` command; otherwise it stops with "Unable to retrieve project metadata". Use a new database for each checkpoint, because Chapter 15 starts a new history for the final model. Reference copies of each generated InitialRetail are in Activities/Chapter04/Migrations and Activities/Chapter15/Migrations. Activity 4 adds Description after its initial snapshot, activity 7 adds Supplier after the relationship snapshot, and activity 15 adds ExternalReference after the final model snapshot.
 
 For Activity15, run the expanded model first, then run `dotnet run --project Testing/PriorModelCompatibility` with that same `EFCORE_BOOK_MIGRATION_CONNECTION`. The compatibility project compiles the entire unchanged `Chapter15/Program.cs` through a source link. It reads the original product fields, rowversion, query filter, category/placement relationships, owned address, customer profile, order lines and converted TPH payment against the expanded schema. It neither recreates a reduced legacy model nor applies migrations.
 

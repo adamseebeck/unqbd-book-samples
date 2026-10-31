@@ -3,11 +3,11 @@ using System.ClientModel.Primitives;
 
 namespace ContosoSupportCopilot.Infrastructure.Configuration;
 
-// BearerTokenPolicy asks its provider for a token before every request,
-// and AzureCliCredential runs the Azure CLI each time it is asked. This
-// provider keeps the token until the credential's refresh time, or five
-// minutes before it expires. Give each policy its own provider, so that
-// each provider serves one scope.
+// BearerTokenPolicy asks its provider for a token before every
+// request, and AzureCliCredential runs the Azure CLI each time it
+// is asked. This provider keeps the token until the credential's
+// refresh time, or five minutes before it expires. Give each policy
+// its own provider, so that each provider serves one scope.
 public sealed class CachedTokenProvider(
     AuthenticationTokenProvider inner) : AuthenticationTokenProvider
 {
@@ -41,8 +41,8 @@ public sealed class CachedTokenProvider(
     }
 
     public override ValueTask<AuthenticationToken> GetTokenAsync(
-        GetTokenOptions options, CancellationToken cancellationToken) =>
-        Fresh() is { } cached
+        GetTokenOptions options, CancellationToken cancellationToken)
+        => Fresh() is { } cached
             ? ValueTask.FromResult(cached)
             : RenewAsync(options, cancellationToken);
 

@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Xunit;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 public sealed class TestDatabase
 {

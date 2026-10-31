@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var lab = builder.Configuration["lab"];
+if (lab is not null)
+    builder.Logging.AddFilter(
+        "Microsoft.Hosting.Lifetime", LogLevel.Warning);
 var connection = builder.Configuration
     .GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
@@ -21,7 +25,7 @@ await using var app = builder.Build();
 app.MapGet("/health/live", () => Results.Ok());
 app.MapHealthChecks("/health/ready");
 
-if (builder.Configuration["lab"] is { } lab)
+if (lab is not null)
 {
     await app.StartAsync();
     await Labs.RunAsync(app.Services, lab);

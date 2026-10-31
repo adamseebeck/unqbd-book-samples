@@ -1,78 +1,67 @@
 # Entity Framework Core Fundamentals, Second Edition: companion code
 
-Companion code for *Entity Framework Core Fundamentals, Second Edition* by Adam Seebeck: one retail domain built up across 16 chapters with .NET 11 and EF Core 11. Run commands from this folder so `global.json` and the local tool manifest apply.
+Companion code for *Entity Framework Core Fundamentals, Second Edition* by Adam Seebeck. The book builds one application, **Retail**, from Chapter 1 to Chapter 16 with .NET 11 and EF Core 11. Each `ChapterNN` folder holds the Retail project as it stands at the end of that chapter.
 
-Install the .NET 11 SDK, version `11.0.100` or later, and verify it with `dotnet --version`. `global.json` accepts later .NET 11 SDKs. Microsoft EF Core packages and the local `dotnet-ef` tool use `11.0.0`. You do not need to change your machine's default SDK.
+## What you need
 
-```powershell
-dotnet tool restore
-dotnet ef --version
-dotnet run --project Chapter01
-dotnet run --project Chapter03
-dotnet run --project Activities/Chapter03
+- The .NET 11 SDK, version `11.0.100` or later. `dotnet --version` should print it. `global.json` in this folder accepts any later .NET 11 SDK.
+- SQL Server Express LocalDB on Windows. Visual Studio 2026 installs it with the ASP.NET and web development workload; with VS Code, install SQL Server Express LocalDB from Microsoft's SQL Server downloads. Run `SqlLocalDB info` in a terminal; the list should include `MSSQLLocalDB`.
+- Visual Studio 2026 or VS Code with C# Dev Kit.
+
+The EF Core packages and the local `dotnet-ef` tool use version `11.0.0`. The tool is listed in `.config/dotnet-tools.json`; run `dotnet tool restore` once in this folder.
+
+## How the folders work
+
+```text
+global.json                 SDK version for every chapter
+.config/dotnet-tools.json   the dotnet-ef tool (Chapter 4 on)
+Chapter01/Retail            the project at the end of Chapter 1
+...
+Chapter12/Retail            the project at the end of Chapter 12
+Chapter12/Retail.Tests      its tests (Chapter 12 on)
+...
+Chapter16/Retail            the finished project
+Activities/ChapterNN        solutions to each chapter's Activity
+Experiments                 a SQLite comparison and a complex-type check
 ```
 
-The local `dotnet-ef` tool needs a compatible .NET runtime in addition to the SDK. If `dotnet ef --version` reports a missing runtime, install the version it names. No machine-wide runtime setting is required.
+To start a chapter from here instead of your own project, copy the **previous** chapter's folder: for Chapter 7, copy `Chapter06`. To see a chapter's finished code, open its own folder.
 
-The `ChapterNN` directories are complete replacement checkpoints of the same retail domain. Their duplicate type names are intentional. Do not combine their Program.cs files in one project. Activity directories are independent solutions; an activity's extra supplier or description does not silently become a prerequisite for the next main chapter.
-
-SQL Server Express LocalDB on Windows is the primary runtime prerequisite. Visual Studio 2026 installs LocalDB with its ASP.NET and web development workload; with VS Code, install SQL Server Express LocalDB from Microsoft's SQL Server downloads. Then run `SqlLocalDB info` in a terminal; the list should include `MSSQLLocalDB`. The default is `(localdb)\MSSQLLocalDB`; `EFCORE_BOOK_LOCALDB` may name another already available LocalDB instance. A lab creates its own `EfCoreBook_ChNN_` database with a random suffix and removes that database on normal disposal. Do not modify its connection guard or turn it into cleanup for another database.
-
-Chapters 1 and 2 inspect SQL or web configuration without initializing a database. `dotnet run --project Chapter02` uses `Chapter02/Properties/launchSettings.json`: the host starts in Development on http://127.0.0.1:5072, so `appsettings.Development.json` supplies the LocalDB setting. Open http://127.0.0.1:5072/configuration, then press Ctrl+C. `dotnet run --project Chapter02 --no-launch-profile` starts it without that profile and shows the missing-setting failure.
-
-`Activities/Chapter02` starts its own bounded loopback host and checks staging retry selection, the provider response and missing configuration. It contacts no staging service.
-
-For the missing-setting check, remove the connection setting from every active configuration source. Removing only an environment variable still leaves appsettings.Development.json available under Development. The supplied separate-process check uses a dedicated environment with no matching settings file and removes inherited connection environment keys.
-
-Chapters 10 and 11 accept a bounded HTTP smoke mode:
+Run a checkpoint from its project folder:
 
 ```powershell
-dotnet run --project Chapter10 -- --check
-dotnet run --project Chapter11 -- --check
-dotnet run --project Activities/Chapter11
-dotnet run --project Activities/Chapter12
+cd Chapter06/Retail
+dotnet run
+dotnet run -- --lab 5
+dotnet run -- --ShowSql true
 ```
 
-The API activities exercise actual loopback HTTP and fresh-context persistence checks. They bind only to loopback and create disposable lab databases. They are educational hosts. A deployed service needs authentication, per-resource authorization, TLS, protected configuration, a migration process and other operational policies.
+Each chapter adds a lab, a short class in `Labs/` that exercises what the chapter built. In Chapters 2 to 9 `dotnet run` runs the newest lab and `--lab N` reruns an earlier one. From Chapter 10 the project is a web app: `dotnet run` serves it on http://127.0.0.1:5072 and `dotnet run -- --lab 11` starts it, runs that lab and stops. `--ShowSql true` (Chapter 6 on) prints every SQL command the app sends.
 
-Testing/XunitSqlServer wraps the same real database model in four xUnit v2 integration tests. Each test-class instance implements IAsyncLifetime and owns a separate disposable LocalDB database. Run dotnet test Testing/XunitSqlServer for a standard test-runner report. The executable Chapter12 checkpoint has no test-runner dependency; these are complementary entry points for the same persistence rules.
-
-## Migration checkpoints
-
-Chapters 4 and 15, and activities 4, 7 and 15, use an operator-controlled migration database. They require an integrated-authentication LocalDB connection whose database begins `EfCoreBook_Migrations_`. Use a fresh database for each independent checkpoint. These projects never infer that a missing connection means permission to use a default shared database.
+Tests (Chapter 12 on) run from the chapter folder:
 
 ```powershell
-$env:EFCORE_BOOK_MIGRATION_CONNECTION = 'Server=(localdb)\MSSQLLocalDB;Database=EfCoreBook_Migrations_Chapter04;Integrated Security=true;Encrypt=true;TrustServerCertificate=true'
-dotnet restore Chapter04
-dotnet ef migrations add InitialRetail --project Chapter04 --startup-project Chapter04
-dotnet ef migrations script --idempotent --project Chapter04 --startup-project Chapter04 --output Chapter04/retail-idempotent.sql
-dotnet run --project Chapter04
+cd Chapter12
+dotnet test Retail.Tests
 ```
 
-```powershell
-$env:EFCORE_BOOK_MIGRATION_CONNECTION = 'Server=(localdb)\MSSQLLocalDB;Database=EfCoreBook_Migrations_Chapter15;Integrated Security=true;Encrypt=true;TrustServerCertificate=true'
-dotnet restore Chapter15
-dotnet ef migrations add InitialRetail --project Chapter15 --startup-project Chapter15
-dotnet ef migrations script --idempotent --project Chapter15 --startup-project Chapter15 --output Chapter15/retail-idempotent.sql
-dotnet run --project Chapter15
-```
+## The database
 
-Chapter04 and Chapter15 ship without migrations; the commands above generate them. `dotnet ef` reads the project before building it, so restore a project once (`dotnet restore ChapterNN`) before its first `dotnet ef` command; otherwise it stops with "Unable to retrieve project metadata". Use a new database for each checkpoint, because Chapter 15 starts a new history for the final model. Reference copies of each generated InitialRetail are in Activities/Chapter04/Migrations and Activities/Chapter15/Migrations. Activity 4 adds Description after its initial snapshot, activity 7 adds Supplier after the relationship snapshot, and activity 15 adds ExternalReference after the final model snapshot.
+Every checkpoint uses one LocalDB database, `EfCoreBook_Retail`, named in `Retail/appsettings.Development.json`. From Chapter 3 each lab starts by dropping and rebuilding that database (from Chapter 4, from the migrations), so every run starts from the same data. The database stays after a run so you can open it in Visual Studio's SQL Server Object Explorer. The reset refuses any server other than LocalDB and any database whose name does not start with `EfCoreBook_`. Tests create their own `EfCoreBook_Test_...` database per test and drop it.
 
-For Activity15, run the expanded model first, then run `dotnet run --project Testing/PriorModelCompatibility` with that same `EFCORE_BOOK_MIGRATION_CONNECTION`. The compatibility project compiles the entire unchanged `Chapter15/Program.cs` through a source link. It reads the original product fields, rowversion, query filter, category/placement relationships, owned address, customer profile, order lines and converted TPH payment against the expanded schema. It neither recreates a reduced legacy model nor applies migrations.
+The migration history grows with the project: `InitialRetail` (Chapter 4), `AddPlacementsAndProfiles` (Chapter 7), `AddProductRowVersion` (Chapter 8) and `AddAddressPaymentsAndAudit` (Chapter 14). Chapter 15 deploys that history with an idempotent script.
 
-Keep the migration databases until you finish the exercise, then remove only the dedicated database you created for that lab. Do not call EnsureCreated and Migrate on the same database. A Down method does not recover data dropped with a column.
+## If something goes wrong
 
-## Provider experiments
+- **"Unable to retrieve project metadata"** from a `dotnet ef` command: the project has not been restored yet. Run `dotnet build`, then the command again.
+- **"Set ConnectionStrings:DefaultConnection."**: the app did not start in the Development environment, so `appsettings.Development.json` was not read. Use `dotnet run` (which applies `Properties/launchSettings.json`) from the `Retail` folder.
+- **A connection error naming the Local Database Runtime**: LocalDB is not installed or not started. Check `SqlLocalDB info`.
+- **Warnings NU1902 or NU1903 about System.Security.Cryptography.Pkcs**: the SQL Server package brings in version 9.0.18, which has known vulnerabilities. Chapters 1 to 9 and the test project add version 9.0.21 to replace it. The web SDK used from Chapter 10 already includes a patched copy.
 
-`Experiments/ProviderComparison` uses the SQLite relational provider with an open in-memory SQLite connection and an application-managed Guid token. Both synchronous and asynchronous save overloads share token stamping. Its competing-writer check uses a synchronous first save and an asynchronous stale save. It is not EF's InMemory provider, and it does not establish SQL Server rowversion, SQL dialect or collation behavior.
+## Notes
 
-`Experiments/ComplexTypes` checks EF Core 11 complex-member configuration against the SQL Server provider. Documentation can change between releases; the program's output shows the behavior of the packages you installed.
+The projects keep NuGet's normal vulnerability auditing on. When you update packages, check the whole dependency graph again.
 
-## Notes on packages and tests
+`Experiments/ProviderComparison` runs the same kind of concurrency check against SQLite with an application-managed token, to show how a different provider behaves. `Experiments/ComplexTypes` tries EF Core 11 complex types against SQL Server (Chapter 14's activity).
 
-The projects keep normal NuGet advisory auditing. A successful restore or build alone is not a vulnerability audit.
-
-The console Design/test dependency graphs explicitly pin `System.Security.Cryptography.Pkcs` to `9.0.21`. This replaces the transitive `9.0.18` flagged by Microsoft's [October 13 high-severity advisory](https://github.com/advisories/GHSA-846f-f764-76mx) and [related moderate-severity advisory](https://github.com/advisories/GHSA-2fmv-rv2c-59x7). Recheck the complete resolved graph when you update packages; a direct security patch doesn't cover a later package set.
-
-Every primary Full Example matches its chapter exactly, apart from line endings. Activity assertions stop the process on an incorrect result, and their PASS labels name grouped behavior checks, not a count of unique end-to-end scenarios.
+The API examples bind to the loopback address and are for learning. A deployed service also needs authentication, authorization, HTTPS, protected configuration and a separate migration process (Chapter 15).

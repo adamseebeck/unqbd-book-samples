@@ -10,8 +10,8 @@ public static class Chapter15Lab
     public static async Task RunAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
-        var app = scope.GetContext();
-        var script = app.GetService<IMigrator>().GenerateScript(
+        var db = scope.GetContext();
+        var script = db.GetService<IMigrator>().GenerateScript(
             options: MigrationsSqlGenerationOptions.Idempotent);
         var batches = Regex
             .Split(script, @"^GO\s*$", RegexOptions.Multiline)
@@ -20,7 +20,7 @@ public static class Chapter15Lab
         Console.WriteLine($"Script batches: {batches.Count}");
 
         var target = new SqlConnectionStringBuilder(
-            app.Database.GetConnectionString())
+            db.Database.GetConnectionString())
         {
             InitialCatalog = "EfCoreBook_Deploy"
         };

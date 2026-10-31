@@ -57,9 +57,9 @@ public static class ChapterCheck
         var vectorSearch = provider.GetRequiredService<IVectorSearchService>();
         var query = await embeddingClient.GenerateAsync("The customer is locked out after a password reset");
         var indexed = await services.InitializeKnowledgeIndexAsync();
-        var storedBefore = await CountStoredChunksAsync(vectorSearch, query.Vector);
+        var storedBefore = await CountStoredChunksAsync(vectorSearch, query.Vector, indexed);
         await services.InitializeKnowledgeIndexAsync();
-        var storedAfter = await CountStoredChunksAsync(vectorSearch, query.Vector);
+        var storedAfter = await CountStoredChunksAsync(vectorSearch, query.Vector, indexed);
         Console.WriteLine($"Index: {indexed} chunks from the sample articles; stored before indexing again: {storedBefore}, after: {storedAfter}");
         passed &= storedBefore == indexed && storedAfter == indexed;
 
@@ -101,8 +101,23 @@ public static class ChapterCheck
     }
 
     // Every stored chunk, whatever its score: a floor of -1 lets every cosine similarity through.
-    private static async Task<int> CountStoredChunksAsync(IVectorSearchService vectorSearch, float[] anyVector) =>
-        (await vectorSearch.SearchAsync(anyVector, new VectorSearchRequest { TopK = 50, MinScore = -1, IncludeUnpublished = true })).Count;
+    // Azure AI Search makes uploaded chunks searchable shortly after the upload, so the count waits up to
+    // ten seconds for the store to reach the expected number; the in-memory store answers at once.
+    private static async Task<int> CountStoredChunksAsync(IVectorSearchService vectorSearch, float[] anyVector, int expected)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (true)
+        {
+            var request = new VectorSearchRequest { TopK = 50, MinScore = -1, IncludeUnpublished = true };
+            var count = (await vectorSearch.SearchAsync(anyVector, request)).Count;
+            if (count == expected || DateTime.UtcNow >= deadline)
+            {
+                return count;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+        }
+    }
 
     private static string Format(double value) => value.ToString("0.00", CultureInfo.InvariantCulture);
 

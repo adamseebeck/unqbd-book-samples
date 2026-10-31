@@ -5,7 +5,7 @@ using Microsoft.Extensions.AI.Evaluation;
 namespace ContosoSupportCopilot.Infrastructure.Evaluation;
 
 // Gives the custom evaluators what the RAG pipeline retrieved and what the test case expected.
-// The text contents name each source, so the evaluation report shows what the answer was based on.
+// Its text contents name each source; an evaluator that adds this context to its metric shows them in the report.
 public sealed class RagEvaluationContext : EvaluationContext
 {
     public const string ContextName = "RAG sources";

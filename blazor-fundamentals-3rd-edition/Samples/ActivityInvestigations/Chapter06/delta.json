@@ -1,13 +1,6 @@
 {
   "chapter": 6,
   "baseline": "Samples/Checkpoints/Chapter06",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk.Client/Pages/FavoritesDemo.razor",
-      "source_sha256": "e56ba3dfa4064a388d788665ab27f81693e1868318fc5eae29411141770783b2",
-      "before": "<FavoritesSummary />",
-      "after": "<button id=\"remove-csharp\" @onclick=\"() => Favorites.Remove(1)\">\n    Remove C#\n</button>\n<FavoritesSummary />"
-    }
-  ],
-  "expected": "Open http://127.0.0.1:58631/favorites and click Favorite C# and Favorite Blazor: the summary shows Favorites: 2 and Saved IDs: 1, 2. Click Remove C# twice: the summary shows Favorites: 1 and Saved IDs: 2, and the second click changes nothing. Open /favorites in a second tab: it starts at Favorites: 0."
+  "deltas": [],
+  "expected": "Open http://127.0.0.1:58631/favorites: the page shows Favorite C#, Favorite Blazor and Remove C# above the summary. Click Favorite C# and Favorite Blazor: the summary shows Favorites: 2 and Saved IDs: 1, 2. Click Remove C# twice: the summary shows Favorites: 1 and Saved IDs: 2, and the second click changes nothing. Open /favorites in a second tab: it starts at Favorites: 0."
 }

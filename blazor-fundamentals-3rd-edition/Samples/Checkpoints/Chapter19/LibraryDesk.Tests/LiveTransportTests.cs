@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
-using Xunit.Abstractions;
 
 public sealed class LiveTransportTests
 {
@@ -23,9 +22,9 @@ public sealed class LiveTransportTests
     [Fact]
     public async Task AbortedPendingAnnounceBecomesRecoverableSendFailure()
     {
-        await using var fixture = await TransportFixture.StartAsync(abortPendingAnnounce: true);
+        await using var standIn = await StandInServer.StartAsync(abortPendingAnnounce: true);
         using var context = new BunitContext();
-        context.Services.AddSingleton<NavigationManager>(new FixtureNavigation(fixture.Address));
+        context.Services.AddSingleton<NavigationManager>(new StandInNavigation(standIn.Address));
         var cut = context.Render<LiveCatalog>();
         cut.WaitForAssertion(() => Assert.Contains("Connected.", cut.Markup), TimeSpan.FromSeconds(10));
         var connection = (HubConnection)typeof(LiveCatalog).GetField("connection", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(cut.Instance)!;
@@ -33,11 +32,11 @@ public sealed class LiveTransportTests
         connection.Reconnecting += error => { reconnecting = error; return Task.CompletedTask; };
         cut.Find("input").Change("Abrupt transport proof");
         var sending = cut.Find("button").ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
-        await fixture.InvocationReceived.Task.WaitAsync(TimeSpan.FromSeconds(10));
-        var callbackError = await Record.ExceptionAsync(async () => await sending.WaitAsync(TimeSpan.FromSeconds(10)));
+        await standIn.InvocationReceived.Task.WaitAsync(TimeSpan.FromSeconds(10), Xunit.TestContext.Current.CancellationToken);
+        var callbackError = await Record.ExceptionAsync(async () => await sending.WaitAsync(TimeSpan.FromSeconds(10), Xunit.TestContext.Current.CancellationToken));
         output.WriteLine($"Actual reconnecting exception: {reconnecting}");
         output.WriteLine($"Actual send callback exception: {callbackError}");
-        Assert.True(fixture.AbortedInvocations > 0);
+        Assert.True(standIn.AbortedInvocations > 0);
         Assert.Null(callbackError);
         cut.WaitForAssertion(() =>
         {
@@ -46,8 +45,8 @@ public sealed class LiveTransportTests
                 cut.Markup.Contains("Reconnecting...") || cut.Markup.Contains("Connected again; missed notices are not replayed."));
             Assert.DoesNotContain("Use a message from 1 to 120 characters.", cut.Markup);
         }, TimeSpan.FromSeconds(10));
-        fixture.AbortPendingAnnounce = false;
-        fixture.CompleteAnnounce = true;
+        standIn.AbortPendingAnnounce = false;
+        standIn.CompleteAnnounce = true;
         cut.WaitForAssertion(() => Assert.Equal(HubConnectionState.Connected, connection.State), TimeSpan.FromSeconds(10));
         cut.WaitForAssertion(() => Assert.False(cut.Find("button").HasAttribute("disabled")), TimeSpan.FromSeconds(10));
         cut.Find("input").Change("Recovered abrupt transport");
@@ -58,15 +57,15 @@ public sealed class LiveTransportTests
     [Fact]
     public async Task RefusedNegotiatedUpgradeBecomesRecoverableInitialFailure()
     {
-        await using var fixture = await TransportFixture.StartAsync(refuseUpgrade: true);
+        await using var standIn = await StandInServer.StartAsync(refuseUpgrade: true);
         using var context = new BunitContext();
-        context.Services.AddSingleton<NavigationManager>(new FixtureNavigation(fixture.Address));
+        context.Services.AddSingleton<NavigationManager>(new StandInNavigation(standIn.Address));
         var cut = context.Render<LiveCatalog>();
         cut.WaitForAssertion(() => Assert.Contains("Initial connection failed. Reload to retry.", cut.Markup), TimeSpan.FromSeconds(10));
-        Assert.True(fixture.RefusedUpgrades > 0);
+        Assert.True(standIn.RefusedUpgrades > 0);
         Assert.True(cut.Find("button").HasAttribute("disabled"));
-        fixture.RefuseUpgrade = false;
-        fixture.CompleteAnnounce = true;
+        standIn.RefuseUpgrade = false;
+        standIn.CompleteAnnounce = true;
         var reloaded = context.Render<LiveCatalog>();
         reloaded.WaitForAssertion(() => Assert.Contains("Connected.", reloaded.Markup), TimeSpan.FromSeconds(10));
         reloaded.Find("input").Change("Recovered refused upgrade");
@@ -77,18 +76,18 @@ public sealed class LiveTransportTests
     [Fact]
     public async Task ClosedBeforeHandshakeBecomesRecoverableInitialFailure()
     {
-        await using var fixture = await TransportFixture.StartAsync(closeBeforeHandshake: true);
+        await using var standIn = await StandInServer.StartAsync(closeBeforeHandshake: true);
         using var context = new BunitContext();
-        context.Services.AddSingleton<NavigationManager>(new FixtureNavigation(fixture.Address));
+        context.Services.AddSingleton<NavigationManager>(new StandInNavigation(standIn.Address));
         var cut = context.Render<LiveCatalog>();
         cut.WaitForAssertion(() => Assert.Contains("Initial connection failed. Reload to retry.", cut.Markup), TimeSpan.FromSeconds(10));
-        Assert.True(fixture.HandshakeReceived.Task.IsCompletedSuccessfully);
+        Assert.True(standIn.HandshakeReceived.Task.IsCompletedSuccessfully);
         var failedConnection = (HubConnection)typeof(LiveCatalog).GetField("connection", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(cut.Instance)!;
         Assert.Equal(HubConnectionState.Disconnected, failedConnection.State);
         output.WriteLine($"Actual failed initial connection state: {failedConnection.State}");
         Assert.True(cut.Find("button").HasAttribute("disabled"));
-        fixture.CloseBeforeHandshake = false;
-        fixture.CompleteAnnounce = true;
+        standIn.CloseBeforeHandshake = false;
+        standIn.CompleteAnnounce = true;
         var reloaded = context.Render<LiveCatalog>();
         reloaded.WaitForAssertion(() => Assert.Contains("Connected.", reloaded.Markup), TimeSpan.FromSeconds(10));
         reloaded.Find("input").Change("Recovered initial connection");
@@ -99,9 +98,9 @@ public sealed class LiveTransportTests
     [Fact]
     public async Task PendingAnnounceTransportTimeoutBecomesRecoverableSendFailure()
     {
-        await using var fixture = await TransportFixture.StartAsync();
+        await using var standIn = await StandInServer.StartAsync();
         using var context = new BunitContext();
-        context.Services.AddSingleton<NavigationManager>(new FixtureNavigation(fixture.Address));
+        context.Services.AddSingleton<NavigationManager>(new StandInNavigation(standIn.Address));
         var cut = context.Render<LiveCatalog>();
         cut.WaitForAssertion(() => Assert.Contains("Connected.", cut.Markup), TimeSpan.FromSeconds(10));
         var connection = (HubConnection)typeof(LiveCatalog).GetField("connection", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(cut.Instance)!;
@@ -110,11 +109,11 @@ public sealed class LiveTransportTests
         connection.Reconnecting += error => { reconnecting = error; return Task.CompletedTask; };
         // Receiving this real protocol completion resets the actual client's
         // server-timeout deadline after changing the public timeout property.
-        await connection.InvokeAsync("FixtureReady").WaitAsync(TimeSpan.FromSeconds(10));
+        await connection.InvokeAsync("StandInReady", Xunit.TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(10), Xunit.TestContext.Current.CancellationToken);
         cut.Find("input").Change("Timeout proof");
         var sending = cut.Find("button").ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
-        await fixture.InvocationReceived.Task.WaitAsync(TimeSpan.FromSeconds(10));
-        await sending.WaitAsync(TimeSpan.FromSeconds(10));
+        await standIn.InvocationReceived.Task.WaitAsync(TimeSpan.FromSeconds(10), Xunit.TestContext.Current.CancellationToken);
+        await sending.WaitAsync(TimeSpan.FromSeconds(10), Xunit.TestContext.Current.CancellationToken);
         cut.WaitForAssertion(() =>
         {
             Assert.IsType<TimeoutException>(reconnecting);
@@ -122,10 +121,10 @@ public sealed class LiveTransportTests
                 cut.Markup.Contains("Reconnecting...") || cut.Markup.Contains("Connected again; missed notices are not replayed."));
             Assert.DoesNotContain("Use a message from 1 to 120 characters.", cut.Markup);
         }, TimeSpan.FromSeconds(10));
-        fixture.CompleteAnnounce = true;
+        standIn.CompleteAnnounce = true;
         connection.ServerTimeout = TimeSpan.FromSeconds(30);
         cut.WaitForAssertion(() => Assert.Equal(HubConnectionState.Connected, connection.State), TimeSpan.FromSeconds(10));
-        await connection.InvokeAsync("FixtureReady").WaitAsync(TimeSpan.FromSeconds(10));
+        await connection.InvokeAsync("StandInReady", Xunit.TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(10), Xunit.TestContext.Current.CancellationToken);
         cut.WaitForAssertion(() => Assert.False(cut.Find("button").HasAttribute("disabled")), TimeSpan.FromSeconds(10));
         cut.Find("input").Change("Recovered pending send");
         await cut.Find("button").ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
@@ -135,21 +134,21 @@ public sealed class LiveTransportTests
     [Fact]
     public async Task HubBusinessErrorKeepsItsValidationOutcome()
     {
-        await using var fixture = await TransportFixture.StartAsync(rejectInvocation: true);
+        await using var standIn = await StandInServer.StartAsync(rejectInvocation: true);
         using var context = new BunitContext();
-        context.Services.AddSingleton<NavigationManager>(new FixtureNavigation(fixture.Address));
+        context.Services.AddSingleton<NavigationManager>(new StandInNavigation(standIn.Address));
         var cut = context.Render<LiveCatalog>();
         cut.WaitForAssertion(() => Assert.Contains("Connected.", cut.Markup), TimeSpan.FromSeconds(10));
-        cut.Find("input").Change("Rejected fixture message");
+        cut.Find("input").Change("Rejected stand-in message");
         await cut.Find("button").ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
         Assert.Contains("Use a message from 1 to 120 characters.", cut.Markup);
         Assert.False(cut.Find("button").HasAttribute("disabled"));
-        Assert.True(fixture.InvocationReceived.Task.IsCompletedSuccessfully);
+        Assert.True(standIn.InvocationReceived.Task.IsCompletedSuccessfully);
     }
 
-    private sealed class FixtureNavigation : NavigationManager
+    private sealed class StandInNavigation : NavigationManager
     {
-        public FixtureNavigation(string address) => Initialize(address + "/", address + "/");
+        public StandInNavigation(string address) => Initialize(address + "/", address + "/");
         protected override void NavigateToCore(string uri, bool forceLoad)
         {
             Uri = ToAbsoluteUri(uri).ToString();
@@ -157,7 +156,7 @@ public sealed class LiveTransportTests
         }
     }
 
-    private sealed class TransportFixture : IAsyncDisposable
+    private sealed class StandInServer : IAsyncDisposable
     {
         private readonly WebApplication app;
         public string Address { get; private set; } = "";
@@ -171,31 +170,31 @@ public sealed class LiveTransportTests
         private int abortedInvocations;
         public int RefusedUpgrades => Volatile.Read(ref refusedUpgrades);
         public int AbortedInvocations => Volatile.Read(ref abortedInvocations);
-        private TransportFixture(WebApplication app) => this.app = app;
-        public static async Task<TransportFixture> StartAsync(bool closeBeforeHandshake = false, bool rejectInvocation = false, bool refuseUpgrade = false, bool abortPendingAnnounce = false)
+        private StandInServer(WebApplication app) => this.app = app;
+        public static async Task<StandInServer> StartAsync(bool closeBeforeHandshake = false, bool rejectInvocation = false, bool refuseUpgrade = false, bool abortPendingAnnounce = false)
         {
             var builder = WebApplication.CreateBuilder();
             builder.Logging.ClearProviders();
             builder.WebHost.UseKestrel().UseUrls("http://127.0.0.1:0");
             var app = builder.Build();
-            var fixture = new TransportFixture(app);
-            fixture.CloseBeforeHandshake = closeBeforeHandshake;
-            fixture.RefuseUpgrade = refuseUpgrade;
-            fixture.AbortPendingAnnounce = abortPendingAnnounce;
+            var standIn = new StandInServer(app);
+            standIn.CloseBeforeHandshake = closeBeforeHandshake;
+            standIn.RefuseUpgrade = refuseUpgrade;
+            standIn.AbortPendingAnnounce = abortPendingAnnounce;
             app.UseWebSockets();
             app.MapPost("/hubs/catalog/negotiate", () => Results.Json(new
             {
                 negotiateVersion = 1,
-                connectionId = "local-fixture",
-                connectionToken = "local-fixture",
+                connectionId = "local-stand-in",
+                connectionToken = "local-stand-in",
                 availableTransports = new[] { new { transport = "WebSockets", transferFormats = new[] { "Text" } } }
             }));
             app.Map("/hubs/catalog", async context =>
             {
                 if (!context.WebSockets.IsWebSocketRequest) { context.Response.StatusCode = 400; return; }
-                if (fixture.RefuseUpgrade)
+                if (standIn.RefuseUpgrade)
                 {
-                    Interlocked.Increment(ref fixture.refusedUpgrades);
+                    Interlocked.Increment(ref standIn.refusedUpgrades);
                     context.Response.StatusCode = 503;
                     return;
                 }
@@ -204,10 +203,10 @@ public sealed class LiveTransportTests
                 {
                     var handshake = await ReceiveRecordAsync(socket, context.RequestAborted);
                     Assert.Contains("\"protocol\":\"json\"", handshake);
-                    fixture.HandshakeReceived.TrySetResult();
-                    if (fixture.CloseBeforeHandshake)
+                    standIn.HandshakeReceived.TrySetResult();
+                    if (standIn.CloseBeforeHandshake)
                     {
-                        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "fixture closes before handshake response", context.RequestAborted);
+                        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "stand-in closes before handshake response", context.RequestAborted);
                         return;
                     }
                     await SendAsync(socket, "{}\u001e", context.RequestAborted);
@@ -219,40 +218,40 @@ public sealed class LiveTransportTests
                         var message = document.RootElement;
                         if (message.GetProperty("type").GetInt32() != 1) continue;
                         var target = message.GetProperty("target").GetString();
-                        if (target == "FixtureReady")
+                        if (target == "StandInReady")
                         {
                             await SendAsync(socket, JsonSerializer.Serialize(new { type = 3, invocationId = message.GetProperty("invocationId").GetString() }) + "\u001e", context.RequestAborted);
                             continue;
                         }
                         Assert.Equal("Announce", target);
-                        fixture.InvocationReceived.TrySetResult();
-                        if (fixture.AbortPendingAnnounce)
+                        standIn.InvocationReceived.TrySetResult();
+                        if (standIn.AbortPendingAnnounce)
                         {
-                            Interlocked.Increment(ref fixture.abortedInvocations);
+                            Interlocked.Increment(ref standIn.abortedInvocations);
                             socket.Abort();
                             return;
                         }
                         if (rejectInvocation)
                         {
-                            var response = JsonSerializer.Serialize(new { type = 3, invocationId = message.GetProperty("invocationId").GetString(), error = "Fixture rejects the message" });
+                            var response = JsonSerializer.Serialize(new { type = 3, invocationId = message.GetProperty("invocationId").GetString(), error = "Stand-in rejects the message" });
                             await SendAsync(socket, response + "\u001e", context.RequestAborted);
                         }
-                        else if (fixture.CompleteAnnounce)
+                        else if (standIn.CompleteAnnounce)
                         {
                             var notice = message.GetProperty("arguments")[0].GetString();
                             var notification = JsonSerializer.Serialize(new { type = 1, target = "CatalogNotice", arguments = new[] { notice } });
                             var completion = JsonSerializer.Serialize(new { type = 3, invocationId = message.GetProperty("invocationId").GetString() });
                             await SendAsync(socket, notification + "\u001e" + completion + "\u001e", context.RequestAborted);
                         }
-                        // Timeout fixture deliberately sends neither a completion nor server pings.
+                        // For the timeout case the stand-in sends neither a completion nor server pings.
                     }
                 }
                 catch (OperationCanceledException) { }
                 catch (WebSocketException) { }
             });
             await app.StartAsync();
-            fixture.Address = app.Urls.Single();
-            return fixture;
+            standIn.Address = app.Urls.Single();
+            return standIn;
         }
         private static async Task<string> ReceiveRecordAsync(WebSocket socket, CancellationToken token)
         {

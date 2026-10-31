@@ -12,8 +12,8 @@ In the copy, which makes the Router interactive and loads the book in OnInitiali
 
 - On /books/1, click Blazor. The address changes to /books/2, but the page still shows C# Field Notes and Price: $24.00.
 - Press F5: Blazor Field Notes appears.
-- With OnInitializedAsync changed back to OnParametersSetAsync, clicking Blazor shows Blazor Field Notes.
-- With `@page "/catalog-item/{Id:int}"` added under the first @page line, /catalog-item/2 shows Blazor Field Notes, /catalog-item/999 shows No book has this identifier. and /catalog-item/abc shows Not Found.
+- Stop the copy, change OnInitializedAsync back to OnParametersSetAsync and run it again: clicking Blazor shows Blazor Field Notes.
+- Stop the copy again and add `@page "/catalog-item/{Id:int}"` under the first @page line. Run it: /catalog-item/2 shows Blazor Field Notes, /catalog-item/999 shows No book has this identifier. and /catalog-item/abc shows Not Found.
 
 ## Files involved
 
@@ -25,4 +25,4 @@ In the copy, which makes the Router interactive and loads the book in OnInitiali
 
 In your running project BookDetails is a static page, so every request, typed or clicked, creates a new instance and the book always matches the address. The copy's interactive Router handles clicks over the circuit instead. When only the Id parameter changes, Blazor keeps the instance and sets the new parameter on it. OnInitializedAsync runs once per instance, so it keeps the first book; OnParametersSetAsync runs every time parameters are set, so it loads the right one. A full load (F5) always creates a new instance, which is why the stale title disappears.
 
-A page can have several route templates. The :int constraint checks the segment's shape: abc doesn't match any route, so the Not Found page appears, while 999 matches and BookDetails shows its own message for a missing book.
+A page can have several route templates. The :int constraint checks the segment's shape: 999 matches, and BookDetails shows its own message for a missing book, while abc matches no route at all. A typed /catalog-item/abc never reaches a page, so the server answers 404, and the UseStatusCodePagesWithReExecute line in Program.cs shows NotFound.razor. Once the copy's interactive Router is running, a navigation inside the app to an address that matches no page shows the same NotFound.razor through the Router's NotFoundPage setting.

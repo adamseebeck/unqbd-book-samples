@@ -1,6 +1,6 @@
 # Chapter 23 activity: a revision on /healthz
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter23, the project at the end of Chapter 23, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter23, the project at the end of Chapter 23, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
 ## Make the copy
 
@@ -11,11 +11,11 @@ python create_copy.py --chapter 23 --output C:/BookExercises/Chapter23
 cd C:/BookExercises/Chapter23
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
-## What the copy changes
+## What you change
 
-The copy is the finished app with one change in LibraryDesk/LibraryDesk/Program.cs: /healthz returns a second value, Revision = "local-review".
+The copy is the finished app at the end of Chapter 23, unchanged. You make the change yourself: in LibraryDesk/LibraryDesk/Program.cs, give the /healthz reply a second property, Revision = "local-review".
 
 ## Run it
 
@@ -27,7 +27,7 @@ cd artifacts/server
 dotnet LibraryDesk.dll --contentRoot . --urls http://127.0.0.1:58633 --environment Production
 ```
 
-Press Ctrl+C in the terminal when you're done.
+Run the artifact rather than dotnet run: outside Development, dotnet run doesn't serve the Blazor script and the scoped styles, so the pages would lose their interactivity and part of their styling. Press Ctrl+C in the terminal when you're done.
 
 ## What you should see
 

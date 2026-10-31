@@ -1,6 +1,6 @@
 # Chapter 13 activity: solved copy
 
-This folder is Samples/Checkpoints/Chapter13, the LibraryDesk project at the end of Chapter 13, with the activity solved. Compare it with your own copy. You can run the app and its test from this folder; dotnet adds bin and obj folders here as it builds.
+This folder is Samples/Checkpoints/Chapter13, the LibraryDesk project at the end of Chapter 13, with the activity solved. Compare it with your own copy. You can run the app and its test from this folder; dotnet adds bin and obj folders here as it builds, which you can delete at any time.
 
 ## The solved change
 
@@ -24,4 +24,6 @@ Stop the app, then run this from the folder:
 dotnet test Tests/Chapter13.Tests.csproj
 ```
 
-The last line starts with Passed! and reports Failed: 0, Passed: 1, Skipped: 0, Total: 1. Samples/Activities/Chapter13.md explains the answer.
+Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded.
+
+Samples/Activities/Chapter13.md explains the answer.

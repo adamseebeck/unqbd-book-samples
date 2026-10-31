@@ -1,12 +1,20 @@
 # Chapter 16 activity answer
 
-The activity gives ModeCounter a Step parameter, in a copy, and passes a different step to each island on /modes.
+The copy's Modes.razor passes a Step value to each island on /modes. You give ModeCounter the parameter that receives it.
 
-## The change
+## What you should see
 
-In the copy's LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor:
+- As the copy is created, /modes shows An unhandled exception occurred while processing the request. and InvalidOperationException: Object of type 'LibraryDesk.Client.Components.ModeCounter' does not have a property matching the name 'Step'. The server can't prerender the page, because ModeCounter has no Step parameter.
+- After your change, open /modes and wait until no counter reads Static. Click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4.
+- Press F5. All three counts return to 0.
+- Chapter 18 shows how to check a parameter like Step with a component test. The copy already has one: after your change, from the copy's folder, dotnet test Tests/Chapter16.Tests.csproj checks one click with Step 2, 3 and 4. The output reads Test summary: total: 3, failed: 0, succeeded: 3, skipped: 0, and the last line starts with Build succeeded.
+
+## The solved ModeCounter
 
 ```razor
+<p data-renderer="@RendererInfo.Name">
+    Renderer: @RendererInfo.Name. Count: @count
+</p>
 <button @onclick="() => count += Step">Increment mode counter</button>
 @code {
     [Parameter] public int Step { get; set; } = 1;
@@ -14,19 +22,13 @@ In the copy's LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor:
 }
 ```
 
-In the copy's LibraryDesk/LibraryDesk/Components/Pages/Modes.razor, the three islands set Step="2" (Server), Step="3" (WebAssembly) and Step="4" (Auto).
-
-## What you should see
-
-- Open /modes and wait until no counter reads Static. Click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4.
-- Press F5. All three counts return to 0.
-- Chapter 18 shows how to check a parameter like Step with a component test. The copy already has one: from the copy's folder, dotnet test Tests/Chapter16.Tests.csproj checks one click with Step 2, 3 and 4, and the last line reports Passed: 3.
+The copy's LibraryDesk/LibraryDesk/Components/Pages/Modes.razor sets Step="2" (Server), Step="3" (WebAssembly) and Step="4" (Auto).
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter16: the copy's changes, its README and its Tests folder.
-- In the copy: the two files above.
+- Samples/ActivityInvestigations/Chapter16: the copy's change to Modes.razor, its README and its Tests folder.
+- In the copy: LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor (your change) and LibraryDesk/LibraryDesk/Components/Pages/Modes.razor.
 
 ## Why
 
-A parameter that crosses into an island must be serializable data, because the island runs in another runtime: on the server over a circuit, or in the browser. A plain int is data, so it can cross into every island. Each island is a separate instance with its own count, so the steps never mix. Auto shows WebAssembly here by rule 1: the page also has a WebAssembly island. The reload creates new instances, so every count starts again at 0.
+A component accepts only the parameters it declares with [Parameter], so a Step attribute on a component without that property fails when the server renders the page. A parameter that crosses into an island must be serializable data, because the island runs in another runtime: on the server over a circuit, or in the browser. A plain int is data, so it can cross into every island. Each island is a separate instance with its own count, so the steps never mix. Auto shows WebAssembly here because the page also has a WebAssembly island (rule 1). The reload creates new instances, so every count starts again at 0.

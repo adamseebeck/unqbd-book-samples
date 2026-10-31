@@ -11,7 +11,7 @@ python create_copy.py --chapter 15 --output C:/BookExercises/Chapter15
 cd C:/BookExercises/Chapter15
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
 ## What the copy changes
 
@@ -29,7 +29,7 @@ Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or
 
 ## What you should see
 
-Open http://127.0.0.1:58631/virtual, press F12, open the Console tab and run document.getElementById("results").childElementCount. It prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000. Your running project prints 18.
+Open http://127.0.0.1:58631/virtual, press F12, open the Console tab and run document.getElementById("results").childElementCount. It prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000. Compare it with the 18 you counted in step 4 of Chapter 15. Then stop the copy, replace the @foreach loop in LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor with the Virtualize element from step 1 but with OverscanCount="10", and run the copy again: the same line prints 32 (30 rows and 2 spacers), at the top and in the middle of the list.
 
 ## Start over
 

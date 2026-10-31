@@ -1,6 +1,6 @@
 # Chapter 21 activity answer
 
-The activity adds a help text to the feedback form's Message box, in a copy, and connects it with aria-describedby.
+The activity adds a help text to the feedback form's Message box, in a copy, and connects it with aria-describedby. Here is the change; compare it with yours.
 
 ## The change
 
@@ -19,11 +19,11 @@ In the copy's LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, the 
 - Open /accessibility and inspect the Message box in the Accessibility pane: its description is the help text, Use 5 to 300 characters. This example saves locally.
 - Submit the form empty: the description is now the help text followed by The Message field is required.
 - With the keyboard only, the empty, invalid-email and valid cases behave as before: Tab reaches each box after its label, the focus outline is visible, and the status message reports the result.
-- From the copy's folder, dotnet test Tests/Chapter21.Tests.csproj runs the copy's test; its last line reports Passed: 1.
+- From the copy's folder, dotnet test Tests/Chapter21.Tests.csproj runs the copy's test. The output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter21: the copy's change, its README and its Tests folder.
+- Samples/ActivityInvestigations/Chapter21: the copy (your Chapter 21 project, unchanged), its README and its Tests folder.
 - In the copy: LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor.
 - Unchanged: LibraryDesk.Tests/AccessibilityTests.cs, the suite's own check of the form's labels and descriptions.
 

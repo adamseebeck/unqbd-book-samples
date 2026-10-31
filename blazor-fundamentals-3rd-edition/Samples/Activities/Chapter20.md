@@ -2,6 +2,18 @@
 
 The activity lowers the reading list's limit from 50 titles to 3, in a copy, and checks that the limit holds and the list survives a reload.
 
+## The change
+
+In the copy's LibraryDesk.Pwa/Pages/Home.razor, both the check and the message change:
+
+```razor
+        if (titles.Length >= 3)
+        {
+            status = "This local list is limited to 3 titles.";
+            return;
+        }
+```
+
 ## Commands
 
 From the copy's folder, run the offline app with the dotnet run command from Chapter 20, typed as one line:
@@ -20,11 +32,11 @@ dotnet test Tests/Chapter20.Tests.csproj
 
 - Open http://127.0.0.1:58634. Save titles until the list has three, then try a fourth: the status reads This local list is limited to 3 titles. and the list still has three.
 - Reload: the same three titles load.
-- The test saves three titles, tries a fourth, and checks that only three writes reached localStorage. Its last line starts with Passed! and reports Passed: 1.
+- The test saves three titles, tries a fourth, and checks that only three writes reached localStorage and that a new page loads the three. The output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter20: the copy's change, its README and its Tests folder.
+- Samples/ActivityInvestigations/Chapter20: the copy (your Chapter 20 working folder, unchanged), its README and its Tests folder.
 - In the copy: LibraryDesk.Pwa/Pages/Home.razor, where both the check (titles.Length >= 3) and the message (limited to 3 titles.) change.
 
 ## Why

@@ -1,6 +1,6 @@
 # Chapter 13 activity answer
 
-The activity makes SelectBook fail for one book, in a copy, then adds a third book and a price to the template without changing BookList.
+The activity makes SelectBook fail for one book, in a copy, then has you add a third book and a price to the template without changing BookList.
 
 ## What you should see
 
@@ -11,11 +11,11 @@ In the copy, where SelectBook's Select method throws for book 2:
 
 After you add `new(3, "Database Field Notes", 26m)` to the books array in TemplatesDemo.razor (with a comma after the Blazor Field Notes line) and run the copy again:
 
-- A Select Database Field Notes button appears; clicking it shows Selected identifier: 3.
+- A Select Database Field Notes button appears below the other two; clicking it shows Selected identifier: 3.
 
-After you change the template to show the price:
+After you add the price to the template and run the copy again:
 
-- Each row starts with its price: $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes, $26.00 Select Database Field Notes.
+- The rows read $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes and $26.00 Select Database Field Notes.
 
 ## The solved template
 
@@ -33,7 +33,7 @@ The solved copy adds `@using System.Globalization` at the top of the page and on
 
 - Samples/ActivityInvestigations/Chapter13: the copy with the failing Select method, and its README.
 - In the copy: LibraryDesk/LibraryDesk.Client/Components/SelectBook.razor (the throw) and LibraryDesk/LibraryDesk.Client/Pages/TemplatesDemo.razor (your third book and price).
-- Samples/ActivitySolutions/Chapter13: the solved third book and price layout, without the throw. From that folder, dotnet test Tests/Chapter13.Tests.csproj runs its test; the last line reports Passed: 1.
+- Samples/ActivitySolutions/Chapter13: the solved third book and price layout, without the throw. From that folder, dotnet test Tests/Chapter13.Tests.csproj runs its test; the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
 - Unchanged: LibraryDesk/LibraryDesk.Client/Components/BookList.razor.
 
 ## Why

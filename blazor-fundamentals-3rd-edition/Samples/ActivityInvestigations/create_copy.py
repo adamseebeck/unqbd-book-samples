@@ -92,9 +92,7 @@ manifest = {"chapter": args.chapter, "changes": records,
     json.dumps(manifest, indent=2), encoding="utf-8")
 
 print(f"Created {output}")
-print(f"  from Checkpoints/Chapter{args.chapter:02}")
 for name in dict.fromkeys(record["file"] for record in records):
     print(f"  changed {name}")
 if (output / "Tests").is_dir():
     print("  added Tests (see README.md)")
-print("Next: cd to the new folder and follow README.md.")

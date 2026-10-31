@@ -34,4 +34,4 @@ Stop the app first, then run this from the working folder:
 dotnet test LibraryDesk.Tests
 ```
 
-The last line starts with Passed! and reports Failed: 0, Passed: 24, Skipped: 0, Total: 24.
+Near the end, the output reads Test summary: total: 24, failed: 0, succeeded: 24, skipped: 0, followed by the duration, and the last line starts with Build succeeded.

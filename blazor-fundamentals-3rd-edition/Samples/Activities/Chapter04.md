@@ -1,6 +1,6 @@
 # Chapter 4 activity answer
 
-The activity adds a third ToggleMessage to ComponentsDemo, with your own Message and a HiddenText of Tap to read, in a copy of Samples/Checkpoints/Chapter04.
+The activity adds a third ToggleMessage to ComponentsDemo, with your own Message and a HiddenText of Tap to read, in a copy of Samples/Checkpoints/Chapter04 made with Copy-Item. Stop your own LibraryDesk first: the copy uses the same address.
 
 ## The change
 
@@ -21,7 +21,7 @@ No other file changes. ToggleMessage already has the HiddenText parameter, with 
 
 ## Files involved
 
-- Samples/ActivitySolutions/Chapter04: the solved copy. Its changed file is LibraryDesk/LibraryDesk.Client/Pages/ComponentsDemo.razor. From that folder, dotnet test Tests/Chapter04.Tests.csproj runs its test; the last line reports Passed: 1.
+- Samples/ActivitySolutions/Chapter04: the solved copy. Its changed file is LibraryDesk/LibraryDesk.Client/Pages/ComponentsDemo.razor. From that folder, dotnet test Tests/Chapter04.Tests.csproj runs its test, which renders the page without a browser, clicks the same buttons and checks the three notes. It ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time.
 - Samples/Checkpoints/Chapter04/LibraryDesk/LibraryDesk.Client/Components/ToggleMessage.razor: the component, unchanged.
 
 ## Why

@@ -1,6 +1,6 @@
 # Chapter 19 activity: five notices and the hub's length check
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter19, the project at the end of Chapter 19, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter19, the project at the end of Chapter 19, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
 ## Make the copy
 
@@ -11,11 +11,11 @@ python create_copy.py --chapter 19 --output C:/BookExercises/Chapter19
 cd C:/BookExercises/Chapter19
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
-## What the copy changes
+## What you change
 
-In LibraryDesk/LibraryDesk.Client/Pages/LiveCatalog.razor, the page keeps the latest five notices: if (notices.Count == 5) instead of 20.
+The copy is your LibraryDesk project at the end of Chapter 19, unchanged. You make the changes yourself: in LibraryDesk/LibraryDesk.Client/Pages/LiveCatalog.razor, make the CatalogNotice callback keep only the latest five notices, and later delete maxlength="120" from the input.
 
 ## Run it
 
@@ -29,7 +29,7 @@ Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or
 
 ## What you should see
 
-Open http://127.0.0.1:58631/live in two tabs. From the first tab, broadcast Notice 1, Notice 2 and so on up to Notice 6. Both lists show Notice 2 to Notice 6; Notice 1 has been dropped. After you delete maxlength="120" from the input and run the copy again, paste a 121-character text (from copy("x".repeat(121)) in the Console) into the Notice box and click Broadcast locally: the status says Use a message from 1 to 120 characters., because the hub checks the length even when the page doesn't.
+Open http://127.0.0.1:58631/live in two tabs. From the first tab, broadcast Notice 1, Notice 2 and so on up to Notice 6. Both lists show Notice 2 to Notice 6; Notice 1 has been dropped. Stop the copy, delete maxlength="120" from the input and run the copy again. Reload the /live tab, or open http://127.0.0.1:58631/live again, so the page has the new input. Paste a 121-character text (from copy("x".repeat(121)) in the Console) into the Notice box and click Broadcast locally: the status says Use a message from 1 to 120 characters., because the hub checks the length even when the page doesn't.
 
 ## Start over
 

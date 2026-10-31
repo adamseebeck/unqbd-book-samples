@@ -93,6 +93,7 @@
         try
         {
             await connection.InvokeAsync("Announce", text);
+            status = "Connected.";
         }
         catch (HubException)
         {

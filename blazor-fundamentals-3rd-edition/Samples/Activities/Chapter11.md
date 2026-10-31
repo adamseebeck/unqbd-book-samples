@@ -1,6 +1,6 @@
 # Chapter 11 activity answer
 
-The activity adds a second policy, Readers, that any signed-in user meets, and a GET /api/profile endpoint that requires it.
+The activity adds a second policy, Readers, that any signed-in user meets, and a GET /api/profile endpoint that requires it. You write both in a copy of the Chapter 11 checkpoint.
 
 ## The change
 
@@ -33,7 +33,8 @@ app.MapGet("/api/profile", (HttpContext context) =>
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter11: the prepared copy, with exactly this change in LibraryDesk/LibraryDesk/Program.cs, and its README.
+- Samples/ActivityInvestigations/Chapter11: the copy's README. The copy is Samples/Checkpoints/Chapter11 unchanged, and you make the change in its LibraryDesk/LibraryDesk/Program.cs.
+- Samples/ActivitySolutions/Chapter11: the same project with exactly this change, to compare with yours.
 - Samples/Checkpoints/Chapter11/LibraryDesk/LibraryDesk/Program.cs: the file before the change.
 
 ## Why

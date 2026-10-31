@@ -9,5 +9,5 @@
       "after": "    @foreach (var book in books)\n    {\n        <div @key=\"book.Id\" style=\"height: 40px\">\n            @book.Id: @book.Title\n        </div>\n    }"
     }
   ],
-  "expected": "Open http://127.0.0.1:58631/virtual, press F12, open the Console tab and run document.getElementById(\"results\").childElementCount. It prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000. Your running project prints 18."
+  "expected": "Open http://127.0.0.1:58631/virtual, press F12, open the Console tab and run document.getElementById(\"results\").childElementCount. It prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000. Compare it with the 18 you counted in step 4 of Chapter 15. Then stop the copy, replace the @foreach loop in LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor with the Virtualize element from step 1 but with OverscanCount=\"10\", and run the copy again: the same line prints 32 (30 rows and 2 spacers), at the top and in the middle of the list."
 }

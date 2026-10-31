@@ -11,7 +11,7 @@ python create_copy.py --chapter 18 --output C:/BookExercises/Chapter18
 cd C:/BookExercises/Chapter18
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
 ## What the copy changes
 
@@ -29,7 +29,7 @@ Then put the original lines back in FavoritesState.cs, `private readonly HashSet
 
 ## What you should see
 
-The filter runs only FavoritesRefreshSiblingsAndIgnoreDuplicates, and it fails after about five seconds. The error starts with WaitForFailedException, because WaitForAssertion kept retrying until its time ran out; ignore its advice about slow machines. The real cause is the line under it that starts with ----: Assert.Equal() Failure: Strings differ, with Expected: "Favorites: 1" and Actual: "Favorites: 2". The last line starts with Failed! and reports Failed: 1, Passed: 0, Total: 1. The second click on Favorite C# added the same ID again. With the HashSet lines back, the last line starts with Passed! and reports Passed: 1.
+The filter runs only FavoritesRefreshSiblingsAndIgnoreDuplicates, and it fails after a few seconds. Its error message names WaitForFailedException, because WaitForAssertion kept retrying until its time ran out; ignore its advice about slower hardware. The real cause is the line under it that starts with ----: Assert.Equal() Failure: Strings differ, with Expected: "Favorites: 1" and Actual: "Favorites: 2". The second click on Favorite C# added the same ID again. The output then reads Test summary: total: 1, failed: 1, succeeded: 0, skipped: 0, and the last line says Build failed with 1 error(s). That error is the failing test, not a compile error. With the HashSet lines back, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
 
 ## Start over
 

@@ -1,6 +1,6 @@
 # Chapter 8 activity: a ten-character minimum
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter08, the project at the end of Chapter 8, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter08, the project at the end of Chapter 8, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
 ## Make the copy
 
@@ -11,11 +11,11 @@ python create_copy.py --chapter 8 --output C:/BookExercises/Chapter08
 cd C:/BookExercises/Chapter08
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
-## What the copy changes
+## What you change
 
-In LibraryDesk/LibraryDesk.Client/Models/FeedbackInput.cs, the message minimum is MinimumLength = 10 instead of 5.
+Nothing in the copy is changed for you. In the copy's LibraryDesk/LibraryDesk.Client/Models/FeedbackInput.cs, change MinimumLength = 5 to MinimumLength = 10 on the Message property and save the file.
 
 ## Run it
 
@@ -39,7 +39,7 @@ The copy has a Tests folder with a component test for this change. Stop the app,
 dotnet test Tests/Chapter08.Tests.csproj
 ```
 
-The last line starts with Passed! and reports Passed: 1. A component test checks component logic; check the page itself in the browser.
+Before your change the test fails: the output ends with Test summary: total: 1, failed: 1, succeeded: 0, skipped: 0, duration: ... and then Build failed with 1 error(s) in .... That error is the failing test, not a compile error. After your change the output ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, duration: ... and then Build succeeded in .... A component test checks component logic; check the page itself in the browser.
 
 ## Start over
 

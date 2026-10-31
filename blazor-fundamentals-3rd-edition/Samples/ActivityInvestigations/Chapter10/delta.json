@@ -1,13 +1,6 @@
 {
   "chapter": 10,
   "baseline": "Samples/Checkpoints/Chapter10",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk.Client/Services/HttpCatalogQuery.cs",
-      "source_sha256": "33a9dedbd6cbbfd87f5c6b1e90a1f41d6b46d1f954fcfe6b87c2b929505afe4c",
-      "before": "http.GetAsync(\"api/books\", cancellationToken)",
-      "after": "http.GetAsync(\"api/not-present\", cancellationToken)"
-    }
-  ],
-  "expected": "Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it."
+  "deltas": [],
+  "expected": "Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it. After you change the address back to \"api/books\" and run the copy again, Load books shows Loaded 3 books. and the three titles."
 }

@@ -7,7 +7,13 @@
       "source_sha256": "b6aec65b4cf405924f2bf62eb992f21014fe40a0a28d82fa71330446c2a0495f",
       "before": "Title=\"Blazor Field Notes\"",
       "after": "Title=\"UnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifierUnbrokenCatalogIdentifier\""
+    },
+    {
+      "file": "LibraryDesk/LibraryDesk.Client/Components/BookCard.razor.css",
+      "source_sha256": "85dec758a4c6a9eabf06226b4a7b0faffa1241b434e5cc89020f341bc8d059a6",
+      "before": "    overflow-wrap: anywhere;\n",
+      "after": ""
     }
   ],
-  "expected": "Open http://127.0.0.1:58631/style, turn on device emulation (Ctrl+Shift+M) and set the width to 360. The long title wraps inside the border, the card grows taller and the page doesn't scroll sideways. At 200 percent zoom the title still wraps inside the card. After you delete overflow-wrap: anywhere; from LibraryDesk/LibraryDesk.Client/Components/BookCard.razor.css and run the copy again, the title runs past the border and the page scrolls sideways."
+  "expected": "Open http://127.0.0.1:58631/style, turn on device emulation (Ctrl+Shift+M) and set the width to 360. The long title runs past the card's right border, and the page scrolls sideways. Stop the copy, add overflow-wrap: anywhere; as the last line inside the .book-card { } rule in LibraryDesk/LibraryDesk.Client/Components/BookCard.razor.css, run the copy again and reload: the title wraps inside the border, the card grows taller and the page doesn't scroll sideways. Click an empty part of the emulated page and zoom to 200 percent (Ctrl+Plus): the title still wraps inside the card."
 }

@@ -9,5 +9,5 @@
       "after": "@bind=\"search\""
     }
   ],
-  "expected": "Open http://127.0.0.1:58631/binding and type blazor: all three titles stay until you press Enter or click outside the box. After you add @bind:event=\"oninput\" back to the input and run the copy again, the list changes as you type. With <p id=\"match-count\">Matches: @Matches.Length</p> under the input, the page shows Matches: 3 for an empty box, Matches: 1 for BLAZOR and Matches: 0 for xyz."
+  "expected": "Open http://127.0.0.1:58631/binding and type blazor: all three titles stay until you press Enter or click outside the box. Stop the copy, add @bind:event=\"oninput\" back to the input and run the copy again: the list changes as you type. Stop it again, add a paragraph with the id match-count under the input that shows Matches: and the number of matching titles, and run it again: the page shows Matches: 3 for an empty box, Matches: 1 for BLAZOR and Matches: 0 for xyz."
 }

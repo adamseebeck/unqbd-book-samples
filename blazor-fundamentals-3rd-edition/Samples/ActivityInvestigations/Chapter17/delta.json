@@ -1,19 +1,6 @@
 {
   "chapter": 17,
   "baseline": "Samples/Checkpoints/Chapter17",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor",
-      "source_sha256": "ec155b1a2744cf26c2dc9fdfcb09dd9a3b43b9219df558d613aae3a8f83a7292",
-      "before": "<p role=\"status\">@status</p>",
-      "after": "<button id=\"clear-catalog-favorites\" @onclick=\"ClearFavorites\">\n    Clear catalog favorites\n</button>\n<p role=\"status\">@status</p>"
-    },
-    {
-      "file": "LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor",
-      "source_sha256": "ec155b1a2744cf26c2dc9fdfcb09dd9a3b43b9219df558d613aae3a8f83a7292",
-      "before": "    private void Add(int id)",
-      "after": "    private void ClearFavorites()\n    {\n        Favorites.Clear();\n        status =\n            $\"Favorites in this runtime: {Favorites.Ids.Count}.\";\n    }\n\n    private void Add(int id)"
-    }
-  ],
-  "expected": "Open http://127.0.0.1:58631/catalog. Favorite Blazor Field Notes and C# Field Notes: the status says Favorites in this runtime: 2. Click Clear catalog favorites: Favorites in this runtime: 0. Click it again: still 0."
+  "deltas": [],
+  "expected": "Add the button and the ClearFavorites method to LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor, then run the copy and open http://127.0.0.1:58631/catalog. Favorite Blazor Field Notes and C# Field Notes: the status says Favorites in this runtime: 2. Click Clear catalog favorites: Favorites in this runtime: 0. Click it again: still 0."
 }

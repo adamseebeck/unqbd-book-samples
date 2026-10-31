@@ -1,6 +1,6 @@
 # Chapter 21 activity: a help text for the Message box
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter21, the project at the end of Chapter 21, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter21, the project at the end of Chapter 21, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
 ## Make the copy
 
@@ -11,11 +11,11 @@ python create_copy.py --chapter 21 --output C:/BookExercises/Chapter21
 cd C:/BookExercises/Chapter21
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
-## What the copy changes
+## What you change
 
-In LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, a help paragraph with the id feedback-message-help (Use 5 to 300 characters. This example saves locally.) sits above the Message box, and the box's aria-describedby lists both ids: feedback-message-help feedback-message-error.
+The copy is your LibraryDesk project at the end of Chapter 21, unchanged, plus a Tests folder. You make the change yourself: in LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, add a paragraph with the id feedback-message-help (Use 5 to 300 characters. This example saves locally.) above the Message box, and make the box's aria-describedby list both ids: feedback-message-help feedback-message-error.
 
 ## Run it
 
@@ -39,7 +39,7 @@ The copy has a Tests folder with a component test for this change. Stop the app,
 dotnet test Tests/Chapter21.Tests.csproj
 ```
 
-The last line starts with Passed! and reports Passed: 1. A component test checks component logic; check the page itself in the browser.
+Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. If a test fails, the last line reads Build failed with 1 error(s) instead; that error is the failing test, not a compile error. It checks that the Message box's aria-describedby lists both ids, that the help text and the label are in place, and that the empty and valid submits behave as before. A component test checks component logic; check the page itself in the browser.
 
 ## Start over
 

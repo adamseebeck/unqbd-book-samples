@@ -11,7 +11,7 @@ python create_copy.py --chapter 13 --output C:/BookExercises/Chapter13
 cd C:/BookExercises/Chapter13
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
 ## What the copy changes
 
@@ -29,7 +29,7 @@ Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or
 
 ## What you should see
 
-On http://127.0.0.1:58631/templates, Select C# Field Notes shows Selected identifier: 1. Select Blazor Field Notes replaces the list with The catalog component failed. Reload to retry., and the line still reads Selected identifier: 1, because the exception happened before the callback reached the page. After you add new(3, "Database Field Notes", 26m) to the books array in TemplatesDemo.razor and run the copy again, Select Database Field Notes shows Selected identifier: 3. With the price in the template, each row starts with its price, such as $26.00 Select Database Field Notes. The solved third book and price layout are in Samples/ActivitySolutions/Chapter13.
+On http://127.0.0.1:58631/templates, Select C# Field Notes shows Selected identifier: 1. Select Blazor Field Notes replaces the list with The catalog component failed. Reload to retry., and the line still reads Selected identifier: 1, because the exception happened before the callback reached the page. After you add new(3, "Database Field Notes", 26m) to the books array in TemplatesDemo.razor and run the copy again, a Select Database Field Notes button appears below the other two, and clicking it shows Selected identifier: 3. After you add the price span to the template and run the copy again, the rows read $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes and $26.00 Select Database Field Notes. The solved third book and price layout are in Samples/ActivitySolutions/Chapter13.
 
 ## Start over
 

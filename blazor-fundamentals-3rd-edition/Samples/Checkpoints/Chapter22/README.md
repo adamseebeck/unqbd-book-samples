@@ -18,7 +18,7 @@ The terminal shows Now listening on: http://127.0.0.1:58631. Open that address i
 
 ## What Chapter 22 added
 
-Chapter 22 added http://127.0.0.1:58631/diagnostics (Diagnostics in the menu): each click writes a CatalogRead entry to the server's log, which you see in the terminal.
+Chapter 22 added http://127.0.0.1:58631/diagnostics (Diagnostics in the menu), a static page with the interactive CatalogReadRecorder component: each click writes a CatalogRead entry to the server's log, which you see in the terminal.
 
 To run the offline app instead, use the command from Chapter 20 and open http://127.0.0.1:58634:
 
@@ -34,4 +34,4 @@ Stop the app first, then run this from the working folder:
 dotnet test LibraryDesk.Tests
 ```
 
-The last line starts with Passed! and reports Failed: 0, Passed: 24, Skipped: 0, Total: 24.
+Near the end, the output reads Test summary: total: 24, failed: 0, succeeded: 24, skipped: 0, followed by the duration, and the last line starts with Build succeeded.

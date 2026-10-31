@@ -52,8 +52,9 @@ builder.Services.AddAuthentication(
 builder.Services.AddAuthorization(options =>
     options.AddPolicy("Staff",
         policy => policy.RequireRole("Librarian")));
-builder.Services.AddSignalR(options =>
-    options.MaximumReceiveMessageSize = 4096);
+builder.Services.AddSignalR()
+    .AddHubOptions<CatalogHub>(options =>
+        options.MaximumReceiveMessageSize = 4096);
 
 var app = builder.Build();
 

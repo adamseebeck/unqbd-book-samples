@@ -1,13 +1,6 @@
 {
   "chapter": 19,
   "baseline": "Samples/Checkpoints/Chapter19",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk.Client/Pages/LiveCatalog.razor",
-      "source_sha256": "75d26f04af5cb91251751623ca9283a9bf35d30c74c6d69f6a912edc82e17378",
-      "before": "if (notices.Count == 20)",
-      "after": "if (notices.Count == 5)"
-    }
-  ],
-  "expected": "Open http://127.0.0.1:58631/live in two tabs. From the first tab, broadcast Notice 1, Notice 2 and so on up to Notice 6. Both lists show Notice 2 to Notice 6; Notice 1 has been dropped. After you delete maxlength=\"120\" from the input and run the copy again, paste a 121-character text (from copy(\"x\".repeat(121)) in the Console) into the Notice box and click Broadcast locally: the status says Use a message from 1 to 120 characters., because the hub checks the length even when the page doesn't."
+  "deltas": [],
+  "expected": "Open http://127.0.0.1:58631/live in two tabs. From the first tab, broadcast Notice 1, Notice 2 and so on up to Notice 6. Both lists show Notice 2 to Notice 6; Notice 1 has been dropped. Stop the copy, delete maxlength=\"120\" from the input and run the copy again. Reload the /live tab, or open http://127.0.0.1:58631/live again, so the page has the new input. Paste a 121-character text (from copy(\"x\".repeat(121)) in the Console) into the Notice box and click Broadcast locally: the status says Use a message from 1 to 120 characters., because the hub checks the length even when the page doesn't."
 }

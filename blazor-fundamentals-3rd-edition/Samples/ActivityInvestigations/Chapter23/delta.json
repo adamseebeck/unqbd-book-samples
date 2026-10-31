@@ -1,13 +1,6 @@
 {
   "chapter": 23,
   "baseline": "Samples/Checkpoints/Chapter23",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk/Program.cs",
-      "source_sha256": "4ddf9228a5b006bd42e5af00945fb472f662a6bf31b46a2fb2c18fc9d9945924",
-      "before": "app.MapGet(\"/healthz\", () => Results.Ok(new { Status = \"ok\" }));",
-      "after": "app.MapGet(\"/healthz\", () =>\n    Results.Ok(new { Status = \"ok\", Revision = \"local-review\" }));"
-    }
-  ],
+  "deltas": [],
   "expected": "Open http://127.0.0.1:58633/healthz: the page shows {\"status\":\"ok\",\"revision\":\"local-review\"}. /lab/signin/reader shows the Not Found page, and /security has no local sign-in buttons."
 }

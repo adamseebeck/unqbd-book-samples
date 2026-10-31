@@ -3,11 +3,11 @@
   "baseline": "Samples/Checkpoints/Chapter02",
   "deltas": [
     {
-      "file": "LibraryDesk/LibraryDesk/Components/Pages/Home.razor",
-      "source_sha256": "486bbe760ec5aff895823d9a2897bdc752fc7b03e6e6a9bd917744d734dba358",
-      "before": "<h1>Hello, world!</h1>",
-      "after": "<h1>LibraryDesk setup verified</h1>"
+      "file": "global.json",
+      "source_sha256": "94cbc6384f5c34fa22ae91a437c4d9835e7fdddb4d998238c99b9b4777a66303",
+      "before": "\"version\": \"11.0.100\"",
+      "after": "\"version\": \"11.0.999\""
     }
   ],
-  "expected": "With 11.0.999 in global.json, dotnet --version fails with A compatible .NET SDK was not found. The error names the requested version, 11.0.999, and the global.json file it came from. With 11.0.100 back, dotnet --version prints 11.0.100 or a later 11.0 version again. The running copy shows the heading LibraryDesk setup verified at http://127.0.0.1:58631."
+  "expected": "With 11.0.999 in global.json, dotnet --version fails. Among the lines it prints are A compatible .NET SDK was not found., Requested SDK version: 11.0.999 and global.json file: followed by the path of the copy's global.json. With 11.0.100 back, dotnet --version prints 11.0.100 or a later 11.0 version. After your heading change, the running copy shows the heading LibraryDesk setup verified at http://127.0.0.1:58631."
 }

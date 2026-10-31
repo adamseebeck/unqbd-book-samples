@@ -1,6 +1,6 @@
 # Chapter 11 activity: a Readers policy and GET /api/profile
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter11, the project at the end of Chapter 11, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter11, the project at the end of Chapter 11, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
 ## Make the copy
 
@@ -11,11 +11,11 @@ python create_copy.py --chapter 11 --output C:/BookExercises/Chapter11
 cd C:/BookExercises/Chapter11
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
-## What the copy changes
+## What you change
 
-LibraryDesk/LibraryDesk/Program.cs has the solved change: a Readers policy built with policy.RequireAuthenticatedUser() beside the Staff policy, and a GET /api/profile endpoint, just before /api/staff/count, that returns the signed-in name and requires the Readers policy. Compare it with your own attempt.
+Nothing in the copy is changed for you. In the copy's LibraryDesk/LibraryDesk/Program.cs, add a policy named Readers, built with policy.RequireAuthenticatedUser(), beside the Staff policy. AddPolicy returns nothing, so turn the AddAuthorization lambda into a block, options => { ...; ...; }, and put both AddPolicy calls inside it. Then add GET /api/profile just before the /api/staff/count endpoint: it takes an HttpContext parameter, returns Results.Ok(new { Name = context.User.Identity!.Name }) and requires the Readers policy. Samples/ActivitySolutions/Chapter11 has the change made.
 
 ## Run it
 

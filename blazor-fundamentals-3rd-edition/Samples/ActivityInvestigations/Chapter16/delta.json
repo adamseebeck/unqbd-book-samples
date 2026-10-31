@@ -3,12 +3,6 @@
   "baseline": "Samples/Checkpoints/Chapter16",
   "deltas": [
     {
-      "file": "LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor",
-      "source_sha256": "6ae405cba2fde4fb0e564a2e1de1986fe7f4e3e61458ab77c1fb4f56d9ce5f7d",
-      "before": "<button @onclick=\"() => count++\">Increment mode counter</button>\n@code { private int count; }",
-      "after": "<button @onclick=\"() => count += Step\">Increment mode counter</button>\n@code {\n    [Parameter] public int Step { get; set; } = 1;\n    private int count;\n}"
-    },
-    {
       "file": "LibraryDesk/LibraryDesk/Components/Pages/Modes.razor",
       "source_sha256": "e9ea8fc7e09e95281a7efa897a2311d408249ccd2032fa86f06d9f383e9b5744",
       "before": "<ModeCounter @rendermode=\"InteractiveServer\" />",
@@ -27,5 +21,5 @@
       "after": "<ModeCounter Step=\"4\" @rendermode=\"InteractiveAuto\" />"
     }
   ],
-  "expected": "Open http://127.0.0.1:58631/modes, wait until no counter reads Static, and click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4. After F5, all three counts return to 0, because the reload created new instances."
+  "expected": "Open http://127.0.0.1:58631/modes. The page shows An unhandled exception occurred while processing the request. and InvalidOperationException: Object of type 'LibraryDesk.Client.Components.ModeCounter' does not have a property matching the name 'Step'. Stop the copy, add [Parameter] public int Step { get; set; } = 1; to the @code block of LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor and change count++ to count += Step, then run the copy again. Wait until no counter reads Static and click each button once: the lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4. After F5, all three counts return to 0, because the reload created new instances."
 }

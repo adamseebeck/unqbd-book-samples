@@ -1,13 +1,6 @@
 {
   "chapter": 12,
   "baseline": "Samples/Checkpoints/Chapter12",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk.Client/Pages/InteropDemo.razor",
-      "source_sha256": "a6615e977e1092315e11d349a5de0ae411d2c0d7740d0f7b58a65aa57880ec34",
-      "before": "\"./js/catalog.js\"",
-      "after": "\"./js/not-present.js\""
-    }
-  ],
-  "expected": "Open http://127.0.0.1:58631/interop with the Network tab open. The status settles on Browser module unavailable. Reload to retry., both buttons stay disabled, and the Network tab shows not-present.js with status 404."
+  "deltas": [],
+  "expected": "Before your change, open http://127.0.0.1:58631/interop, press Tab until Focus input is highlighted and press Enter: the cursor moves into the text box and the status reads Input focused. Click Read browser time, click another menu link and come back with Interop: both buttons become active again after a moment, and one click on Read browser time updates the time once.\n\nAfter your change, open http://127.0.0.1:58631/interop with the Network tab open. The status settles on Browser module unavailable. Reload to retry., both buttons stay disabled, and the Network tab shows not-present.js with status 404."
 }

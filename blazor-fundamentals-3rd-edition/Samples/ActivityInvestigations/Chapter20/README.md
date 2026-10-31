@@ -1,6 +1,6 @@
 # Chapter 20 activity: a three-title reading list
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter20, the project at the end of Chapter 20, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter20, the project at the end of Chapter 20, unchanged; you make the change yourself. Stop your own LibraryDesk.Pwa with Ctrl+C first if it is running: the copy uses the same address.
 
 ## Make the copy
 
@@ -11,11 +11,11 @@ python create_copy.py --chapter 20 --output C:/BookExercises/Chapter20
 cd C:/BookExercises/Chapter20
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists each change.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
 
-## What the copy changes
+## What you change
 
-In LibraryDesk.Pwa/Pages/Home.razor, the reading list allows 3 titles instead of 50.
+The copy is your working folder at the end of Chapter 20, unchanged, plus a Tests folder. You make the change yourself: in LibraryDesk.Pwa/Pages/Home.razor, limit the list to 3 titles and change the message to match.
 
 ## Run it
 
@@ -39,7 +39,7 @@ The copy has a Tests folder with a component test for this change. Stop the app,
 dotnet test Tests/Chapter20.Tests.csproj
 ```
 
-The last line starts with Passed! and reports Passed: 1. It saves three titles, tries a fourth, and checks that only three writes reached localStorage. A component test checks component logic; check the page itself in the browser.
+Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. If a test fails, the last line reads Build failed with 1 error(s) instead; that error is the failing test, not a compile error. It saves three titles, tries a fourth, and checks that only three writes reached localStorage and that a new page loads the three. A component test checks component logic; check the page itself in the browser.
 
 ## Start over
 

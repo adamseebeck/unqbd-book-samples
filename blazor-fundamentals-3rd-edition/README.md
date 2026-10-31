@@ -4,7 +4,7 @@ Companion code for *Blazor Fundamentals, Third Edition* by Adam Seebeck: the Lib
 
 ## Prerequisites
 
-- The .NET 11 SDK, version 11.0.100 or later. Each global.json selects it and accepts later .NET 11 feature bands; the framework packages use version 11.0.0.
+- The .NET 11 SDK, version 11.0.100 or later. Each global.json selects it and accepts later .NET 11 feature bands; the framework packages use the matching framework version: 11.0.0 with SDK 11.0.100, or a later 11.0 patch, such as 11.0.1, with a later SDK. This code uses 11.0.0.
 - Python 3. It runs the activity copy script and, in Chapters 20 and 23, serves the published offline app.
 - A current browser such as Microsoft Edge or Google Chrome.
 - A code editor if you like: Visual Studio (a version that supports .NET 11) and Visual Studio Code with the C# Dev Kit extension both work. The command line is the route the book describes.
@@ -14,8 +14,8 @@ Companion code for *Blazor Fundamentals, Third Edition* by Adam Seebeck: the Lib
 - Samples/Checkpoints/Chapter02 to Chapter23: the LibraryDesk project at the end of each chapter, laid out like your working folder, each with a README.
 - Samples/LibraryDesk: the finished app (the solution folder with the server and client projects). Samples/LibraryDesk.Tests holds its component tests, Samples/LibraryDesk.Pwa is Chapter 20's offline app, and Samples/LibraryDesk.Pwa.Tests holds the offline app's storage tests.
 - Samples/Activities: the answer to every chapter's activity.
-- Samples/ActivityInvestigations: create_copy.py and each activity's change. It makes a copy of a chapter's checkpoint with the change applied.
-- Samples/ActivitySolutions: solved copies for the activities of Chapters 4, 5 and 13.
+- Samples/ActivityInvestigations: create_copy.py and each activity's setup. It makes a copy of a chapter's checkpoint for the activity, with any change or Tests folder the activity needs.
+- Samples/ActivitySolutions: solved copies for the activities of Chapters 4, 5, 11 and 13.
 
 See Samples/README.md for the folder map and more detail.
 

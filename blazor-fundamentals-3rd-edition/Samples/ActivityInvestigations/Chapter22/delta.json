@@ -1,19 +1,6 @@
 {
   "chapter": 22,
   "baseline": "Samples/Checkpoints/Chapter22",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk/appsettings.json",
-      "source_sha256": "2d8bb40059df22089b94c025be8baad5a869b72d4d755d199c872f03bfe6f225",
-      "before": "\"Default\": \"Information\",",
-      "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
-    },
-    {
-      "file": "LibraryDesk/LibraryDesk/appsettings.Development.json",
-      "source_sha256": "817db0bf2ecca78364c41dbaf7949bf2504cf47a1c3d0d54f3be8178fefc030b",
-      "before": "\"Default\": \"Information\",",
-      "after": "\"Default\": \"Information\",\n      \"LibraryDesk.Components.Pages.Diagnostics\": \"Warning\","
-    }
-  ],
-  "expected": "Open http://127.0.0.1:58631/diagnostics and click twice. The page shows Reads recorded: 2, but the terminal shows no CatalogRead entries: the category now starts at Warning, and the entries are Information. After you change \"Warning\" back to \"Information\" in both files and run the copy again, each click writes an info: LibraryDesk.Components.Pages.Diagnostics[0] line followed by its CatalogRead line."
+  "deltas": [],
+  "expected": "Open http://127.0.0.1:58631/diagnostics and click twice. The page shows Reads recorded: 2, but the terminal shows no CatalogRead entries: the category now starts at Warning, and the entries are Information. After you change \"Warning\" back to \"Information\" in both files and run the copy again, each click writes an info: LibraryDesk.Components.CatalogReadRecorder[0] line followed by its CatalogRead line."
 }

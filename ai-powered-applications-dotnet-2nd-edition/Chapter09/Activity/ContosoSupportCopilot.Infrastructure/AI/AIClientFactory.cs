@@ -70,7 +70,8 @@ public class AIClientFactory
         if (_options.Provider == AIProvider.Foundry && _options.UseEntraId)
         {
             #pragma warning disable OPENAI001 // The OpenAI SDK marks token-based authentication as experimental.
-            var tokenPolicy = new BearerTokenPolicy(AzureCredentialFactory.Create(_environment), FoundryScope);
+            // The policy asks for a token before every request; CachedTokenProvider keeps one until it is due.
+            var tokenPolicy = new BearerTokenPolicy(new CachedTokenProvider(AzureCredentialFactory.Create(_environment)), FoundryScope);
             return new OpenAIClient(tokenPolicy, clientOptions);
             #pragma warning restore OPENAI001
         }

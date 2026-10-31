@@ -206,7 +206,9 @@ public sealed partial class RagOrchestrator : IRagOrchestrator
         return string.Join(Environment.NewLine, lines);
     }
 
-    // A citation marker such as [Article: Handle API rate limits (9e8d7c6b-0003-4a5b-8c7d-000000000003)]
-    [GeneratedRegex(@"[[]Article:.*?[(](?<id>[0-9A-Fa-f-]{36})[)][]]")]
+    // A citation marker such as [Article: Handle API rate limits (9e8d7c6b-0003-4a5b-8c7d-000000000003)]. Only the ID
+    // after the opening parenthesis counts: models sometimes drop the closing parenthesis or bracket, so the pattern
+    // ends at the ID.
+    [GeneratedRegex(@"[[]Article:[^]]*?[(](?<id>[0-9A-Fa-f-]{36})")]
     private static partial Regex CitationMarker();
 }

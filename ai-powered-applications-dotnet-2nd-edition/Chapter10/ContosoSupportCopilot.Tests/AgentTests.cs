@@ -257,11 +257,33 @@ public sealed class AgentTests
         using var agent = new OpenTelemetryAgent(new ChatClientAgent(new FilteredAnswerChatClient(),
             new ChatClientAgentOptions { Name = "FilteredAgent" }), SupportAgentFactory.TelemetrySourceName);
 
-        var outcome = await runner.RunAsync(agent, context, "Write the reply.", [], CancellationToken.None);
+        var outcome = await runner.RunAsync(agent, context, "Write the reply.", [], toolMode: null, CancellationToken.None);
 
         Assert.Equal(AgentFailureMode.ContentSafety, outcome.FailureMode);
         Assert.Null(await scope.ServiceProvider.GetRequiredService<IAgentSessionRepository>()
             .GetAsync(context.ConversationId, "FilteredAgent", "engineer-ana"));
+    }
+
+    [Fact]
+    public async Task AgentRunner_RequiresTheToolOnTheFirstModelCallOnly()
+    {
+        using var host = await AgentTestHost.StartAsync();
+        using var scope = host.Services.CreateScope();
+        var runner = scope.ServiceProvider.GetRequiredService<AgentRunner>();
+        var context = new AgentContext { ConversationId = Guid.NewGuid(), RequesterId = "engineer-ana" };
+        var model = new ToolThenAnswerChatClient();
+        using var agent = new OpenTelemetryAgent(new ChatClientAgent(model,
+            new ChatClientAgentOptions { Name = "LookupAgent" }), SupportAgentFactory.TelemetrySourceName);
+
+        var outcome = await runner.RunAsync(agent, context, "What is the value?",
+            [AIFunctionFactory.Create(() => "42", "lookup_value", "Returns the value.")],
+            ChatToolMode.RequireSpecific("lookup_value"), CancellationToken.None);
+
+        // FunctionInvokingChatClient lifts the requirement after the first call, so the second call can answer.
+        Assert.Null(outcome.FailureMode);
+        Assert.Equal("The value is 42.", outcome.Response!.Text);
+        Assert.Equal(["lookup_value", null], model.ToolModes.Select(m => (m as RequiredChatToolMode)?.RequiredFunctionName));
+        Assert.IsType<RequiredChatToolMode>(model.ToolModes[0]);
     }
 
     [Fact]
@@ -330,10 +352,10 @@ public sealed class AgentTests
 
         // The second run starts and saves while the first one is still running: just before the first save.
         var race = new SaveRace(sessions, () => second.ServiceProvider.GetRequiredService<AgentRunner>()
-            .RunAsync(agent, context, "The second question", [], CancellationToken.None));
+            .RunAsync(agent, context, "The second question", [], toolMode: null, CancellationToken.None));
         var runner = ActivatorUtilities.CreateInstance<AgentRunner>(first.ServiceProvider, race);
 
-        var outcome = await runner.RunAsync(agent, context, "The first question", [], CancellationToken.None);
+        var outcome = await runner.RunAsync(agent, context, "The first question", [], toolMode: null, CancellationToken.None);
 
         var stored = await sessions.GetAsync(context.ConversationId, "RaceAgent", "engineer-ana");
         Assert.Null(outcome.FailureMode);
@@ -407,6 +429,30 @@ public sealed class AgentTests
 
         public Task<AgentResult> ExecuteAsync(AgentContext context, CancellationToken cancellationToken = default) =>
             Task.FromResult(AgentResults.Failure(Name, AgentFailureMode.Transient));
+    }
+
+    // Asks for lookup_value on the first call and answers on the second, recording each call's tool mode.
+    private sealed class ToolThenAnswerChatClient : IChatClient
+    {
+        public List<ChatToolMode?> ToolModes { get; } = [];
+
+        public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            ToolModes.Add(options?.ToolMode);
+            var message = ToolModes.Count == 1
+                ? new ChatMessage(ChatRole.Assistant, [new FunctionCallContent("call-1", "lookup_value")])
+                : new ChatMessage(ChatRole.Assistant, "The value is 42.");
+            return Task.FromResult(new ChatResponse(message));
+        }
+
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public object? GetService(Type serviceType, object? serviceKey = null) => serviceType.IsInstanceOfType(this) ? this : null;
+
+        public void Dispose()
+        {
+        }
     }
 
     // A provider whose content filter stops the answer: a normal response with the ContentFilter finish reason.

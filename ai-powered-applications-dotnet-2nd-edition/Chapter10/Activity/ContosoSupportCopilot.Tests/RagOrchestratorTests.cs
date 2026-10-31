@@ -65,6 +65,27 @@ public class RagOrchestratorTests
     }
 
     [Fact]
+    public async Task GenerateGroundedResponseAsync_ReadsAMarkerWithoutItsClosingParenthesis()
+    {
+        // Models sometimes drop the closing parenthesis or bracket; the ID still has to belong to a source the model received.
+        AnswerWith($"Accounts unlock after 30 minutes. [Article: Lockouts ({_lockouts.Id}]");
+        var grounded = await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket);
+
+        AnswerWith($"Accounts unlock after 30 minutes. [Article: Lockouts ({_lockouts.Id})\n\nAn administrator can unlock one at once.");
+        var unclosed = await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket);
+
+        AnswerWith($"Accounts unlock after 30 minutes. [Article: Lockouts ({_lockouts.Id}] [Article: Invented ({Guid.NewGuid()}]");
+        var invented = await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket);
+
+        Assert.True(grounded.IsGrounded);
+        Assert.Equal([_lockouts.Id], grounded.CitedArticleIds);
+        Assert.True(unclosed.IsGrounded);
+        Assert.Equal([_lockouts.Id], unclosed.CitedArticleIds);
+        Assert.False(invented.IsGrounded);
+        Assert.Equal([_lockouts.Id], invented.CitedArticleIds);
+    }
+
+    [Fact]
     public async Task GenerateGroundedResponseAsync_IsNotGrounded_WhenTheAnswerCitesNothing()
     {
         AnswerWith("Accounts unlock after 30 minutes.");

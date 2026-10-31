@@ -48,7 +48,7 @@ public sealed class AgentRunner
     }
 
     public async Task<AgentRunOutcome> RunAsync(AIAgent agent, AgentContext context, string message, IList<AITool> tools,
-        CancellationToken cancellationToken)
+        ChatToolMode? toolMode, CancellationToken cancellationToken)
     {
         var name = agent.Name ?? throw new InvalidOperationException("Agents need a name to store their sessions.");
         var stopwatch = Stopwatch.StartNew();
@@ -60,8 +60,10 @@ public sealed class AgentRunner
             var history = agent.GetService<ChatClientAgent>()?.ChatHistoryProvider as InMemoryChatHistoryProvider;
             var earlier = history?.GetMessages(session).Count ?? 0;
 
-            // One agent serves every run (Step 5), so this run's tools travel in its run options.
-            var options = new ChatClientAgentRunOptions(new ChatOptions { Tools = tools });
+            // One agent serves every run (Step 5), so this run's tools travel in its run options. A restored session
+            // already holds earlier tool results, so the caller can require a tool on the first model call;
+            // FunctionInvokingChatClient lifts the requirement after that call, so the loop still ends.
+            var options = new ChatClientAgentRunOptions(new ChatOptions { Tools = tools, ToolMode = toolMode });
             var response = await agent.RunAsync(message, session, options, cancellationToken);
 
             // A filtered answer arrives as a response that ends with the ContentFilter finish reason.

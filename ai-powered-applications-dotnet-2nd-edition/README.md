@@ -78,7 +78,7 @@ dotnet user-secrets set "AI:EmbeddingDeployment" "<embedding-deployment-name>" -
 dotnet user-secrets set "AI:ApiKey" "<api-key>" --project ContosoSupportCopilot.Api
 ```
 
-For keyless access, assign your account the Cognitive Services OpenAI User role on the resource, sign in with `az login`, skip the key, and set `AI:UseEntraId` to `true`. A deployed app uses its managed identity instead.
+For keyless access, assign your account the Cognitive Services OpenAI User role on the resource, sign in with `az login`, skip the key, and set `AI:UseEntraId` to `true`. A deployed app uses its managed identity instead. `CachedTokenProvider` keeps each token until shortly before it expires, so the Azure CLI runs about once an hour, not before every model call.
 
 **OpenAI.** Set `AI:Provider` to `OpenAI`, `AI:ApiKey` to your key, and the two model names. To use an OpenAI-compatible server, also set `AI:Endpoint` to its base address.
 

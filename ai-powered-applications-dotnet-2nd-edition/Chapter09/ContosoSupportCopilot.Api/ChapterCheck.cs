@@ -46,7 +46,9 @@ public static class ChapterCheck
         var baseline = await evaluation.EvaluateDatasetAsync(dataset, SupportPrompts.GroundedAnswer, strict, "strict-floor");
         Print(baseline, strict);
         var suggestion = baseline.RetrievalRecommendation?.SuggestedSearchRequest;
-        Console.WriteLine($"Optimizer: {baseline.RetrievalRecommendation?.Reasoning} (TopK {suggestion?.TopK}, MinScore {F(suggestion?.MinScore ?? 0)})");
+        Console.WriteLine(suggestion is null
+            ? $"Optimizer: no change, because recall {F(baseline.AverageMetrics.Recall)} is at least 0.7 and precision {F(baseline.AverageMetrics.Precision)} at least 0.6"
+            : $"Optimizer: {baseline.RetrievalRecommendation!.Reasoning} (TopK {suggestion.TopK}, MinScore {F(suggestion.MinScore)})");
 
         var candidate = await evaluation.EvaluateDatasetAsync(dataset, SupportPrompts.GroundedAnswer, suggestion ?? strict, "optimizer-suggestion");
         Print(candidate, suggestion ?? strict);
@@ -56,7 +58,7 @@ public static class ChapterCheck
         var defaults = await evaluation.EvaluateDatasetAsync(dataset, SupportPrompts.GroundedAnswer, configured, "configured");
         Print(defaults, configured);
         var missed = defaults.Results.Where(r => r.Metrics.Recall < 1).Select(r => r.TestCaseName);
-        Console.WriteLine($"Still missed: {string.Join(", ", missed)}");
+        Console.WriteLine($"Still missed: {(missed.Any() ? string.Join(", ", missed) : "none")}");
 
         // 3. What word overlap catches: a sentence that shares no words with its source.
         var refund = Source(SampleData.DuplicateChargeArticleId, "Refund a duplicate charge",
@@ -117,8 +119,12 @@ public static class ChapterCheck
         var scenarioRuns = await evaluation.WriteHtmlReportAsync(reportPath);
         Console.WriteLine($"Report: {reportPath} ({scenarioRuns} scenario runs)");
 
-        var passed = candidate.AverageMetrics.Recall > baseline.AverageMetrics.Recall
-            && defaults.AverageMetrics.Recall >= candidate.AverageMetrics.Recall
+        // Offline, the floor of 0.5 is too strict for the hashed word vectors, the optimizer's looser search finds more,
+        // and the configured defaults find the most. A model's embeddings score differently: the floor may already keep
+        // recall above 0.7, and then the optimizer suggests nothing. With a model, the check prints those numbers only.
+        var offline = provider.GetRequiredService<IOptions<AIProviderOptions>>().Value.Provider == AIProvider.Offline;
+        var passed = (!offline || (candidate.AverageMetrics.Recall > baseline.AverageMetrics.Recall
+                && defaults.AverageMetrics.Recall >= candidate.AverageMetrics.Recall))
             && defaults.Results.Single(r => r.TestCaseName == "out-of-scope").Response == RagOrchestrator.NoContentResponse
             && offTopic.Interpretation!.Failed
             && !overlap.Interpretation.Failed

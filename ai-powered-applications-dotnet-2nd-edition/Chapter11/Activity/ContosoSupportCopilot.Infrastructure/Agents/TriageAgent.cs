@@ -1,6 +1,7 @@
 using ContosoSupportCopilot.Domain.Models;
 using ContosoSupportCopilot.Domain.Repositories;
 using ContosoSupportCopilot.Domain.Services;
+using Microsoft.Extensions.AI;
 
 namespace ContosoSupportCopilot.Infrastructure.Agents;
 
@@ -49,7 +50,8 @@ public class TriageAgent : IAgent
         var priority = new AgentToolFunction(_tools.Resolve(PriorityScoreTool.ToolName), toolContext);
         var agent = _agentFactory.GetAgent(Name, Instructions);
 
-        var outcome = await _runner.RunAsync(agent, context, $"{ticket.Subject}\n{ticket.Description}", [classify, priority], cancellationToken);
+        var outcome = await _runner.RunAsync(agent, context, $"{ticket.Subject}\n{ticket.Description}", [classify, priority],
+            ChatToolMode.RequireSpecific(TicketClassificationTool.ToolName), cancellationToken);
         var classification = classify.Calls.LastOrDefault()?.Result;
         await _runner.LogRunAsync(context, Name, outcome, cancellationToken: cancellationToken);
 

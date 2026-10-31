@@ -66,7 +66,7 @@ dotnet user-secrets set "AI:ChatDeployment" "llama3.2" --project ContosoSupportC
 dotnet user-secrets set "AI:EmbeddingDeployment" "nomic-embed-text" --project ContosoSupportCopilot.Api
 ```
 
-Quality and speed depend on the model and your hardware.
+Quality and speed depend on the model and your hardware. llama3.2 runs the checks of Chapters 2 to 7. From Chapter 8 on, use Microsoft Foundry or OpenAI: those chapters check citation formats, scores from a judging model, and agent tool calls, which small local models such as llama3.2 and qwen2.5:7b do not follow reliably at the time of writing.
 
 **Microsoft Foundry.** Create a Foundry resource, deploy a chat model (a GPT-5-series model such as gpt-5.4-mini at the time of writing) and an embedding model (such as text-embedding-3-small), and copy the endpoint and key from the resource:
 
@@ -114,7 +114,7 @@ dotnet tool run aieval report --path ContosoSupportCopilot.Api/evaluation-result
 
 ## Agents, Workflows, and Operations
 
-From Chapter 10 on, the agents use Microsoft Agent Framework (`Microsoft.Agents.AI`). With a real provider, use a chat deployment that supports tool calling, such as a GPT-5-series deployment in Microsoft Foundry or llama3.2 in Ollama at the time of writing. Agents keep one session per conversation, agent, and engineer, with a version check: a run that saves after another run adds its turn to the stored session. Every run writes a record with its model and token counts.
+From Chapter 10 on, the agents use Microsoft Agent Framework (`Microsoft.Agents.AI`). With a real provider, use a chat deployment that supports tool calling, such as a GPT-5-series deployment in Microsoft Foundry at the time of writing; see the Ollama note above for local models. Agents keep one session per conversation, agent, and engineer, with a version check: a run that saves after another run adds its turn to the stored session. Every run writes a record with its model and token counts.
 
 From Chapter 11 on, a step that fails for a transient reason stops the workflow with its state saved, and the endpoint answers 503 with a `Retry-After` header; resuming the run retries that step. The `Workflow` section sets the wait, `RetryAfterSeconds` (default 60, and never shorter than `KernelResilience:CircuitBreakerBreakSeconds`), and `MaxStepRetries` (default 2, at most 5): after that many stops, the step's next transient failure goes to a person. The process and resume endpoints take the engineer from the `X-Engineer-Id` header; the sample has no sign-in. Only the engineer who started a workflow can resume it, and a resume that another request beat answers 409. The Chapter 11 activity adds an `Idempotency-Key` header, scoped to the engineer; the same key sent again with another ticket or input answers 422 with a Problem Details body.
 

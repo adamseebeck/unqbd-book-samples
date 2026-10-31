@@ -1,44 +1,35 @@
-using System.Globalization;
+using System.Diagnostics;
 
-try
+int[] numbers = Enumerable.Range(1, 20).ToArray();
+Parallel.ForEach(numbers, n =>
 {
-    int first = ReadInteger("First integer:");
-    int second = ReadInteger("Second integer:");
-    if (first < 0 || second < 0)
-        throw new NegativeNumberException("Negative numbers are not allowed in this exercise.");
-    Console.WriteLine($"Result: {first / second}");
-}
-catch (FormatException)
-{
-    Console.WriteLine("That was not a valid integer.");
-}
-catch (OverflowException)
-{
-    Console.WriteLine("The integer was too large or too small.");
-}
-catch (DivideByZeroException)
-{
-    Console.WriteLine("You cannot divide by zero.");
-}
-catch (NegativeNumberException ex)
-{
-    Console.WriteLine(ex.Message);
-}
-finally
-{
-    Console.WriteLine("Operation complete.");
-}
+    Console.WriteLine($"Square {n}: {n * n}; thread {Environment.CurrentManagedThreadId}");
+});
+Console.WriteLine("Serial order:");
+foreach (int n in numbers)
+    Console.WriteLine($"Square {n}: {n * n}");
 
-int ReadInteger(string prompt)
+if (args.Contains("--benchmark"))
 {
-    Console.WriteLine(prompt);
-    string? input = Console.ReadLine();
-    if (input is null)
-        throw new FormatException("A number is required.");
-    return int.Parse(input, CultureInfo.InvariantCulture);
-}
+    const int count = 10_000_000;
+    double[] serial = new double[count];
+    double[] parallel = new double[count];
+    Action<int> squareRoot = i => parallel[i] = Math.Sqrt(i);
 
-class NegativeNumberException : Exception
-{
-    public NegativeNumberException(string message) : base(message) { }
+    // Warm up both loops with the full count before timing.
+    for (int i = 0; i < count; i++)
+        serial[i] = Math.Sqrt(i);
+    Parallel.For(0, count, squareRoot);
+
+    Stopwatch watch = Stopwatch.StartNew();
+    for (int i = 0; i < count; i++)
+        serial[i] = Math.Sqrt(i);
+    watch.Stop();
+    Console.WriteLine($"Serial milliseconds: {watch.ElapsedMilliseconds}");
+
+    watch.Restart();
+    Parallel.For(0, count, squareRoot);
+    watch.Stop();
+    Console.WriteLine($"Parallel milliseconds: {watch.ElapsedMilliseconds}");
+    Console.WriteLine($"Results agree: {serial.SequenceEqual(parallel)}");
 }

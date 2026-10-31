@@ -1,40 +1,41 @@
-AppSettings? settings = default;
-int calls = 0;
+EnrollmentResult accepted = new Enrolled("Ada", 3);
+EnrollmentResult rejected = new Rejected("Course full");
+EnrollmentResult empty = default;
 
-string BuildTheme()
+Console.WriteLine(DescribeResult(accepted));
+Console.WriteLine(DescribeResult(rejected));
+Console.WriteLine(DescribeResult(empty));
+
+EnrollmentState registered = new Registered("Ada");
+EnrollmentState waitlisted = new Waitlisted(2);
+EnrollmentState? absent = null;
+
+Console.WriteLine(DescribeState(registered));
+Console.WriteLine(DescribeState(waitlisted));
+Console.WriteLine(DescribeState(absent));
+
+string DescribeResult(
+    EnrollmentResult result) => result switch
 {
-    calls++;
-    return "Dark";
-}
+    Enrolled(var student, var seat) =>
+        $"Enrolled: {student}, seat {seat}",
+    Rejected(var reason) => $"Rejected: {reason}",
+    null => "No result"
+};
 
-settings?.Theme = BuildTheme();
-Console.WriteLine($"Before initialization: calls={calls}");
-
-settings ??= new();
-settings?.Theme = BuildTheme();
-settings?.Saves += 1;
-
-string[]? labels = null;
-labels?[0] = BuildTheme();
-labels = ["Default"];
-labels?[0] = "Saved";
-
-Console.WriteLine($"After initialization: calls={calls}");
-Console.WriteLine($"Theme: {settings?.Theme}");
-Console.WriteLine($"Saves: {settings?.Saves}");
-Console.WriteLine($"Label: {labels?[0]}");
-Console.WriteLine($"Type: {nameof(AppSettings)}");
-Console.WriteLine($"Property: {nameof(AppSettings.Theme)}");
-Console.WriteLine($"Generic: {nameof(Dictionary<,>)}");
-
-public class AppSettings
+string DescribeState(
+    EnrollmentState? state) => state switch
 {
-    public string Theme
-    {
-        get;
-        set => field = string.IsNullOrWhiteSpace(value)
-            ? "Light" : value;
-    } = "Light";
+    Registered(var student) => $"Registered: {student}",
+    Waitlisted(var position) =>
+        $"Waitlisted: position {position}",
+    null => "No status"
+};
 
-    public int Saves { get; set; }
-}
+public sealed record Enrolled(string Student, int Seat);
+public sealed record Rejected(string Reason);
+public union EnrollmentResult(Enrolled, Rejected);
+
+public closed record EnrollmentState;
+public sealed record Registered(string Student) : EnrollmentState;
+public sealed record Waitlisted(int Position) : EnrollmentState;

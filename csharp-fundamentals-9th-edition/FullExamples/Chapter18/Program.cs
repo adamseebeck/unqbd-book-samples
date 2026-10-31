@@ -1,57 +1,41 @@
-using System.Globalization;
+using System.Diagnostics;
 
-try
+int[] numbers = Enumerable.Range(1, 20).ToArray();
+int[] squares = new int[numbers.Length];
+ParallelOptions options = new() { MaxDegreeOfParallelism = 2 };
+Parallel.For(0, numbers.Length, options, i =>
 {
-    int first = ReadInteger("First integer:");
-    int second = ReadInteger("Second integer:");
-    Console.WriteLine($"Result: {first / second}");
-}
-catch (FormatException)
-{
-    Console.WriteLine("That was not a valid integer.");
-}
-catch (OverflowException)
-{
-    Console.WriteLine("The integer was too large or too small.");
-}
-catch (DivideByZeroException)
-{
-    Console.WriteLine("You cannot divide by zero.");
-}
-finally
-{
-    Console.WriteLine("Operation complete.");
-}
+    squares[i] = numbers[i] * numbers[i];
+});
+Console.WriteLine($"Squares: {string.Join(", ", squares)}");
 
-CheckAge(18);
-try
-{
-    throw new InvalidScoreException("Score cannot exceed 100.");
-}
-catch (InvalidScoreException ex)
-{
-    Console.WriteLine(ex.Message);
-}
+var plinqSquares = numbers.AsParallel().AsOrdered()
+    .Select(n => n * n).ToArray();
+Console.WriteLine(
+    $"PLINQ agrees: {squares.SequenceEqual(plinqSquares)}");
 
-int ReadInteger(string prompt)
-{
-    Console.WriteLine(prompt);
-    string? input = Console.ReadLine();
-    if (input is null)
-        throw new FormatException("A number is required.");
-    return int.Parse(input, CultureInfo.InvariantCulture);
-}
+const int count = 100_000;
+double[] serial = new double[count];
+double[] parallel = new double[count];
+Action<int> squareRoot = i => parallel[i] = Math.Sqrt(i);
 
-void CheckAge(int age)
-{
-    if (age < 0)
-        throw new ArgumentOutOfRangeException(
-            nameof(age), "Age cannot be negative.");
-    Console.WriteLine($"Age is {age}");
-}
+// Warm up both loops with the full count before timing.
+Parallel.For(0, count, options, squareRoot);
+for (int i = 0; i < count; i++)
+    serial[i] = Math.Sqrt(i);
 
-class InvalidScoreException : Exception
-{
-    public InvalidScoreException(string message)
-        : base(message) { }
-}
+Stopwatch watch = Stopwatch.StartNew();
+for (int i = 0; i < count; i++)
+    serial[i] = Math.Sqrt(i);
+watch.Stop();
+long serialTicks = watch.ElapsedTicks;
+
+watch.Restart();
+Parallel.For(0, count, options, squareRoot);
+watch.Stop();
+long parallelTicks = watch.ElapsedTicks;
+
+Console.WriteLine(
+    $"Results agree: {serial.SequenceEqual(parallel)}");
+Console.WriteLine($"Serial stopwatch ticks: {serialTicks}");
+Console.WriteLine($"Parallel stopwatch ticks: {parallelTicks}");

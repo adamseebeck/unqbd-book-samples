@@ -1,41 +1,63 @@
-EnrollmentResult accepted = new Enrolled("Ada", 3);
-EnrollmentResult rejected = new Rejected("Course full");
-EnrollmentResult empty = default;
-
-Console.WriteLine(DescribeResult(accepted));
-Console.WriteLine(DescribeResult(rejected));
-Console.WriteLine(DescribeResult(empty));
-
-EnrollmentState registered = new Registered("Ada");
-EnrollmentState waitlisted = new Waitlisted(2);
-EnrollmentState? absent = null;
-
-Console.WriteLine(DescribeState(registered));
-Console.WriteLine(DescribeState(waitlisted));
-Console.WriteLine(DescribeState(absent));
-
-static string DescribeResult(
-    EnrollmentResult result) => result switch
+Sensor sensor = new("Room");
+int notifications = 0;
+EventHandler<ThresholdReachedEventArgs> handler = (_, data) =>
 {
-    Enrolled(var student, var seat) =>
-        $"Enrolled: {student}, seat {seat}",
-    Rejected(var reason) => $"Rejected: {reason}",
-    null => "No result"
+    notifications++;
+    Console.WriteLine(
+        $"Threshold reached: {data.SensorName} = {data.Reading}");
 };
 
-static string DescribeState(
-    EnrollmentState? state) => state switch
+sensor.ThresholdReached += handler;
+sensor.ReadValue(25);
+sensor.ReadValue(72);
+sensor.ThresholdReached -= handler;
+sensor.ReadValue(88);
+Console.WriteLine($"Notifications: {notifications}");
+
+public partial class Sensor
 {
-    Registered(var student) => $"Registered: {student}",
-    Waitlisted(var position) =>
-        $"Waitlisted: position {position}",
-    null => "No status"
-};
+    public partial Sensor(string name);
+    public partial event
+        EventHandler<ThresholdReachedEventArgs>? ThresholdReached;
+    public string Name { get; }
+}
 
-public sealed record Enrolled(string Student, int Seat);
-public sealed record Rejected(string Reason);
-public union EnrollmentResult(Enrolled, Rejected);
+public partial class Sensor
+{
+    private EventHandler<ThresholdReachedEventArgs>?
+        _thresholdReached;
 
-public closed record EnrollmentState;
-public sealed record Registered(string Student) : EnrollmentState;
-public sealed record Waitlisted(int Position) : EnrollmentState;
+    public partial Sensor(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        Name = name;
+        Console.WriteLine($"Sensor initialized: {Name}");
+    }
+
+    public partial event
+        EventHandler<ThresholdReachedEventArgs>? ThresholdReached
+    {
+        add => _thresholdReached += value;
+        remove => _thresholdReached -= value;
+    }
+
+    public void ReadValue(int value)
+    {
+        if (value > 50)
+            _thresholdReached?.Invoke(this,
+                new ThresholdReachedEventArgs(Name, value));
+    }
+}
+
+public sealed class ThresholdReachedEventArgs : EventArgs
+{
+    public string SensorName { get; }
+    public int Reading { get; }
+
+    public ThresholdReachedEventArgs(
+        string sensorName, int reading)
+    {
+        SensorName = sensorName;
+        Reading = reading;
+    }
+}

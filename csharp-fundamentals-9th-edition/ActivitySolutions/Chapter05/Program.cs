@@ -1,8 +1,7 @@
 Console.Write("Temperature in degrees Fahrenheit: ");
-if (!double.TryParse(Console.ReadLine(), out double temperature)
-    || !double.IsFinite(temperature))
+if (!double.TryParse(Console.ReadLine(), out double temperature))
 {
-    Console.WriteLine("Enter a finite numeric temperature.");
+    Console.WriteLine("Enter a numeric temperature.");
     return;
 }
 
@@ -22,7 +21,7 @@ string message = temperature switch
 };
 Console.WriteLine(message);
 
-if (temperature >= 80 && humidity >= 70)
+if (temperature >= 85 && humidity >= 70)
 {
     Console.WriteLine("High temperature and humidity increase heat discomfort.");
 }

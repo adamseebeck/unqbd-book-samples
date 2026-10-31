@@ -1,42 +1,62 @@
-using System.Globalization;
-
-PaymentResult paid = Pay(19.95m);
-PaymentResult declined = Pay(0m);
-PaymentResult empty = default;
-Console.WriteLine(DescribeResult(paid));
-Console.WriteLine(DescribeResult(declined));
-Console.WriteLine(DescribeResult(empty));
-
-Console.WriteLine(DescribeState(new PendingPayment()));
-Console.WriteLine(DescribeState(new FinishedPayment("R-100")));
-Console.WriteLine(DescribeState(null));
-
-static PaymentResult Pay(decimal amount)
+Sensor sensor = new("Desk", 50);
+int notifications = 0;
+EventHandler<ThresholdReachedEventArgs> handler = (_, data) =>
 {
-    if (amount <= 0)
-        return new Declined("Amount must be positive");
-    return new Paid("R-100", amount);
+    notifications++;
+    Console.WriteLine($"{data.SensorName}: {data.Reading} exceeded {data.Threshold}");
+};
+
+sensor.ThresholdReached += handler;
+sensor.ReadValue(25);
+sensor.ReadValue(72);
+sensor.ThresholdReached -= handler;
+sensor.ReadValue(88);
+Console.WriteLine($"Notifications: {notifications}");
+
+public partial class Sensor
+{
+    public partial Sensor(string name, int threshold);
+    public partial event EventHandler<ThresholdReachedEventArgs>? ThresholdReached;
+    public string Name { get; }
+    public int Threshold { get; }
 }
 
-static string DescribeResult(PaymentResult result) => result switch
+public partial class Sensor
 {
-    Paid(var receipt, var amount) =>
-        $"Paid {receipt}: {amount.ToString("F2", CultureInfo.InvariantCulture)}",
-    Declined(var reason) => $"Declined: {reason}",
-    null => "No result"
-};
+    private EventHandler<ThresholdReachedEventArgs>? _thresholdReached;
 
-static string DescribeState(PaymentState? state) => state switch
+    public partial Sensor(string name, int threshold)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        Name = name;
+        Threshold = threshold;
+        Console.WriteLine($"Sensor initialized: {Name}");
+    }
+
+    public partial event EventHandler<ThresholdReachedEventArgs>? ThresholdReached
+    {
+        add => _thresholdReached += value;
+        remove => _thresholdReached -= value;
+    }
+
+    public void ReadValue(int value)
+    {
+        if (value > Threshold)
+            _thresholdReached?.Invoke(this,
+                new ThresholdReachedEventArgs(Name, value, Threshold));
+    }
+}
+
+public sealed class ThresholdReachedEventArgs : EventArgs
 {
-    PendingPayment => "Pending",
-    FinishedPayment(var receipt) => $"Finished: {receipt}",
-    null => "No state"
-};
+    public string SensorName { get; }
+    public int Reading { get; }
+    public int Threshold { get; }
 
-public sealed record Paid(string Receipt, decimal Amount);
-public sealed record Declined(string Reason);
-public union PaymentResult(Paid, Declined);
-
-public closed record PaymentState;
-public sealed record PendingPayment : PaymentState;
-public sealed record FinishedPayment(string Receipt) : PaymentState;
+    public ThresholdReachedEventArgs(string sensorName, int reading, int threshold)
+    {
+        SensorName = sensorName;
+        Reading = reading;
+        Threshold = threshold;
+    }
+}

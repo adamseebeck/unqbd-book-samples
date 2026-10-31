@@ -1,13 +1,13 @@
 Console.Write("First number: ");
-if (!double.TryParse(Console.ReadLine(), out double first) || !double.IsFinite(first))
+if (!double.TryParse(Console.ReadLine(), out double first))
 {
-    Console.WriteLine("Enter a finite number.");
+    Console.WriteLine("Enter a number.");
     return;
 }
 Console.Write("Second number: ");
-if (!double.TryParse(Console.ReadLine(), out double second) || !double.IsFinite(second))
+if (!double.TryParse(Console.ReadLine(), out double second))
 {
-    Console.WriteLine("Enter a finite number.");
+    Console.WriteLine("Enter a number.");
     return;
 }
 Console.Write("Operation (+, -, *, /): ");

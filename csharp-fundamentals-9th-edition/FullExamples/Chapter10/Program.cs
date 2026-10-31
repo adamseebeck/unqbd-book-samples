@@ -14,6 +14,9 @@ p2.X = 20;
 p1.Display();
 p2.Display();
 
+CoffeeSize order = CoffeeSize.Medium;
+Console.WriteLine($"Size: {order} ({(int)order})");
+
 public record Book(string Title, string Author, decimal Price);
 
 public record Student
@@ -30,4 +33,11 @@ public struct Point
     {
         Console.WriteLine($"({X}, {Y})");
     }
+}
+
+enum CoffeeSize
+{
+    Small,
+    Medium,
+    Large
 }

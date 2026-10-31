@@ -38,5 +38,5 @@ List<string> presized =
     [with(capacity: values.Length * 2), .. values];
 HashSet<string> unique =
     [with(StringComparer.OrdinalIgnoreCase), .. values];
-Console.WriteLine($"Constructed count: {presized.Count}");
+Console.WriteLine($"Presized count: {presized.Count}");
 Console.WriteLine($"Unique count: {unique.Count}");

@@ -35,7 +35,7 @@ The local global.json selects Microsoft.Testing.Platform. The test project uses 
 
 ## Student Tracker project
 
-The book builds one program, the Student Tracker, a step at a time from Chapter 3 to Chapter 22. `StudentTracker/ChapterNN` holds the program as it stands at the end of that chapter (Chapters 12, 16 and 17 add nothing to it), so you can compare your copy or pick up from any chapter. From this folder:
+The book builds one program, the Student Tracker, a step at a time from Chapter 3 to Chapter 22. `StudentTracker/ChapterNN` holds the program as it stands at the end of that chapter (Chapters 12, 17 and 18 add nothing to it), so you can compare your copy or pick up from any chapter. From this folder:
 
 ```powershell
 dotnet run --project StudentTracker/Chapter05/StudentTracker

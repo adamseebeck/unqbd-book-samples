@@ -1,33 +1,25 @@
-Console.Write("Sentence: ");
-string sentence = Console.ReadLine() ?? string.Empty;
-Console.WriteLine($"Capitalized: {sentence.IsCapitalized()}");
-Console.WriteLine($"Words: {sentence.WordCount()}");
-Console.WriteLine($"Question: {sentence.IsQuestion}");
+Config? config = null;
+config?.Theme = "Dark";
+Console.WriteLine($"Before initialization: {config is not null}");
 
-IEnumerable<string> words = sentence.Split(
-    (char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-if (words.Any())
-    Console.WriteLine($"First word: {words[0]}");
+config ??= new();
+config?.Theme = "Dark";
+config?.Language = "es";
+config?.AutoSave = false;
+Console.WriteLine($"{nameof(Config)} initialized: {config is not null}");
+Console.WriteLine($"{nameof(Config.Theme)}: {config?.Theme}");
+Console.WriteLine($"{nameof(Config.Language)}: {config?.Language}");
+Console.WriteLine($"{nameof(Config.AutoSave)}: {config?.AutoSave}");
+Console.WriteLine($"Generic name: {nameof(Dictionary<,>)}");
 
-public static class StringExtensions
+public class Config
 {
-    public static bool IsCapitalized(this string? text) =>
-        !string.IsNullOrEmpty(text) && char.IsUpper(text[0]);
-
-    public static int WordCount(this string? text) =>
-        text?.Split((char[]?)null,
-            StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
-
-    extension(string? text)
+    public string Theme
     {
-        public bool IsQuestion => text?.TrimEnd().EndsWith('?') == true;
-    }
-}
+        get;
+        set => field = string.IsNullOrWhiteSpace(value) ? "Light" : value;
+    } = "Light";
 
-public static class SequenceExtensions
-{
-    extension<T>(IEnumerable<T> sequence)
-    {
-        public T this[int index] => sequence.ElementAt(index);
-    }
+    public string Language { get; set; } = "en";
+    public bool AutoSave { get; set; } = true;
 }

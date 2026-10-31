@@ -1,62 +1,41 @@
-Sensor sensor = new("Desk", 50);
-int notifications = 0;
-EventHandler<ThresholdReachedEventArgs> handler = (_, data) =>
+Console.Write("Sentence: ");
+string sentence = Console.ReadLine() ?? string.Empty;
+Console.WriteLine($"Capitalized: {sentence.IsCapitalized()}");
+Console.WriteLine($"Words: {sentence.WordCount()}");
+Console.WriteLine($"Question: {sentence.IsQuestion}");
+
+IEnumerable<string> words = sentence.Split(
+    ' ', StringSplitOptions.RemoveEmptyEntries);
+if (words.Any())
+    Console.WriteLine($"First word: {words[0]}");
+
+public static class StringExtensions
 {
-    notifications++;
-    Console.WriteLine($"{data.SensorName}: {data.Reading} exceeded {data.Threshold}");
-};
+    public static bool IsCapitalized(this string? text) =>
+        !string.IsNullOrEmpty(text) && char.IsUpper(text[0]);
 
-sensor.ThresholdReached += handler;
-sensor.ReadValue(25);
-sensor.ReadValue(72);
-sensor.ThresholdReached -= handler;
-sensor.ReadValue(88);
-Console.WriteLine($"Notifications: {notifications}");
-
-public partial class Sensor
-{
-    public partial Sensor(string name, int threshold);
-    public partial event EventHandler<ThresholdReachedEventArgs>? ThresholdReached;
-    public string Name { get; }
-    public int Threshold { get; }
-}
-
-public partial class Sensor
-{
-    private EventHandler<ThresholdReachedEventArgs>? _thresholdReached;
-
-    public partial Sensor(string name, int threshold)
+    public static int WordCount(this string? text)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Name = name;
-        Threshold = threshold;
-        Console.WriteLine($"Sensor initialized: {Name}");
+        if (text is null)
+        {
+            return 0;
+        }
+
+        return text.Split(' ',
+            StringSplitOptions.RemoveEmptyEntries).Length;
     }
 
-    public partial event EventHandler<ThresholdReachedEventArgs>? ThresholdReached
+    extension(string? text)
     {
-        add => _thresholdReached += value;
-        remove => _thresholdReached -= value;
-    }
-
-    public void ReadValue(int value)
-    {
-        if (value > Threshold)
-            _thresholdReached?.Invoke(this,
-                new ThresholdReachedEventArgs(Name, value, Threshold));
+        public bool IsQuestion =>
+            text is not null && text.TrimEnd().EndsWith('?');
     }
 }
 
-public sealed class ThresholdReachedEventArgs : EventArgs
+public static class SequenceExtensions
 {
-    public string SensorName { get; }
-    public int Reading { get; }
-    public int Threshold { get; }
-
-    public ThresholdReachedEventArgs(string sensorName, int reading, int threshold)
+    extension<T>(IEnumerable<T> sequence)
     {
-        SensorName = sensorName;
-        Reading = reading;
-        Threshold = threshold;
+        public T this[int index] => sequence.ElementAt(index);
     }
 }

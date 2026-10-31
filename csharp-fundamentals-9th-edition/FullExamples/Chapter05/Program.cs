@@ -21,3 +21,11 @@ switch (choice)
         Console.WriteLine("That's not a valid choice.");
         break;
 }
+
+string place = choice switch
+{
+    < 1 => "below the menu",
+    > 3 => "above the menu",
+    _ => "on the menu"
+};
+Console.WriteLine($"{choice} is {place}.");

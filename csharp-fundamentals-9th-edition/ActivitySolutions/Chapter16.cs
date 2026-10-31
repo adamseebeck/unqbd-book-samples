@@ -1,33 +1,44 @@
-bool deterministic = args.Contains("--deterministic");
-bool fail = args.Contains("--fail");
-using CancellationTokenSource cancellation = new();
-if (args.Contains("--cancel"))
-    cancellation.Cancel();
-Task<int>[] tasks =
-{
-    FetchDataAsync(1, cancellation.Token),
-    FetchDataAsync(2, cancellation.Token),
-    FetchDataAsync(3, cancellation.Token)
-};
+using System.Globalization;
+
 try
 {
-    int[] results = await Task.WhenAll(tasks);
-    Console.WriteLine($"Results: {string.Join(", ", results)}");
-    Console.WriteLine($"Sum: {results.Sum()}");
+    int first = ReadInteger("First integer:");
+    int second = ReadInteger("Second integer:");
+    if (first < 0 || second < 0)
+        throw new NegativeNumberException("Negative numbers are not allowed in this exercise.");
+    Console.WriteLine($"Result: {first / second}");
 }
-catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+catch (FormatException)
 {
-    Console.WriteLine("Fetch canceled.");
+    Console.WriteLine("That was not a valid integer.");
 }
-catch (InvalidOperationException ex)
+catch (OverflowException)
 {
-    Console.WriteLine($"Fetch failed: {ex.Message}");
+    Console.WriteLine("The integer was too large or too small.");
+}
+catch (DivideByZeroException)
+{
+    Console.WriteLine("You cannot divide by zero.");
+}
+catch (NegativeNumberException ex)
+{
+    Console.WriteLine(ex.Message);
+}
+finally
+{
+    Console.WriteLine("Operation complete.");
 }
 
-async Task<int> FetchDataAsync(int id, CancellationToken cancellationToken)
+int ReadInteger(string prompt)
 {
-    await Task.Delay(20, cancellationToken);
-    if (fail && id == 2)
-        throw new InvalidOperationException("Request 2 failed.");
-    return deterministic ? id * 10 : Random.Shared.Next(0, 100);
+    Console.WriteLine(prompt);
+    string? input = Console.ReadLine();
+    if (input is null)
+        throw new FormatException("A number is required.");
+    return int.Parse(input, CultureInfo.InvariantCulture);
+}
+
+class NegativeNumberException : Exception
+{
+    public NegativeNumberException(string message) : base(message) { }
 }

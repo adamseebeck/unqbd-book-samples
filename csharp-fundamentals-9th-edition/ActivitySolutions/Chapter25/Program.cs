@@ -1,25 +1,42 @@
-Config? config = null;
-config?.Theme = "Dark";
-Console.WriteLine($"Before initialization: {config is not null}");
+using System.Globalization;
 
-config ??= new();
-config?.Theme = "Dark";
-config?.Language = "es";
-config?.AutoSave = false;
-Console.WriteLine($"{nameof(Config)} initialized: {config is not null}");
-Console.WriteLine($"{nameof(Config.Theme)}: {config?.Theme}");
-Console.WriteLine($"{nameof(Config.Language)}: {config?.Language}");
-Console.WriteLine($"{nameof(Config.AutoSave)}: {config?.AutoSave}");
-Console.WriteLine($"Generic name: {nameof(Dictionary<,>)}");
+PaymentResult paid = Pay(19.95m);
+PaymentResult declined = Pay(0m);
+PaymentResult empty = default;
+Console.WriteLine(DescribeResult(paid));
+Console.WriteLine(DescribeResult(declined));
+Console.WriteLine(DescribeResult(empty));
 
-public class Config
+Console.WriteLine(DescribeState(new PendingPayment()));
+Console.WriteLine(DescribeState(new FinishedPayment("R-100")));
+Console.WriteLine(DescribeState(null));
+
+PaymentResult Pay(decimal amount)
 {
-    public string Theme
-    {
-        get;
-        set => field = string.IsNullOrWhiteSpace(value) ? "Light" : value;
-    } = "Light";
-
-    public string Language { get; set; } = "en";
-    public bool AutoSave { get; set; } = true;
+    if (amount <= 0)
+        return new Declined("Amount must be positive");
+    return new Paid("R-100", amount);
 }
+
+string DescribeResult(PaymentResult result) => result switch
+{
+    Paid(var receipt, var amount) =>
+        $"Paid {receipt}: {amount.ToString("F2", CultureInfo.InvariantCulture)}",
+    Declined(var reason) => $"Declined: {reason}",
+    null => "No result"
+};
+
+string DescribeState(PaymentState? state) => state switch
+{
+    PendingPayment => "Pending",
+    FinishedPayment(var receipt) => $"Finished: {receipt}",
+    null => "No state"
+};
+
+public sealed record Paid(string Receipt, decimal Amount);
+public sealed record Declined(string Reason);
+public union PaymentResult(Paid, Declined);
+
+public closed record PaymentState;
+public sealed record PendingPayment : PaymentState;
+public sealed record FinishedPayment(string Receipt) : PaymentState;

@@ -3,7 +3,7 @@ while (true)
 {
     Console.WriteLine("1 Add, 2 View, 3 Search, 4 Remove, 5 Export, 0 Exit");
     string? choice = Console.ReadLine();
-    if (choice is null or "0")
+    if (choice is null || choice == "0")
         break;
     if (choice == "2")
     {
@@ -22,7 +22,7 @@ while (true)
         Console.WriteLine("Exported to contacts-export.txt.");
         continue;
     }
-    if (choice is not ("1" or "3" or "4"))
+    if (choice != "1" && choice != "3" && choice != "4")
     {
         Console.WriteLine("Unknown option.");
         continue;

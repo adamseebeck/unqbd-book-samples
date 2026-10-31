@@ -19,7 +19,7 @@ using (SchoolContext db = new(path))
                  .OrderByDescending(s => s.Score).ThenBy(s => s.Name))
         Console.WriteLine($"{student.Name} - {student.Score}");
 }
-// Open a second context to prove the data came back from the same file.
+// Open a second context to show the data came back from the same file.
 using (SchoolContext reopened = new(path))
 {
     Console.WriteLine($"Reopened count: {reopened.Students.Count()}");

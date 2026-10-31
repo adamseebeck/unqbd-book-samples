@@ -1,40 +1,53 @@
-using System.Diagnostics;
+await DownloadMessageAsync();
+Console.WriteLine("All done!");
+int value = await GetDataAsync(CancellationToken.None);
+Console.WriteLine($"The answer is {value}");
 
-int[] numbers = Enumerable.Range(1, 20).ToArray();
-int[] squares = new int[numbers.Length];
-ParallelOptions options = new() { MaxDegreeOfParallelism = 2 };
-Parallel.For(0, numbers.Length, options, i =>
+Task<int> t1 = GetDataAsync(CancellationToken.None);
+Task<int> t2 = GetDataAsync(CancellationToken.None);
+Task<int> t3 = GetDataAsync(CancellationToken.None);
+int[] results = await Task.WhenAll(t1, t2, t3);
+Console.WriteLine($"Sum: {results.Sum()}");
+
+try
 {
-    squares[i] = numbers[i] * numbers[i];
-});
-Console.WriteLine($"Squares: {string.Join(", ", squares)}");
+    await FailingOperationAsync();
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine($"Error: {ex.Message}");
+}
 
-var plinqSquares = numbers.AsParallel().AsOrdered()
-    .Select(n => n * n).ToArray();
-Console.WriteLine(
-    $"PLINQ agrees: {squares.SequenceEqual(plinqSquares)}");
+using CancellationTokenSource cancellation = new();
+cancellation.Cancel();
+try
+{
+    await GetDataAsync(cancellation.Token);
+}
+catch (OperationCanceledException)
+    when (cancellation.IsCancellationRequested)
+{
+    Console.WriteLine("Operation canceled.");
+}
 
-const int count = 100_000;
-double[] serial = new double[count];
-double[] parallel = new double[count];
-// Warm up the loop bodies and parallel infrastructure
-// before timing.
-Parallel.For(0, 100, i => parallel[i] = Math.Sqrt(i));
-for (int i = 0; i < 100; i++)
-    serial[i] = Math.Sqrt(i);
+int total = await Task.Run(() => Enumerable.Range(1, 5).Sum());
+Console.WriteLine($"CPU total: {total}");
 
-Stopwatch watch = Stopwatch.StartNew();
-for (int i = 0; i < count; i++)
-    serial[i] = Math.Sqrt(i);
-watch.Stop();
-long serialTicks = watch.ElapsedTicks;
+async Task DownloadMessageAsync()
+{
+    Console.WriteLine("Starting download...");
+    await Task.Delay(20);
+    Console.WriteLine("Download complete!");
+}
 
-watch.Restart();
-Parallel.For(0, count, options, i => parallel[i] = Math.Sqrt(i));
-watch.Stop();
-long parallelTicks = watch.ElapsedTicks;
+async Task<int> GetDataAsync(CancellationToken cancellationToken)
+{
+    await Task.Delay(20, cancellationToken);
+    return 42;
+}
 
-Console.WriteLine(
-    $"Results agree: {serial.SequenceEqual(parallel)}");
-Console.WriteLine($"Serial stopwatch ticks: {serialTicks}");
-Console.WriteLine($"Parallel stopwatch ticks: {parallelTicks}");
+async Task FailingOperationAsync()
+{
+    await Task.Delay(20);
+    throw new InvalidOperationException("Something went wrong");
+}

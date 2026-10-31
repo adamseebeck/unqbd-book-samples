@@ -39,7 +39,7 @@ The copy has a Tests folder with a component test for this change. Stop the app,
 dotnet test Tests/Chapter17.Tests.csproj
 ```
 
-Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. If a test fails, the last line reads Build failed with 1 error(s) instead; that error is the failing test, not a compile error. The test finds your button by its id, clear-catalog-favorites. Before you add the button, it fails with ElementNotFoundException, and the last line says Build failed with 1 error(s): that error is the failing test, not a compile error. A component test checks component logic; check the page itself in the browser.
+Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. The test finds your button by its id, clear-catalog-favorites. Before you add the button, it fails with ElementNotFoundException, and the last line says Build failed with 1 error(s): that error is the failing test, not a compile error. A component test checks component logic; check the page itself in the browser.
 
 ## Start over
 

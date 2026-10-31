@@ -29,7 +29,7 @@ Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or
 
 ## What you should see
 
-Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it. After you change the address back to "api/books" and run the copy again, Load books shows Loaded 3 books. and the three titles.
+Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it. After you change the address back to "api/books", run the copy again and press F5 on /api-demo, Load books shows Loaded 3 books. and the three titles.
 
 ## Check it with a test
 

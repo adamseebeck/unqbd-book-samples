@@ -15,7 +15,7 @@ Choose an output folder that doesn't exist yet, outside the companion code. The 
 
 ## What you change
 
-Nothing in the app: the copy is Samples/Checkpoints/Chapter06 with a Tests folder added. You add the button yourself: in LibraryDesk/LibraryDesk.Client/Pages/FavoritesDemo.razor, a Remove C# button above <FavoritesSummary /> that calls Favorites.Remove(1).
+Nothing in the app: the copy is Samples/Checkpoints/Chapter06 with a Tests folder added. You add the button yourself: in LibraryDesk/LibraryDesk.Client/Pages/FavoritesDemo.razor, a Remove C# button above `<FavoritesSummary />` that calls Favorites.Remove(1).
 
 ## Run it
 

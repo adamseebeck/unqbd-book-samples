@@ -23,7 +23,7 @@ In the copy's LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, the 
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter21: the copy (your Chapter 21 project, unchanged), its README and its Tests folder.
+- Samples/ActivityInvestigations/Chapter21: the README, delta.json and Tests folder that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter21, unchanged.
 - In the copy: LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor.
 - Unchanged: LibraryDesk.Tests/AccessibilityTests.cs, the suite's own check of the form's labels and descriptions.
 

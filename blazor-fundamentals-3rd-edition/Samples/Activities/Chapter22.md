@@ -23,7 +23,7 @@ info: LibraryDesk.Components.CatalogReadRecorder[0]
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter22: the copy (your Chapter 22 project, unchanged), its README and its Tests folder.
+- Samples/ActivityInvestigations/Chapter22: the README, delta.json and Tests folder that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter22, unchanged.
 - In the copy: LibraryDesk/LibraryDesk/appsettings.json and LibraryDesk/LibraryDesk/appsettings.Development.json.
 - Unchanged: LibraryDesk/LibraryDesk/Components/CatalogReadRecorder.razor, which still calls LogInformation on each click.
 

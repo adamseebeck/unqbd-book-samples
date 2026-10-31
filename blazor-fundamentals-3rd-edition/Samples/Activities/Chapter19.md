@@ -23,7 +23,7 @@ For the second part, the input loses its maxlength:
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter19: the copy (your Chapter 19 project, unchanged) and its README.
+- Samples/ActivityInvestigations/Chapter19: the README and delta.json that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter19, unchanged.
 - In the copy: LibraryDesk/LibraryDesk.Client/Pages/LiveCatalog.razor (the limit, and the maxlength you delete).
 - Unchanged: LibraryDesk/LibraryDesk/Hubs/CatalogHub.cs, whose Announce method checks the length.
 

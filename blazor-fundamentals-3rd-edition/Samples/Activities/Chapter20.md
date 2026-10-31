@@ -36,7 +36,7 @@ dotnet test Tests/Chapter20.Tests.csproj
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter20: the copy (your Chapter 20 working folder, unchanged), its README and its Tests folder.
+- Samples/ActivityInvestigations/Chapter20: the README, delta.json and Tests folder that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter20, unchanged.
 - In the copy: LibraryDesk.Pwa/Pages/Home.razor, where both the check (titles.Length >= 3) and the message (limited to 3 titles.) change.
 
 ## Why

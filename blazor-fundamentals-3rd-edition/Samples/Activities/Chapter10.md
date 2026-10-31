@@ -20,7 +20,7 @@ Open http://127.0.0.1:58631/api-demo in the copy, open the Network tab and click
 - The page shows The catalog is unavailable. Try again.
 - The Load books button is active again, so you can retry.
 
-After you put "api/books" back and run the copy again, Load books shows Loaded 3 books. and the three titles.
+After you put "api/books" back, run the copy again and press F5, Load books shows Loaded 3 books. and the three titles. Without F5 the page keeps the old client code and asks for api/not-present again.
 
 ## Files involved
 

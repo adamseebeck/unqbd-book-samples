@@ -33,7 +33,7 @@ and the method sits above Add:
 
 ## Files involved
 
-- Samples/ActivityInvestigations/Chapter17: the copy (your Chapter 17 project, unchanged), its README and its Tests folder.
+- Samples/ActivityInvestigations/Chapter17: the README, delta.json and Tests folder that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter17, unchanged.
 - In the copy: LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor (your change).
 - Unchanged: LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs, whose Clear method already exists.
 

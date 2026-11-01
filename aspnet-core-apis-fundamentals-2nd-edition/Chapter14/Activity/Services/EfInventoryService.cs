@@ -236,10 +236,11 @@ public class EfInventoryService : IInventoryService
 
         if (item is null || item.Reserved < quantity)
         {
-            // Each order's units stay reserved until its workflow releases them, so this is corrupted data,
-            // not a request the client could retry: a 500 that the handler logs as an error
-            throw new InvalidOperationException(
-                $"Fewer than {quantity} units of {productSku} are reserved in {warehouseCode}.");
+            // READ COMMITTED gives each statement its own view: another request on the same order
+            // committed after this request read the order, so the client reads it again
+            throw new ConflictException(
+                $"Fewer than {quantity} units of {productSku} are reserved in {warehouseCode}: another request changed the order. Read it again and retry.",
+                "CONCURRENCY_CONFLICT");
         }
 
         return item;

@@ -11,7 +11,7 @@ public static class HealthReportWriter
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     // The build that answers: the Dockerfile passes the commit to dotnet publish as SourceRevisionId, which the
-    // informational version carries after a +, so a deployment can wait for its own build (Chapter16/ci)
+    // informational version carries after a +, so a deployment can wait for its own build (the deployment workflow)
     private static readonly string Version = typeof(HealthReportWriter).Assembly
         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
 

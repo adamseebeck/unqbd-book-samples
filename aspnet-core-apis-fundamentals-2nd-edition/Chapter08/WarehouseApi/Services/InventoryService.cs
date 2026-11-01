@@ -76,6 +76,12 @@ public class InventoryService : IInventoryService
             return Task.FromResult(new StockAdjustmentResult(false, null, "An adjustment must change the quantity", 400));
         }
 
+        // More than 10,000 units either way is a mistake, not an adjustment (Chapter 4)
+        if (quantityChange is < -10_000 or > 10_000)
+        {
+            return Task.FromResult(new StockAdjustmentResult(false, null, "QuantityChange must be from -10000 to 10000", 400));
+        }
+
         var key = Key(warehouseCode, productSku);
         var requestHash = _idempotencyContext.CreateRequestHash(
             $"adjust|{key.WarehouseCode}|{key.ProductSku}|{quantityChange}|{reasonCode}");

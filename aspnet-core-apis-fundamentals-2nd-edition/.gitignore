@@ -20,3 +20,5 @@ TestResults/
 secrets.json
 *.pfx
 .env
+# Chapter 3 writes stock alerts next to the project
+stock-alerts.log

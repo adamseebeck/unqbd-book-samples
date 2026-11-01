@@ -15,6 +15,16 @@ Accept: application/json
 
 ###
 
+# No warehouseCode: 400 Bad Request
+GET {{WarehouseApi_HostAddress}}/api/inventory/SKU-001
+Accept: application/json
+
+###
+
+POST {{WarehouseApi_HostAddress}}/api/alerts?message=Recount
+
+###
+
 GET {{WarehouseApi_HostAddress}}/api/warehouses/MAIN
 Accept: application/json
 

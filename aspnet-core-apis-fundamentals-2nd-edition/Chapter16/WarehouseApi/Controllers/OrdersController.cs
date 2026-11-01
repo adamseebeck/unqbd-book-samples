@@ -149,7 +149,7 @@ public class OrdersController : ControllerBase
     }
 
     // V2, a new resource: request the order's shipment. The stock is reserved before the response, the ERP
-    // shipment is not, so 202 Accepted points to the status monitor; once the ERP has confirmed it, 200
+    // shipment is not, so 202 Accepted points to the status monitor; 200 once it has left Pending
     [HttpPost("{id:guid}/shipment")]
     [MapToApiVersion(ApiVersionConstants.V2)]
     [Authorize(Policy = AuthorizationPolicies.RequireSupervisor)]

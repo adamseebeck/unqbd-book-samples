@@ -89,4 +89,11 @@ app.MapGet("/api/inventory/{sku}", async (
         : Results.Ok(new { Sku = sku, WarehouseCode = warehouseCode, Quantity = quantity });
 });
 
+// Resolving the alert service runs the factory, which opens stock-alerts.log
+app.MapPost("/api/alerts", async (string message, IStockAlertService alertService) =>
+{
+    await alertService.SendAlertAsync(message);
+    return Results.NoContent();
+});
+
 app.Run();

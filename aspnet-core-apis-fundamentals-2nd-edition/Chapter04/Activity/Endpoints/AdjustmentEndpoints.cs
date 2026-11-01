@@ -12,7 +12,7 @@ public static class AdjustmentEndpoints
             IInventoryService inventoryService,
             CancellationToken cancellationToken) =>
         {
-            // At most 10,000 units per adjustment, so the new quantity cannot overflow an int
+            // At most 10,000 units per adjustment: a sanity limit that rejects a mistyped quantity
             if (string.IsNullOrWhiteSpace(request.Sku)
                 || string.IsNullOrWhiteSpace(request.WarehouseCode)
                 || request.Quantity is 0 or < -10_000 or > 10_000)

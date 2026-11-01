@@ -18,6 +18,12 @@ public class WarehouseDbContext : DbContext
     public DbSet<OrderLine> OrderLines => Set<OrderLine>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
+    // Every DateTime property, such as Order.CreatedDate, goes through the converter
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ProductConfiguration());

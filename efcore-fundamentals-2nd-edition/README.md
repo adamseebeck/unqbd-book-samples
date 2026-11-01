@@ -51,6 +51,8 @@ Every checkpoint uses one LocalDB database, `EfCoreBook_Retail`, named in `Retai
 
 The migration history grows with the project: `InitialRetail` (Chapter 4), `AddPlacementsAndProfiles` (Chapter 7), `AddProductRowVersion` (Chapter 8) and `AddAddressPaymentsAndAudit` (Chapter 14). Chapter 15 deploys that history with an idempotent script.
 
+Re-running an earlier lab preserves that chapter's demonstration. In particular, Chapter 13's bulk update bypasses `SaveChanges` and does not populate the audit stamp introduced in Chapter 14. Chapter 14 explains this limitation and its activity shows how to set `LastModifiedUtc` in the same bulk statement. Do not assume a `SaveChanges` audit hook applies to direct bulk updates.
+
 ## If something goes wrong
 
 - **"Unable to retrieve project metadata"** from a `dotnet ef` command: the project has not been restored yet. Run `dotnet build`, then the command again.

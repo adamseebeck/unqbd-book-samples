@@ -7,6 +7,7 @@ Companion code for *Blazor Fundamentals, Third Edition* by Adam Seebeck: the Lib
 - The .NET 11 SDK, version 11.0.100 or later. Each global.json selects it and accepts later .NET 11 feature bands; the framework packages use the matching framework version: 11.0.0 with SDK 11.0.100, or a later 11.0 patch, such as 11.0.1, with a later SDK. This code uses 11.0.0.
 - Python 3. It runs the activity copy script and, in Chapters 20 and 23, serves the published offline app.
 - A current browser such as Microsoft Edge or Google Chrome.
+- A PowerShell terminal. Windows PowerShell works on Windows. On macOS or Linux, install PowerShell 7 from https://learn.microsoft.com/powershell/scripting/install/installing-powershell and start it with `pwsh`. Use that shell for the book's commands. Paths beginning with `~/` start in your home folder. On macOS and Linux, use `curl` wherever the book's Windows commands say `curl.exe`.
 - A code editor if you like: Visual Studio (a version that supports .NET 11) and Visual Studio Code with the C# Dev Kit extension both work. The command line is the route the book describes.
 
 ## What is in Samples
@@ -37,6 +38,6 @@ The terminal shows Now listening on: http://127.0.0.1:58631, and the app is read
 dotnet test LibraryDesk.Tests
 ```
 
-For an activity, go to Samples/ActivityInvestigations and run python create_copy.py --chapter 6 --output C:/BookExercises/Chapter06, replacing 6 with the chapter number and choosing a new folder. The README in the copy gives the command to run and the result to expect.
+For an activity, go to Samples/ActivityInvestigations and run `python create_copy.py --chapter 6 --output ../Chapter06Practice`, replacing 6 with the chapter number and choosing a new folder. The relative output path works on each supported system. The README in the copy gives the command to run and the result to expect.
 
 Found a problem in the code? Contact us at [unqbd.com/Contact](https://www.unqbd.com/Contact).

@@ -1,21 +1,24 @@
 # LibraryDesk at the end of Chapter 6
 
-This folder is the LibraryDesk project as it stands at the end of Chapter 6, laid out like your own working folder: global.json and the LibraryDesk solution folder (LibraryDesk.sln, the LibraryDesk server project and the LibraryDesk.Client project).
+This is the cumulative project at the end of Chapter 6. To continue with the next chapter, work in a copy of this complete folder. To follow Chapter 6 from its beginning, use the previous checkpoint instead.
 
-## Catch up from here
+## Open, build and run in Visual Studio
 
-If you skipped Chapter 6, or your project stopped working and you can't find why, copy this whole folder to a new working folder, such as C:/BookExercises/LibraryDesk, and continue with Chapter 7 there. Work in the copy, so this folder stays as it is.
+1. Copy the complete folder to a short writable working path, keeping global.json beside the LibraryDesk solution folder.
+2. In Visual Studio 2026 with .NET 11 support and the ASP.NET and web development workload, open LibraryDesk/LibraryDesk.slnx. The .sln is retained for compatibility; open only one solution file.
+3. Right-click the LibraryDesk server project and choose Set as Startup Project. Select Debug, Any CPU and its http profile. Save All and build with Ctrl+Shift+B.
+4. Press F5. Open http://127.0.0.1:58631. Shift+F5 stops this IDE run and may close its debugger browser. Stop the previous copy before running another on the same port.
 
-## Run it
+## What Chapter 6 added
 
-From the working folder, run this command, typed as one line:
+Chapter 6 added http://127.0.0.1:58631/favorites (Favorites in the menu): Favorite buttons, a summary that reads the FavoritesState service, and a theme label from a cascading value.
+
+## Command-line alternative
+
+From this outer working folder:
 
 ```powershell
 dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
 ```
 
-The terminal shows Now listening on: http://127.0.0.1:58631. Open that address in your browser. Press Ctrl+C in the terminal to stop the app.
-
-## What Chapter 6 added
-
-Chapter 6 added http://127.0.0.1:58631/favorites (Favorites in the menu): Favorite buttons, a summary that reads the FavoritesState service, and a theme label from a cascading value.
+The run command keeps the terminal busy; Ctrl+C stops that terminal-owned process. Run tests after stopping it. F5 and Shift+F5 are the primary IDE workflow.

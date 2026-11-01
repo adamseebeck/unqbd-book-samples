@@ -1,0 +1,10 @@
+@host = http://127.0.0.1:58631
+
+### Post a static form without its antiforgery token
+POST {{host}}/static-feedback
+Content-Type: application/x-www-form-urlencoded
+
+_handler=static-feedback
+
+### Read the public catalog
+GET {{host}}/api/books

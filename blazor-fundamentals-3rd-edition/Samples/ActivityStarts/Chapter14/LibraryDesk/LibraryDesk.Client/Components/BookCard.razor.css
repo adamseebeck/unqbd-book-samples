@@ -1,0 +1,9 @@
+.book-card {
+    padding: 1rem;
+    border: 1px solid #526474;
+    border-radius: 0.4rem;
+}
+.book-card h2 { font-size: 1.2rem; }
+@media (min-width: 45rem) {
+    .book-card { max-width: 40rem; }
+}

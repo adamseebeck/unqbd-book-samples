@@ -1,0 +1,19 @@
+@host = http://127.0.0.1:58631
+
+### Post a static form without its antiforgery token
+POST {{host}}/static-feedback
+Content-Type: application/x-www-form-urlencoded
+
+_handler=static-feedback
+
+### Read the public catalog
+GET {{host}}/api/books
+
+### Check the app health endpoint
+GET {{host}}/healthz
+
+### Post to the local sign-in route without a form token
+POST {{host}}/lab/signin/reader
+
+### Compare an unknown POST endpoint
+POST {{host}}/nothing-here

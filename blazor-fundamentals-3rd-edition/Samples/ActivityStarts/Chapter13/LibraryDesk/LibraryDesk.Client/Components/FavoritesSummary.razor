@@ -1,0 +1,19 @@
+@using LibraryDesk.Client.Services
+@inject FavoritesState Favorites
+@implements IDisposable
+
+<p role="status" id="favorite-count">Favorites: @Count</p>
+<p id="favorite-ids">Saved IDs: @IdList</p>
+<button @onclick="Favorites.Clear">Clear favorites</button>
+
+@code {
+    private int Count => Favorites.Ids.Count;
+    private string IdList => string.Join(", ", Favorites.Ids);
+
+    protected override void OnInitialized() =>
+        Favorites.Changed += Refresh;
+
+    private void Refresh() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Favorites.Changed -= Refresh;
+}

@@ -1,0 +1,30 @@
+@page "/books/{Id:int}"
+@using System.Globalization
+@using LibraryDesk.Client.Models
+@using LibraryDesk.Client.Services
+@inject ICatalogQuery Catalog
+<h1>Book details</h1>
+@if (book is null)
+{
+    <p role="status">No book has this identifier.</p>
+}
+else
+{
+    <h2>@book.Title</h2>
+    <p>Price: @book.Price.ToString("C", UsEnglish)</p>
+}
+<NavLink href="books/1">C#</NavLink>
+<NavLink href="books/2">Blazor</NavLink>
+
+@code {
+    private static readonly CultureInfo UsEnglish =
+        CultureInfo.GetCultureInfo("en-US");
+
+    [Parameter] public int Id { get; set; }
+
+    private BookItem? book;
+
+    protected override async Task OnInitializedAsync() =>
+        book = (await Catalog.GetAsync())
+            .SingleOrDefault(b => b.Id == Id);
+}

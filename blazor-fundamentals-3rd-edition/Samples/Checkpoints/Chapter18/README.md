@@ -1,31 +1,31 @@
 # LibraryDesk at the end of Chapter 18
 
-This folder is the LibraryDesk project as it stands at the end of Chapter 18, laid out like your own working folder: global.json, the LibraryDesk solution folder (LibraryDesk.sln, the LibraryDesk server project and the LibraryDesk.Client project) and LibraryDesk.Tests.
+This is the cumulative project at the end of Chapter 18. To continue with the next chapter, work in a copy of this complete folder. To follow Chapter 18 from its beginning, use the previous checkpoint instead.
 
-## Catch up from here
+## Open, build and run in Visual Studio
 
-If you skipped Chapter 18, or your project stopped working and you can't find why, copy this whole folder to a new working folder, such as C:/BookExercises/LibraryDesk, and continue with Chapter 19 there. Work in the copy, so this folder stays as it is.
-
-## Run it
-
-From the working folder, run this command, typed as one line:
-
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-The terminal shows Now listening on: http://127.0.0.1:58631. Open that address in your browser. Press Ctrl+C in the terminal to stop the app.
+1. Copy the complete folder to a short writable working path, keeping global.json beside the LibraryDesk solution folder.
+2. In Visual Studio 2026 with .NET 11 support and the ASP.NET and web development workload, open LibraryDesk/LibraryDesk.slnx. The .sln is retained for compatibility; open only one solution file.
+3. Right-click the LibraryDesk server project and choose Set as Startup Project. Select Debug, Any CPU and its http profile. Save All and build with Ctrl+Shift+B.
+4. Press F5. Open http://127.0.0.1:58631. Shift+F5 stops this IDE run and may close its debugger browser. Stop the previous copy before running another on the same port.
 
 ## What Chapter 18 added
 
 Chapter 18 added no page. It added the LibraryDesk.Tests folder beside the solution folder, with the component tests in ComponentTests.cs, ApiLoadTests.cs and InteropLifetimeTests.cs.
 
+BookRequests.http under the server project contains the applicable HTTP checks. Start the server first, then click Send request above the request you want. Its @host defaults to the development address.
+
 ## Run the tests
 
-Stop the app first, then run this from the working folder:
+Stop debugging and build. Open Test > Test Explorer, group by Project, then right-click LibraryDesk.Tests and choose Run. Expect 18 passed tests. Select a failed test to read its message and source links.
+
+## Command-line alternative
+
+From this outer working folder:
 
 ```powershell
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
 dotnet test LibraryDesk.Tests
 ```
 
-Near the end, the output reads Test summary: total: 18, failed: 0, succeeded: 18, skipped: 0, followed by the duration, and the last line starts with Build succeeded.
+The run command keeps the terminal busy; Ctrl+C stops that terminal-owned process. Run tests after stopping it. F5 and Shift+F5 are the primary IDE workflow.

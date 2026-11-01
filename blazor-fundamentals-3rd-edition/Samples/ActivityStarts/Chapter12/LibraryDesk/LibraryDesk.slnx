@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../global.json" />
+  </Folder>
+  <Project Path="LibraryDesk/LibraryDesk.csproj" />
+  <Project Path="LibraryDesk.Client/LibraryDesk.Client.csproj" />
+  <Project Path="../Tests/Chapter12.Tests.csproj" />
+</Solution>

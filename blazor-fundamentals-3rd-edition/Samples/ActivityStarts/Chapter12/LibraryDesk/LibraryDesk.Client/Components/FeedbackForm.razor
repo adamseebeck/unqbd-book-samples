@@ -1,0 +1,41 @@
+@using LibraryDesk.Client.Models
+<p>All fields are required.</p>
+<EditForm Model="model" OnValidSubmit="Save" FormName="feedback">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label for="feedback-name">Name</label>
+    <InputText id="feedback-name"
+               aria-required="true"
+               aria-describedby="feedback-name-error"
+               @bind-Value="model.Name" />
+    <div id="feedback-name-error">
+        <ValidationMessage For="() => model.Name" />
+    </div>
+    <label for="feedback-email">Email</label>
+    <InputText id="feedback-email" type="email"
+               aria-required="true"
+               aria-describedby="feedback-email-error"
+               @bind-Value="model.Email" />
+    <div id="feedback-email-error">
+        <ValidationMessage For="() => model.Email" />
+    </div>
+    <label for="feedback-message">Message</label>
+    <InputTextArea id="feedback-message"
+                   aria-required="true"
+                   aria-describedby="feedback-message-error"
+                   @bind-Value="model.Message" />
+    <div id="feedback-message-error">
+        <ValidationMessage For="() => model.Message" />
+    </div>
+    <button type="submit">Save local feedback</button>
+</EditForm>
+<p role="status">@result</p>
+
+@code {
+    private readonly FeedbackInput model = new();
+    private string result = "Nothing saved.";
+
+    private void Save() => result =
+        $"Feedback accepted locally for {model.Name}. " +
+        "No account was created.";
+}

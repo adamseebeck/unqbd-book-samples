@@ -1,0 +1,11 @@
+<button @onclick="Select">Select @Title</button>
+@code {
+    [Parameter] public int Id { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public EventCallback<int> Selected { get; set; }
+    private Task Select()
+    {
+        if (Id == 2) throw new InvalidOperationException();
+        return Selected.InvokeAsync(Id);
+    }
+}

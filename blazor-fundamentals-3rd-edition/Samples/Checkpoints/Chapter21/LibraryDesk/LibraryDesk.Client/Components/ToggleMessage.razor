@@ -16,19 +16,25 @@
     private string Expanded => visible ? "true" : "false";
 
     protected override void OnInitialized() =>
-        Console.WriteLine($"Initialized: {Message}");
+        WriteLifecycle($"Initialized: {Message}");
 
     protected override void OnParametersSet() =>
-        Console.WriteLine($"Parameters set: {Message}");
+        WriteLifecycle($"Parameters set: {Message}");
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
-            Console.WriteLine($"First render: {Message}");
+            WriteLifecycle($"First render: {Message}");
+    }
+
+    private static void WriteLifecycle(string message)
+    {
+        Console.WriteLine(message);
+        System.Diagnostics.Debug.WriteLine(message);
     }
 
     private void Toggle() => visible = !visible;
 
     public void Dispose() =>
-        Console.WriteLine($"Disposed: {Message}");
+        WriteLifecycle($"Disposed: {Message}");
 }

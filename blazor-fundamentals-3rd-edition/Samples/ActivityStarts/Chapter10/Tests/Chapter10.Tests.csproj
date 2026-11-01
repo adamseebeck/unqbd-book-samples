@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="2.11.3" />
+    <PackageReference Include="xunit.v3.mtp-off"
+        Version="4.0.2" />
+    <PackageReference Include="xunit.runner.visualstudio"
+        Version="4.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk"
+        Version="18.11.0" />
+    <ProjectReference Include="../LibraryDesk/LibraryDesk/LibraryDesk.csproj" />
+  </ItemGroup>
+
+</Project>

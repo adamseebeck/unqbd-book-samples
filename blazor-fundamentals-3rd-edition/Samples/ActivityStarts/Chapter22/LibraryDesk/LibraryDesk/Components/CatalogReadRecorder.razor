@@ -1,0 +1,14 @@
+@inject ILogger<CatalogReadRecorder> Logger
+<button @onclick="Record">Record catalog read</button>
+<p role="status">Reads recorded: @reads</p>
+
+@code {
+    private int reads;
+
+    private void Record()
+    {
+        reads++;
+        Logger.LogInformation(
+            "CatalogRead {BookCount} {ReadNumber}", 3, reads);
+    }
+}

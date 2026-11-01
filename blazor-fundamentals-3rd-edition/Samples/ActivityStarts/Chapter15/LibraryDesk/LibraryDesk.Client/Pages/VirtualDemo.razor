@@ -1,0 +1,18 @@
+@page "/virtual"
+@rendermode InteractiveServer
+@using LibraryDesk.Client.Models
+<h1>Virtual catalog</h1>
+<div id="results" style="height: 300px; overflow-y: auto"
+     tabindex="0" aria-label="Catalog results">
+    @foreach (var book in books)
+    {
+        <div @key="book.Id" style="height: 40px">
+            @book.Id: @book.Title
+        </div>
+    }
+</div>
+@code {
+    private readonly BookItem[] books = Enumerable.Range(1, 10000)
+        .Select(i => new BookItem(i, $"Catalog title {i}", 20m))
+        .ToArray();
+}

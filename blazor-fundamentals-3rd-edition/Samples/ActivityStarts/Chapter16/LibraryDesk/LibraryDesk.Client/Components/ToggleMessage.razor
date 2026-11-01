@@ -1,0 +1,40 @@
+@implements IDisposable
+
+<section>
+    <p>@(visible ? Message : HiddenText)</p>
+    <button @onclick="Toggle" aria-expanded="@Expanded">
+        Toggle message
+    </button>
+</section>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = "Book details";
+    [Parameter]
+    public string HiddenText { get; set; } = "Details hidden";
+    private bool visible;
+    private string Expanded => visible ? "true" : "false";
+
+    protected override void OnInitialized() =>
+        WriteLifecycle($"Initialized: {Message}");
+
+    protected override void OnParametersSet() =>
+        WriteLifecycle($"Parameters set: {Message}");
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            WriteLifecycle($"First render: {Message}");
+    }
+
+    private static void WriteLifecycle(string message)
+    {
+        Console.WriteLine(message);
+        System.Diagnostics.Debug.WriteLine(message);
+    }
+
+    private void Toggle() => visible = !visible;
+
+    public void Dispose() =>
+        WriteLifecycle($"Disposed: {Message}");
+}

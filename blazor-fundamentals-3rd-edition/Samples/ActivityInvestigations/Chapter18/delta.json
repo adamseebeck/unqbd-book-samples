@@ -1,20 +1,19 @@
 {
   "chapter": 18,
-  "baseline": "Samples",
+  "baseline": "Samples/Checkpoints/Chapter18",
   "deltas": [
     {
       "file": "LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs",
-      "source_sha256": "4e491bbec0eed1ead473062985767294a935c5557074da147944d3fdd5ea1295",
+      "source_sha256": "087547905ba0a1ce4321bd65507d4c09b073d037b1f661f1f7efdf608ee631b7",
       "before": "private readonly HashSet<int> ids = [];",
       "after": "private readonly List<int> ids = [];"
     },
     {
       "file": "LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs",
-      "source_sha256": "4e491bbec0eed1ead473062985767294a935c5557074da147944d3fdd5ea1295",
+      "source_sha256": "087547905ba0a1ce4321bd65507d4c09b073d037b1f661f1f7efdf608ee631b7",
       "before": "if (ids.Add(id)) Changed?.Invoke();",
       "after": "ids.Add(id);\n        Changed?.Invoke();"
     }
   ],
-  "expected": "The focused FavoritesRefreshSiblingsAndIgnoreDuplicates test must fail for the List variant and pass for the original HashSet version. The defect is in storage semantics rather than the Changed notification condition.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "The filter runs only FavoritesRefreshSiblingsAndIgnoreDuplicates, and it fails after a few seconds. Its error message names WaitForFailedException, because WaitForAssertion kept retrying until its time ran out; ignore its advice about slower hardware. The real cause is the line under it that starts with ----: Assert.Equal() Failure: Strings differ, with Expected: \"Favorites: 1\" and Actual: \"Favorites: 2\". The second click on Favorite C# added the same ID again. The output then reads Test summary: total: 1, failed: 1, succeeded: 0, skipped: 0, and the last line says Build failed with 1 error(s). That error is the failing test, not a compile error. With the HashSet lines back, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded."
 }

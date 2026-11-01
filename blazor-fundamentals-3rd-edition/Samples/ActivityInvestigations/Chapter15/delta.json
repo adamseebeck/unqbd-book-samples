@@ -3,12 +3,11 @@
   "baseline": "Samples/Checkpoints/Chapter15",
   "deltas": [
     {
-      "file": "LibraryDesk.Client/Pages/VirtualDemo.razor",
-      "source_sha256": "9ef463ed2beee60ebcec4f7c5ae564c10977fe8e32033415a1751ea97dcfd7eb",
-      "before": "<Virtualize Items=\"books\" Context=\"book\" ItemSize=\"40\" OverscanCount=\"3\">\n        <div @key=\"book.Id\" style=\"height: 40px\">@book.Id: @book.Title</div>\n    </Virtualize>",
-      "after": "@foreach (var book in books)\n    {\n        <div @key=\"book.Id\" style=\"height: 40px\">@book.Id: @book.Title</div>\n    }"
+      "file": "LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor",
+      "source_sha256": "a5b5fa1c2c27a72d08f89d3c09c5f8972f5a9593f4f20d26c7e682f30e9d2f2f",
+      "before": "    <Virtualize Items=\"books\" Context=\"book\" ItemSize=\"40\"\n                OverscanCount=\"3\">\n        <div @key=\"book.Id\" style=\"height: 40px\">\n            @book.Id: @book.Title\n        </div>\n    </Virtualize>",
+      "after": "    @foreach (var book in books)\n    {\n        <div @key=\"book.Id\" style=\"height: 40px\">\n            @book.Id: @book.Title\n        </div>\n    }"
     }
   ],
-  "expected": "The deliberate foreach variant renders all 10000 rows. The original Virtualize checkpoint renders a small visible window and later identifiers after scrolling. Compare row counts; this test doesn't measure latency.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/virtual, press F12, open the Console tab and run document.getElementById(\"results\").childElementCount. It prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000. Compare it with the 18 you counted in step 4 of Chapter 15. Then stop the copy, replace the @foreach loop in LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor with the Virtualize element from step 1 but with OverscanCount=\"10\", and run the copy again: the same line prints 32 (30 rows and 2 spacers), at the top and in the middle of the list."
 }

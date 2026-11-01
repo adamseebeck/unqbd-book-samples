@@ -1,11 +1,46 @@
-# Chapter 17 Activity Code Delta
+# Chapter 17 activity: a Clear catalog favorites button
 
-From Samples/ActivityInvestigations run `python create_copy.py --chapter 17 --output C:/BookExercises/Chapter17` with Python 3, choosing a new working folder outside the companion code. The script checks that its starting files are unchanged, copies the complete project and applies delta.json to the copy.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter17, the project at the end of Chapter 17, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
-From that new directory run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631` with the SDK that global.json selects.
+## Make the copy
 
-After favoriting two distinct books, the new clear button empties the injected scoped FavoritesState and updates the page status to zero. Repeating clear stays at zero. It does not save anything across runtimes or reloads.
+In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
 
-To start over, make another fresh copy. Make deliberate failures only in the disposable copy, and run the check to confirm the outcome above.
+```powershell
+python create_copy.py --chapter 17 --output C:/BookExercises/Chapter17
+cd C:/BookExercises/Chapter17
+```
 
-The disposable copy also contains a focused test: `dotnet test Tests/Chapter17.Tests.csproj`. A component test doesn't cover a browser module download or CSS layout; check those in a browser.
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
+
+## What you change
+
+The copy is your LibraryDesk project at the end of Chapter 17, unchanged, plus a Tests folder with a test for the button you add.
+
+## Run it
+
+Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
+
+```powershell
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
+```
+
+Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
+
+## What you should see
+
+Add the button and the ClearFavorites method to LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor, then run the copy and open http://127.0.0.1:58631/catalog. Favorite Blazor Field Notes and C# Field Notes: the status says Favorites in this runtime: 2. Click Clear catalog favorites: Favorites in this runtime: 0. Click it again: still 0.
+
+## Check it with a test
+
+The copy has a Tests folder with a component test for this change. Stop the app, then run this from the copy's folder:
+
+```powershell
+dotnet test Tests/Chapter17.Tests.csproj
+```
+
+Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. The test finds your button by its id, clear-catalog-favorites. Before you add the button, it fails with ElementNotFoundException, and the last line says Build failed with 1 error(s): that error is the failing test, not a compile error. A component test checks component logic; check the page itself in the browser.
+
+## Start over
+
+To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter17.md explains the answer.

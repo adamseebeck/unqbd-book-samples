@@ -5,7 +5,8 @@ namespace LibraryDesk.Services;
 
 public sealed class MemoryCatalogQuery : ICatalogQuery
 {
-    public Task<BookItem[]> GetAsync(CancellationToken cancellationToken = default)
+    public Task<BookItem[]> GetAsync(
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(new[]

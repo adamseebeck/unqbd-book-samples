@@ -1,7 +1,10 @@
 @page "/modes"
 @using LibraryDesk.Client.Components
 <h1>Render mode boundaries</h1>
-<p id="static-marker">Static HTML is readable before interactivity starts.</p>
+<p id="static-marker">
+    This page has no render mode, so it uses static SSR.
+    Page renderer: @RendererInfo.Name.
+</p>
 <h2>Server island</h2>
 <ModeCounter @rendermode="InteractiveServer" />
 <h2>WebAssembly island</h2>

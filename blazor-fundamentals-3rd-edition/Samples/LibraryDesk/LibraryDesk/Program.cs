@@ -10,13 +10,21 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
-builder.Services.AddSingleton<ICatalogQuery, MemoryCatalogQuery>();
+// Keep Data Protection keys in memory for this local app.
+builder.Services.AddDataProtection()
+    .UseEphemeralDataProtectionProvider();
 builder.Services.AddScoped<FavoritesState>();
+builder.Services.AddSingleton<ICatalogQuery,
+    MemoryCatalogQuery>();
+builder.Services.AddAntiforgery();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(
+        CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/security";
@@ -26,73 +34,98 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SameSite = SameSiteMode.Strict;
         options.Events.OnRedirectToLogin = context =>
         {
-            if (context.Request.Path.StartsWithSegments("/api")) context.Response.StatusCode = 401;
-            else context.Response.Redirect(context.RedirectUri);
+            if (context.Request.Path.StartsWithSegments("/api"))
+                context.Response.StatusCode = 401;
+            else
+                context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
         };
         options.Events.OnRedirectToAccessDenied = context =>
         {
-            if (context.Request.Path.StartsWithSegments("/api")) context.Response.StatusCode = 403;
-            else context.Response.Redirect(context.RedirectUri);
+            if (context.Request.Path.StartsWithSegments("/api"))
+                context.Response.StatusCode = 403;
+            else
+                context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
         };
     });
 builder.Services.AddAuthorization(options =>
-    options.AddPolicy("Staff", policy => policy.RequireRole("Librarian")));
-builder.Services.AddAntiforgery();
-// Teaching fixture only: no machine key-ring writes; cookies expire on restart.
-// A real deployment must configure and validate durable protected key storage.
-builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
-builder.Services.AddSignalR(options => options.MaximumReceiveMessageSize = 4096);
+    options.AddPolicy("Staff",
+        policy => policy.RequireRole("Librarian")));
+builder.Services.AddSignalR()
+    .AddHubOptions<CatalogHub>(options =>
+        options.MaximumReceiveMessageSize = 4096);
 
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
     app.UseHttpsRedirection();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/not-found",
+    createScopeForStatusCodePages: true);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-// These passwordless accounts are a local test fixture, never an identity system.
+// Passwordless test accounts for local Development runs only.
 if (app.Environment.IsDevelopment())
 {
-    app.MapPost("/lab/signin/{account}", async (string account, HttpContext context,
-        IAntiforgery antiforgery) =>
+    app.MapPost("/lab/signin/{account}", async (string account,
+        HttpContext context, IAntiforgery antiforgery) =>
     {
-        if (context.Connection.RemoteIpAddress is not { } ip || !IPAddress.IsLoopback(ip))
+        var ip = context.Connection.RemoteIpAddress;
+        if (ip is null || !IPAddress.IsLoopback(ip))
             return Results.StatusCode(403);
-        if (!new[] { "reader", "librarian" }.Contains(account)) return Results.BadRequest();
+        if (account is not ("reader" or "librarian"))
+            return Results.BadRequest();
         try { await antiforgery.ValidateRequestAsync(context); }
-        catch (AntiforgeryValidationException) { return Results.BadRequest("Invalid form token."); }
-        var claims = new List<Claim> { new(ClaimTypes.Name, account) };
-        if (account == "librarian") claims.Add(new(ClaimTypes.Role, "Librarian"));
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity));
+        catch (AntiforgeryValidationException)
+        {
+            return Results.BadRequest("Invalid form token.");
+        }
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, account)
+        };
+        if (account == "librarian")
+            claims.Add(new(ClaimTypes.Role, "Librarian"));
+        var scheme =
+            CookieAuthenticationDefaults.AuthenticationScheme;
+        var identity = new ClaimsIdentity(claims, scheme);
+        var principal = new ClaimsPrincipal(identity);
+        await context.SignInAsync(scheme, principal);
         return Results.LocalRedirect("/security");
     });
-    app.MapPost("/lab/signout", async (HttpContext context, IAntiforgery antiforgery) =>
+    app.MapPost("/lab/signout", async (HttpContext context,
+        IAntiforgery antiforgery) =>
     {
         try { await antiforgery.ValidateRequestAsync(context); }
-        catch (AntiforgeryValidationException) { return Results.BadRequest("Invalid form token."); }
+        catch (AntiforgeryValidationException)
+        {
+            return Results.BadRequest("Invalid form token.");
+        }
         await context.SignOutAsync();
         return Results.LocalRedirect("/security");
     });
 }
 
-app.MapGet("/api/books", async (ICatalogQuery catalog, CancellationToken token) =>
-    await catalog.GetAsync(token));
-app.MapGet("/api/staff/count", () => Results.Ok(new { Count = 3 }))
+app.MapGet("/api/books", async (ICatalogQuery catalog,
+    CancellationToken token) => await catalog.GetAsync(token));
+app.MapGet("/api/staff/count",
+        () => Results.Ok(new { Count = 3 }))
     .RequireAuthorization("Staff");
 app.MapGet("/healthz", () => Results.Ok(new { Status = "ok" }));
 app.MapHub<CatalogHub>("/hubs/catalog");
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(LibraryDesk.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(
+        typeof(LibraryDesk.Client._Imports).Assembly);
+
 app.Run();

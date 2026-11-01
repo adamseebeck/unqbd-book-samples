@@ -1,31 +1,41 @@
-# Chapter 2 Activity Answer
+# Chapter 2 activity answer
 
-- Create the clean template in a new directory. Record dotnet --version, both project paths, and the first build result.
-- Change the SDK version to a deliberately unavailable value in a disposable copy, observe the resolution failure, and restore the correct value. Compare the resulting project structure with the supplied server/client sample; later service references are added in their own chapters.
-- After noting the clean results, change the static Home heading to LibraryDesk setup verified and run the checkpoint. Check that the returned page shows that exact heading.
+The copy of the Chapter 2 project arrives with a global.json that asks for SDK 11.0.999, a version that doesn't exist. You read the error, fix the pin, change the Home page's heading and check it with a test.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+- With "version": "11.0.999" in the copy's global.json, dotnet --version fails. Among the lines it prints are A compatible .NET SDK was not found., Requested SDK version: 11.0.999 and global.json file: followed by the full path of the copy's global.json. It also lists the installed SDKs.
+- With "11.0.100" back, dotnet --version prints 11.0.100 or a later 11.0 version again.
+- After you change the heading, the copy shows LibraryDesk setup verified at http://127.0.0.1:58631, in place of the template's Hello, world!
+- dotnet test Tests/Chapter02.Tests.csproj ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time. Before your heading change it ends with Build failed with 1 error(s): that error is the failing test, not a compile error.
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter02`. Its README describes the expected result and how to start over.
+## The change
 
-## Reference Implementation
+In the copy's global.json, the version goes back to 11.0.100:
 
-- `../Checkpoints/Chapter02/global.json`
-- `../Checkpoints/Chapter02/LibraryDesk/LibraryDesk.csproj`
-- `../Checkpoints/Chapter02/LibraryDesk.Client/LibraryDesk.Client.csproj`
-- `../Checkpoints/Chapter02/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter02/LibraryDesk.Client/Program.cs`
+```json
+{
+    "sdk": {
+        "version": "11.0.100",
+        "rollForward": "latestFeature"
+    }
+}
+```
 
-## Expected Reasoning
+In LibraryDesk/LibraryDesk/Components/Pages/Home.razor, the heading line becomes:
 
-The project baseline consists of a selected SDK, matching target frameworks, explicit package versions, and a generated server/client layout. Verify that baseline before diagnosing application behavior.
+```razor
+<h1>LibraryDesk setup verified</h1>
+```
 
-## Production Notes
+## Files involved
 
-The supplied sample projects include exact package versions. Restore resolves their transitive dependencies, so record the resolved package graph when you ship a reproducible build. A network or vulnerability-feed failure is not a compiler error, so read the actual message before you change code. A clean build also doesn't mean your packages are free of known vulnerabilities; check advisories separately.
+- Samples/ActivityInvestigations/Chapter02: the copy's change (global.json), its README and the test.
+- In the copy: global.json and LibraryDesk/LibraryDesk/Components/Pages/Home.razor, the two files you edit.
+- Samples/Checkpoints/Chapter02: the project the copy starts from.
 
-Build the clean template before changing it.
+## Why
 
-Use a dedicated working copy for compilation. Generated bin and obj directories are disposable build state, while your source files and configuration are the material to preserve. The companion code ships without those outputs. The full sample contains later chapters' registrations; the initial template command intentionally starts with fewer services.
+Every dotnet command looks for a global.json file in the current folder and its parents, and uses the SDK version it asks for. "rollForward": "latestFeature" lets a later .NET 11 SDK stand in, but no installed SDK can stand in for 11.0.999, so the command stops and tells you which file asked for it. That message is the one to look for when a project suddenly refuses to build on a new machine: compare the version in global.json with dotnet --list-sdks.
+
+The test renders the Home page without a browser and checks its heading, so it passes only once your change is in. Chapter 18 explains component tests.

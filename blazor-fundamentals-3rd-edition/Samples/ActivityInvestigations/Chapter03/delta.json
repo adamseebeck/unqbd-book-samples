@@ -1,14 +1,6 @@
 {
   "chapter": 3,
   "baseline": "Samples/Checkpoints/Chapter03",
-  "deltas": [
-    {
-      "file": "LibraryDesk.Client/Pages/Run.razor",
-      "source_sha256": "67e47db72b483461858c09dde384f13584cd609bc37cf790b9693eabeecdd19a",
-      "before": "<h1>First run</h1>",
-      "after": "<h1>My first server counter</h1>"
-    }
-  ],
-  "expected": "The changed heading is visible and two Add one clicks show Current count: 2. A new full document load starts a new component at zero. Note whether your heading edit applied through Hot Reload or needed a restart; a compiled copy can't tell you.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "deltas": [],
+  "expected": "Two clicks on Add one show Current count: 2. When you save the Reset button and method, the terminal reports File updated and then C# and Razor changes applied, and the page shows the Reset button while it still says Current count: 2. Click Reset: Current count: 0. When you change private int count; to private long count; and save, the terminal reports Restart is needed to apply the changes and asks Do you want to restart your app? Press y, and the count starts again at 0."
 }

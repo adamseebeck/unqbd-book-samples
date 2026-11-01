@@ -1,33 +1,40 @@
-# Chapter 23 Activity Answer
+# Chapter 23 activity answer
 
-- Publish both supplied projects to local directories. Run the server artifact in Production and confirm the local test sign-in routes are gone.
-- Serve the PWA artifact and repeat the offline reload check. The project files and commands are the answer reference.
-- Keep the outputs local and note the runtime version you used; this activity doesn't deploy anything.
-- Add a fixed Revision = "local-review" field to the health endpoint in a disposable finished-server copy.
-- Build and run that copy in Production. Check for the marker from /healthz, a 404 for GET requests to the lab paths, and no local sign-in controls. For POSTs with a valid token, check that all three lab paths return the same status as the unrelated missing-route control (404 or 405), with no redirect or success. Get the token from /static-feedback in the same session; POSTs without a token return 400 under this .NET 11 CSRF pipeline, even for unrelated unknown routes. This copy is separate from the published packages you built above.
+The activity adds a revision to /healthz in a copy of the finished app, publishes the copy, and runs its server artifact in Production. Here is the change; compare it with yours.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the copy's LibraryDesk/LibraryDesk/Program.cs, the health endpoint returns a second value:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter23`. Its README describes the expected result and how to start over.
+```csharp
+app.MapGet("/healthz", () => Results.Ok(
+    new { Status = "ok", Revision = "local-review" }));
+```
 
-## Reference Implementation
+## Commands
 
-- `../global.json`
-- `../LibraryDesk/LibraryDesk/LibraryDesk.csproj`
-- `../LibraryDesk.Pwa/LibraryDesk.Pwa.csproj`
-- `../LibraryDesk/LibraryDesk/Program.cs`
-- `../LibraryDesk/LibraryDesk.Client/Program.cs`
+From the copy's folder, publish the server project and run the artifact with the commands from the chapter:
 
-## Expected Reasoning
+```powershell
+dotnet publish LibraryDesk/LibraryDesk/LibraryDesk.csproj -c Release -o artifacts/server
+cd artifacts/server
+dotnet LibraryDesk.dll --contentRoot . --urls http://127.0.0.1:58633 --environment Production
+```
 
-The server and PWA publish outputs have different hosting contracts. Running them locally checks those outputs; a live release still needs its own deployment checks.
+## What you should see
 
-## Production Notes
+- http://127.0.0.1:58633/healthz shows {"status":"ok","revision":"local-review"}.
+- /lab/signin/reader shows the Not Found page, the same page as any other unknown address.
+- /security has no local sign-in buttons.
 
-Recheck behavior against the current .NET 11 servicing release and support policy before a public rollout. Do not carry an old eighteen-month STS assumption forward without checking Microsoft's current policy. Pin runtime and container tags when validating a release; a convenient latest tag can point to another build later.
+Press Ctrl+C in the terminal to stop the artifact.
 
-Keep rollback inputs before changing a live host.
+## Files involved
 
-CI can reproduce builds and tests, but only when a runner actually runs the workflow. Treat a skipped check, or one that failed to start, as not run rather than passed. Keep credentials out of repository source and don't give a deployment token more access than the workflow needs. Hosted workflows, containers, real TLS and proxy behavior, and physical devices each need testing in their own environment.
+- Samples/ActivityInvestigations/Chapter23: the copy (the finished app, unchanged) and its README.
+- In the copy: LibraryDesk/LibraryDesk/Program.cs, and artifacts/server, the folder dotnet publish creates.
+- Samples/Checkpoints/Chapter23: the finished app the copy starts from, the same files as Samples/LibraryDesk.
+
+## Why
+
+dotnet publish compiles the copy in Release and writes everything the server needs, including its static files, to artifacts/server. That folder runs anywhere ASP.NET Core is installed, with dotnet LibraryDesk.dll. The /lab sign-in endpoints and the sign-in buttons exist only when the environment is Development, so in Production the routes are never mapped and the address matches nothing. The environment comes from the --environment argument, not from the build. dotnet run outside Development doesn't serve the Blazor script and the scoped styles, so the published artifact is the right thing to run here. A revision value in the health reply tells you which build a server is running, without exposing anything private. A local publish is not a deployment: nothing leaves your computer.

@@ -1,0 +1,7 @@
+<button @onclick="Select">Select @Title</button>
+@code {
+    [Parameter] public int Id { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public EventCallback<int> Selected { get; set; }
+    private Task Select() => Selected.InvokeAsync(Id);
+}

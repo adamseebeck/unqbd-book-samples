@@ -1,0 +1,47 @@
+@page "/static-feedback"
+@using LibraryDesk.Client.Models
+<h1>Static feedback form</h1>
+<p>All fields are required.</p>
+<EditForm Model="Model" OnValidSubmit="Save"
+          FormName="static-feedback">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label for="static-name">Name</label>
+    <InputText id="static-name"
+               aria-required="true"
+               aria-describedby="static-name-error"
+               @bind-Value="Model!.Name" />
+    <div id="static-name-error">
+        <ValidationMessage For="() => Model!.Name" />
+    </div>
+    <label for="static-email">Email</label>
+    <InputText id="static-email" type="email"
+               aria-required="true"
+               aria-describedby="static-email-error"
+               @bind-Value="Model!.Email" />
+    <div id="static-email-error">
+        <ValidationMessage For="() => Model!.Email" />
+    </div>
+    <label for="static-message">Message</label>
+    <InputTextArea id="static-message"
+                   aria-required="true"
+                   aria-describedby="static-message-error"
+                   @bind-Value="Model!.Message" />
+    <div id="static-message-error">
+        <ValidationMessage For="() => Model!.Message" />
+    </div>
+    <button type="submit">Validate on server</button>
+</EditForm>
+<p role="status">@result</p>
+
+@code {
+    [SupplyParameterFromForm]
+    private FeedbackInput? Model { get; set; }
+
+    private string result = "No submission.";
+
+    protected override void OnInitialized() => Model ??= new();
+
+    private void Save() =>
+        result = "Static form accepted locally.";
+}

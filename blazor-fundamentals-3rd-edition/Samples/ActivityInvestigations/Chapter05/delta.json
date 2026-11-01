@@ -3,12 +3,11 @@
   "baseline": "Samples/Checkpoints/Chapter05",
   "deltas": [
     {
-      "file": "LibraryDesk.Client/Pages/BindingDemo.razor",
-      "source_sha256": "cab281a0d3edab86fa739be1f87cf4b2562ce7042aa9441802160045ae950e12",
+      "file": "LibraryDesk/LibraryDesk.Client/Pages/BindingDemo.razor",
+      "source_sha256": "31aeff6e7016facd7b7abcfdf73f110c1b45744f8b2002b559f34d7687bb543e",
       "before": "@bind=\"search\" @bind:event=\"oninput\"",
       "after": "@bind=\"search\""
     }
   ],
-  "expected": "With the onchange variant, an input event alone retains three rows; committing change updates the filtered result. Restore the oninput checkpoint and its normal input behavior.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/binding and type blazor: all three titles stay until you press Enter or click outside the box. Stop the copy, add @bind:event=\"oninput\" back to the input and run the copy again: the list changes as you type. Stop it again, add a paragraph with the id match-count under the input that shows Matches: and the number of matching titles, and run it again: the page shows Matches: 3 for an empty box, Matches: 1 for BLAZOR and Matches: 0 for xyz."
 }

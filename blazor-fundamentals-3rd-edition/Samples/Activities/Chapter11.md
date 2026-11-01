@@ -1,34 +1,42 @@
-# Chapter 11 Activity Answer
+# Chapter 11 activity answer
 
-- Run the anonymous, reader, and librarian cases against both /staff and /api/staff/count. Verify that hiding or showing AuthorizeView does not change the API decision.
-- Try a sign-in POST without its antiforgery token and check that it's rejected. The supplied server Program.cs, Security, Staff, and Routes files are the answer reference.
-- Use only the local test identities; don't connect a real account or production identity provider.
-- Add a Readers policy requiring an authenticated user and a server-only /api/profile endpoint that returns the current name and requires that policy.
-- Verify anonymous 401, reader/librarian profile names, and unchanged Staff 403/200 results using the local antiforgery-protected cookie sign-in.
+The activity adds a second policy, Readers, that any signed-in user meets, and a GET /api/profile endpoint that requires it. You write both in a copy of the Chapter 11 checkpoint.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the server's LibraryDesk/LibraryDesk/Program.cs, the AddAuthorization call gets a block with both policies:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter11`. Its README describes the expected result and how to start over.
+```csharp
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Staff",
+        policy => policy.RequireRole("Librarian"));
+    options.AddPolicy("Readers",
+        policy => policy.RequireAuthenticatedUser());
+});
+```
 
-## Reference Implementation
+The new endpoint goes just before the /api/staff/count endpoint:
 
-- `../Checkpoints/Chapter11/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter11/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter11/LibraryDesk/Components/Pages/Security.razor`
-- `../Checkpoints/Chapter11/LibraryDesk/Components/Pages/Staff.razor`
-- `../Checkpoints/Chapter11/LibraryDesk/Components/Routes.razor`
-- `../Checkpoints/Chapter11/LibraryDesk/Components/Pages/Denied.razor`
+```csharp
+app.MapGet("/api/profile", (HttpContext context) =>
+        Results.Ok(new { Name = context.User.Identity!.Name }))
+    .RequireAuthorization("Readers");
+```
 
-## Expected Reasoning
+## What you should see
 
-The server page and API enforce the Staff policy independently, while components display the current result. The local test sign-in makes those checks testable without implementing a real identity provider.
+- http://127.0.0.1:58631/api/profile before signing in: the Network tab shows status 401.
+- Signed in on /security as the reader: /api/profile shows {"name":"reader"}.
+- Signed in as the librarian: /api/profile shows {"name":"librarian"}.
+- /api/staff/count still gives the reader 403 and the librarian 200.
 
-## Production Notes
+## Files involved
 
-The cookie sign-in example enforces policy for SSR and server requests only. The Auto-capable catalog is public, and the client Program.cs doesn't configure an authentication-state deserialization provider, so the server policy tests say nothing about a WebAssembly login flow. An application's client authentication state also remains advisory to the API, which must validate the request itself. The example uses ephemeral Data Protection keys so it never writes to the machine key store; its cookies become invalid after the process restarts.
+- Samples/ActivityInvestigations/Chapter11: the copy's README. The copy is Samples/Checkpoints/Chapter11 unchanged, and you make the change in its LibraryDesk/LibraryDesk/Program.cs.
+- Samples/ActivitySolutions/Chapter11: the same project with exactly this change, to compare with yours.
+- Samples/Checkpoints/Chapter11/LibraryDesk/LibraryDesk/Program.cs: the file before the change.
 
-Never turn the passwordless test sign-in into a login system.
+## Why
 
-Real deployments need HTTPS, secure cookie settings appropriate to the hosting arrangement, durable Data Protection keys, safe local return URLs, and revocation or revalidation behavior. A long-lived server circuit can outlive changes in the external identity system; design how the application learns that permission changed. The local tests don't cover an external identity provider or production session lifetimes.
+A policy is a named rule. RequireAuthenticatedUser passes for anyone the cookie handler has signed in, whatever their role; RequireRole("Librarian") passes only for the librarian. Without a sign-in cookie, the request has no identity, so the endpoint answers 401 (not signed in). The reader is signed in but isn't a librarian, so /api/staff/count answers 403 (signed in, not allowed). The endpoint reads the name from context.User, which the server built from the cookie; it never trusts a name sent by the browser. JSON serialization writes the Name property as name.

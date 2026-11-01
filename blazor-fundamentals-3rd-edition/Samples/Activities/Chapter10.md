@@ -1,32 +1,35 @@
-# Chapter 10 Activity Answer
+# Chapter 10 activity answer
 
-- Load /api-demo in the browser, click Load books, and check for the three sample titles. In a disposable copy, change the query URL to a nonexistent endpoint, rebuild, and check for the retry message with an enabled button.
-- Restore api/books. The supplied HttpCatalogQuery and ApiDemo are the answer reference; no request should reach a public test API.
+The activity makes HttpCatalogQuery ask for an address that doesn't exist, in a copy, watches the page recover, and then repairs the address.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the copy's LibraryDesk/LibraryDesk.Client/Services/HttpCatalogQuery.cs, the request line becomes:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter10`. Its README describes the expected result and how to start over.
+```csharp
+            await http.GetAsync("api/not-present", cancellationToken);
+```
 
-## Reference Implementation
+At the end you change "api/not-present" back to "api/books".
 
-- `../Checkpoints/Chapter10/LibraryDesk.Client/Models/BookItem.cs`
-- `../Checkpoints/Chapter10/LibraryDesk.Client/Services/ICatalogQuery.cs`
-- `../Checkpoints/Chapter10/LibraryDesk/Services/MemoryCatalogQuery.cs`
-- `../Checkpoints/Chapter10/LibraryDesk.Client/Services/HttpCatalogQuery.cs`
-- `../Checkpoints/Chapter10/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter10/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter10/LibraryDesk.Client/Pages/ApiDemo.razor`
+## What you should see
 
-## Expected Reasoning
+Open http://127.0.0.1:58631/api-demo in the copy, open the Network tab and click Load books:
 
-The query owns response validation, the component owns visible request state and cancellation, and the client startup owns browser transport configuration. Each layer can be tested on its own.
+- The Network tab shows a row named not-present with status 404.
+- The page shows The catalog is unavailable. Try again.
+- The Load books button is active again, so you can retry.
 
-## Production Notes
+After you put "api/books" back, run the copy again and press F5, Load books shows Loaded 3 books. and the three titles. Without F5 the page keeps the old client code and asks for api/not-present again.
 
-Test browser HTTP in a real browser: startup assets, origin rules and request handling only run there, so a server-side request or a bUnit test can't cover them. Load the data successfully in the browser, then make the endpoint unavailable to check recovery. The component unit test supplies a failed query to check the UI transition without any transport.
+## Files involved
 
-Do not retry writes without an idempotency design.
+- Samples/ActivityInvestigations/Chapter10: the copy's README and its test. The copy is Samples/Checkpoints/Chapter10 unchanged.
+- In the copy: LibraryDesk/LibraryDesk.Client/Services/HttpCatalogQuery.cs, the one file you change.
+- Unchanged: LibraryDesk/LibraryDesk.Client/Pages/ApiDemo.razor (the page and its catch blocks) and the GET /api/books endpoint in LibraryDesk/LibraryDesk/Program.cs.
 
-Server applications commonly use IHttpClientFactory for handler lifetime and configuration. Browser HttpClient has a different transport environment. Resilience packages also need exact dependencies and a bounded policy. This small same-origin read uses a timeout and a manual retry; add a resilience library such as Polly only as an explicit, versioned dependency. Public responses remain minimal DTOs with no server secrets.
+## Why
+
+The server has no endpoint at /api/not-present, so it answers 404. EnsureSuccessStatusCode turns any status outside 200 to 299 into an HttpRequestException. ApiDemo's first catch handles only the cancellation that happens when you leave the page, so the second catch, for catalog failures, handles the exception: it clears the list and shows the retry message. The finally block sets loading back to false, which enables the button. The query reports failures; the page decides what the visitor sees.
+
+The copy also has a component test, Tests/Chapter10.Tests.csproj, that gives ApiDemo a stand-in HTTP handler answering 404 and checks the path, the message and the enabled button. It passes while the address is api/not-present.

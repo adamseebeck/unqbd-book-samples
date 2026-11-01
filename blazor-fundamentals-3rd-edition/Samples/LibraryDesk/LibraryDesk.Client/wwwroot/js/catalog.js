@@ -4,5 +4,6 @@ export function focusElement(element) {
 }
 
 export async function notifyTime(dotnet) {
-    await dotnet.invokeMethodAsync("ReceiveTime", new Date().toISOString());
+    const now = new Date().toISOString();
+    await dotnet.invokeMethodAsync("ReceiveTime", now);
 }

@@ -1,28 +1,21 @@
-# Chapter 5 Activity Answer
+# Chapter 5 activity answer
 
-- Change the native filter to update only when the field loses focus, verify the difference, then restore oninput. Add a visible result count and ensure the count matches the list for empty, mixed-case, and absent searches.
-- BindingDemo.razor is the reference for filtering and empty-state behavior; the count can derive from the same Matches value.
+The activity compares the default change event with @bind:event="oninput" in a copy, then adds a line that counts the matching titles.
 
-## Solved Source and Execution
+## What you should see
 
-Complete executable extension: `../ActivitySolutions/Chapter05`. Run and test commands are in that checkpoint's README.
+- In the copy, the input is `<input id="search" @bind="search" />`, with no @bind:event. Type blazor on /binding: all three titles stay until you press Enter or click outside the box. Then the list shrinks to Blazor Field Notes.
+- Stop the copy, add @bind:event="oninput" back to the input and run it again: the list changes as you type. Every change needs a restart here, because the copy runs with dotnet run.
+- With `<p id="match-count">Matches: @Matches.Length</p>` under the input, the page shows Matches: 3 for an empty box, Matches: 1 for BLAZOR and Matches: 0 for xyz.
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter05`. Its README describes the expected result and how to start over.
+## Files involved
 
-## Reference Implementation
+- Samples/ActivityInvestigations/Chapter05: the copy without @bind:event, and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/BindingDemo.razor.
+- Samples/ActivitySolutions/Chapter05: the solved page, with @bind:event="oninput", the Search text line and the match-count line. From that folder, dotnet test Tests/Chapter05.Tests.csproj runs the same check and passes.
 
-- `../Checkpoints/Chapter05/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter05/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter05/LibraryDesk.Client/Pages/BindingDemo.razor`
+## Why
 
-## Expected Reasoning
+@bind without @bind:event updates the field on the change event, which the browser raises when the box loses focus or you press Enter. @bind:event="oninput" updates it on every keystroke. Matches is a property computed from search, so anything that reads it, the list or the new count, shows the new result on the next render without extra code. The count needs no field of its own: one source of truth, two views of it.
 
-Razor renders state, binding chooses how input updates it, and conditions explain empty outcomes. A local filter makes those relationships visible before form and network abstractions are added.
-
-## Production Notes
-
-The filter recomputes when rendered. That is appropriate for three titles, but repeatedly allocating and scanning a large collection can dominate rendering. Move expensive filtering into a deliberate state update or a query service when measurement shows a need. Do not hide stale results behind a ShouldRender override; Chapter 15 explains why that can create correctness defects.
-
-Keep untrusted text encoded.
-
-An oninput handler can fire many times per second. A later HTTP-backed filter should debounce input, cancel superseded requests, and prevent an older response from overwriting a newer search. The current example makes no remote calls and therefore has no retry or data-race policy to configure.
+The activity copy has a component test, Tests/Chapter05.Tests.csproj, that renders the page without a browser, types BLAZOR and xyz the way keystrokes do, and checks the list and your Matches line. Run it when you're done: it ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time. Run before your changes, it ends with Build failed with 1 error(s); that error is the failing test, not a compile error.

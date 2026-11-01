@@ -1,0 +1,61 @@
+@page "/api-demo"
+@rendermode @(new InteractiveWebAssemblyRenderMode(
+    prerender: false))
+@using System.Text.Json
+@using LibraryDesk.Client.Models
+@using LibraryDesk.Client.Services
+@inject ICatalogQuery Catalog
+@implements IDisposable
+
+<h1>Catalog HTTP client</h1>
+<button @onclick="Load" disabled="@loading">Load books</button>
+<p role="status">@status</p>
+<ul>
+    @foreach (var book in books)
+    {
+        <li @key="book.Id">@book.Title</li>
+    }
+</ul>
+
+@code {
+    private readonly CancellationTokenSource lifetime = new();
+    private BookItem[] books = [];
+    private bool loading;
+    private string status = "Ready.";
+
+    private async Task Load()
+    {
+        if (loading) return;
+        loading = true;
+        status = "Loading...";
+        try
+        {
+            books = await Catalog.GetAsync(lifetime.Token);
+            status = $"Loaded {books.Length} books.";
+        }
+        catch (OperationCanceledException)
+            when (lifetime.IsCancellationRequested)
+        {
+            // The page is closing, so there is nothing to show.
+        }
+        catch (Exception ex) when (IsCatalogFailure(ex))
+        {
+            books = [];
+            status = "The catalog is unavailable. Try again.";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private static bool IsCatalogFailure(Exception ex) =>
+        ex is HttpRequestException or JsonException
+            or InvalidDataException or OperationCanceledException;
+
+    public void Dispose()
+    {
+        lifetime.Cancel();
+        lifetime.Dispose();
+    }
+}

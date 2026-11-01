@@ -4,5 +4,6 @@ namespace LibraryDesk.Client.Services;
 
 public interface ICatalogQuery
 {
-    Task<BookItem[]> GetAsync(CancellationToken cancellationToken = default);
+    Task<BookItem[]> GetAsync(
+        CancellationToken cancellationToken = default);
 }

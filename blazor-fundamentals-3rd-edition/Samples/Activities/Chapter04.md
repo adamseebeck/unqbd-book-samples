@@ -1,27 +1,29 @@
-# Chapter 4 Activity Answer
+# Chapter 4 activity answer
 
-- Add a third ToggleMessage with a different book title and HiddenText. Toggle the middle instance twice and verify all three final states.
-- The supplied component and composition are the reference solution; a correct extension creates another instance without static fields or a new service.
+The activity adds a third ToggleMessage to ComponentsDemo, with your own Message and a HiddenText of Tap to read, in a copy of Samples/Checkpoints/Chapter04 made with Copy-Item. Stop your own LibraryDesk first: the copy uses the same address.
 
-## Solved Source and Execution
+## The change
 
-Complete executable extension: `../ActivitySolutions/Chapter04`. Run and test commands are in that checkpoint's README.
+In the copy's LibraryDesk/LibraryDesk.Client/Pages/ComponentsDemo.razor, add a third line under the two existing notes. The solved copy uses this message; yours can be any text:
 
-## Reference Implementation
+```razor
+<ToggleMessage Message="Database Field Notes is available."
+               HiddenText="Tap to read" />
+```
 
-- `../Checkpoints/Chapter04/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter04/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter04/LibraryDesk.Client/Components/ToggleMessage.razor`
-- `../Checkpoints/Chapter04/LibraryDesk.Client/Pages/ComponentsDemo.razor`
+No other file changes. ToggleMessage already has the HiddenText parameter, with Details hidden as its default.
 
-## Expected Reasoning
+## What you should see
 
-Parameters enter from a parent, private state belongs to an instance, and lifecycle work belongs at the stage that provides its prerequisites. Independent toggle behavior checks that those boundaries are working.
+- /components shows three notes. The first two read Details hidden; the third reads Tap to read.
+- Click the middle note's button twice and the third note's button once. The first note shows Details hidden, the middle one Details hidden (two clicks showed and hid it again), and the third shows your message, here Database Field Notes is available.
+- The terminal shows six Initialized lines for one page visit: three from prerendering (C#, Blazor, then your note) and three more when the live page starts, in the same pattern step 6 showed for two notes.
 
-## Production Notes
+## Files involved
 
-Component boundaries should follow meaningful UI responsibilities. Splitting every line of markup into a component adds overhead and makes the data flow harder to follow. Start with a cohesive unit such as ToggleMessage, then extract shared behavior when it has a clear contract. A small parameter surface is easier to test and maintain than a component that reaches into unrelated services.
+- Samples/ActivitySolutions/Chapter04: the solved copy. Its changed file is LibraryDesk/LibraryDesk.Client/Pages/ComponentsDemo.razor. From that folder, dotnet test Tests/Chapter04.Tests.csproj runs its test, which renders the page without a browser, clicks the same buttons and checks the three notes. It ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time.
+- Samples/Checkpoints/Chapter04/LibraryDesk/LibraryDesk.Client/Components/ToggleMessage.razor: the component, unchanged.
 
-Define the child before composing it.
+## Why
 
-Rendering does not make a component a security boundary. Parameter values reach markup unless you deliberately keep them server-only. Use text rendering for book descriptions; do not turn untrusted descriptions into MarkupString. The toggle changes presentation only; it doesn't restrict access to the underlying data.
+Each ToggleMessage is a separate instance with its own private visible field, so a click on one note never changes another. Parameters set from the parent, Message and HiddenText, configure each instance; the visible field is state the instance keeps for itself. The terminal lines show the lifecycle running twice per note, once for prerendering and once when the circuit starts, which is why a one-time action never belongs in OnInitialized.

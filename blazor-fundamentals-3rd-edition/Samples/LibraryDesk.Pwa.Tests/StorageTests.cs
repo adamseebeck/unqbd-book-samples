@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Xunit;
 
+// BL0016 asks app code to guard JS interop calls with try/catch.
+// These tests drive a stand-in for the browser's localStorage.
+#pragma warning disable BL0016
 public sealed class StorageTests
 {
     [Fact]
@@ -24,7 +27,7 @@ public sealed class StorageTests
         finally
         {
             storage.FailWrites(); storage.Read.TrySetResult("[\"Existing title\"]");
-            await attempt.WaitAsync(TimeSpan.FromSeconds(5));
+            await attempt.WaitAsync(TimeSpan.FromSeconds(5), Xunit.TestContext.Current.CancellationToken);
         }
         cut.WaitForAssertion(() => Assert.Equal("Existing title", cut.Find("li").TextContent));
     }
@@ -50,7 +53,7 @@ public sealed class StorageTests
         finally
         {
             storage.FailWrites();
-            await Task.WhenAll(first, second).WaitAsync(TimeSpan.FromSeconds(5));
+            await Task.WhenAll(first, second).WaitAsync(TimeSpan.FromSeconds(5), Xunit.TestContext.Current.CancellationToken);
         }
         cut.WaitForAssertion(() => Assert.Contains("Storage failed. The list was not saved.", cut.Markup));
         Assert.Empty(cut.FindAll("li"));
@@ -58,7 +61,7 @@ public sealed class StorageTests
         var retry = cut.Find("button").TriggerEventAsync("onclick", new MouseEventArgs());
         cut.WaitForAssertion(() => Assert.Equal(2, storage.Writes.Count));
         storage.Writes[^1].Completion.SetResult(true);
-        await retry.WaitAsync(TimeSpan.FromSeconds(5));
+        await retry.WaitAsync(TimeSpan.FromSeconds(5), Xunit.TestContext.Current.CancellationToken);
         cut.WaitForAssertion(() => Assert.Equal("New title", cut.Find("li").TextContent));
         Assert.Equal(new[] { "New title" }, System.Text.Json.JsonSerializer.Deserialize<string[]>(storage.Writes[^1].Json));
     }
@@ -83,4 +86,5 @@ public sealed class StorageTests
             foreach (var write in Writes) write.Completion.TrySetException(new JSException("Controlled storage write failure."));
         }
     }
+#pragma warning restore BL0016
 }

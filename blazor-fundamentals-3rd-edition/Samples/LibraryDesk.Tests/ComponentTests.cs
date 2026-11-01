@@ -1,9 +1,10 @@
-using Bunit;
 using System.Net;
+using Bunit;
 using LibraryDesk.Client.Components;
 using LibraryDesk.Client.Models;
 using LibraryDesk.Client.Pages;
 using LibraryDesk.Client.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -13,9 +14,12 @@ public sealed class ComponentTests
     public void CounterRespondsToClicks()
     {
         using var context = new BunitContext();
+        context.Renderer.SetRendererInfo(
+            new RendererInfo("Server", true));
         var cut = context.Render<Run>();
         cut.Find("button").Click();
-        Assert.Contains("Current count: 1", cut.Find("#count").TextContent);
+        Assert.Contains("Current count: 1",
+            cut.Find("#count").TextContent);
     }
 
     [Fact]
@@ -24,10 +28,15 @@ public sealed class ComponentTests
         using var context = new BunitContext();
         var cut = context.Render<ComponentsDemo>();
         cut.FindAll("button")[0].Click();
-        Assert.Contains("C# Field Notes is available.", cut.Markup);
+        Assert.Contains("C# Field Notes is available.",
+            cut.Markup);
         Assert.Contains("Details hidden", cut.Markup);
-        Assert.Equal("true", cut.FindAll("button")[0].GetAttribute("aria-expanded"));
-        Assert.Equal("false", cut.FindAll("button")[1].GetAttribute("aria-expanded"));
+        var first = cut.FindAll("button")[0];
+        var second = cut.FindAll("button")[1];
+        Assert.Equal("true",
+            first.GetAttribute("aria-expanded"));
+        Assert.Equal("false",
+            second.GetAttribute("aria-expanded"));
     }
 
     [Theory]
@@ -48,13 +57,17 @@ public sealed class ComponentTests
         using var context = new BunitContext();
         context.Services.AddScoped<FavoritesState>();
         var cut = context.Render<FavoritesDemo>();
+        string Count() => cut.Find("#favorite-count").TextContent;
         cut.FindAll("button")[0].Click();
         cut.FindAll("button")[0].Click();
-        cut.WaitForAssertion(() => Assert.Equal("Favorites: 1", cut.Find("#favorite-count").TextContent));
+        cut.WaitForAssertion(
+            () => Assert.Equal("Favorites: 1", Count()));
         cut.FindAll("button")[1].Click();
-        cut.WaitForAssertion(() => Assert.Equal("Favorites: 2", cut.Find("#favorite-count").TextContent));
+        cut.WaitForAssertion(
+            () => Assert.Equal("Favorites: 2", Count()));
         cut.FindAll("button")[2].Click();
-        cut.WaitForAssertion(() => Assert.Equal("Favorites: 0", cut.Find("#favorite-count").TextContent));
+        cut.WaitForAssertion(
+            () => Assert.Equal("Favorites: 0", Count()));
     }
 
     [Fact]
@@ -67,8 +80,11 @@ public sealed class ComponentTests
         var firstPage = first.Render<FavoritesDemo>();
         var secondPage = second.Render<FavoritesDemo>();
         firstPage.FindAll("button")[0].Click();
-        firstPage.WaitForAssertion(() => Assert.Equal("Favorites: 1", firstPage.Find("#favorite-count").TextContent));
-        Assert.Equal("Favorites: 0", secondPage.Find("#favorite-count").TextContent);
+        firstPage.WaitForAssertion(() => Assert.Equal(
+            "Favorites: 1",
+            firstPage.Find("#favorite-count").TextContent));
+        Assert.Equal("Favorites: 0",
+            secondPage.Find("#favorite-count").TextContent);
     }
 
     [Fact]
@@ -84,7 +100,8 @@ public sealed class ComponentTests
     [Theory]
     [InlineData("invalid-address", "A valid length message")]
     [InlineData("ada@example.test", "four")]
-    public void InvalidEmailOrShortMessageDoesNotReportSuccess(string email, string message)
+    public void InvalidEmailOrShortMessageDoesNotReportSuccess(
+        string email, string message)
     {
         using var context = new BunitContext();
         var cut = context.Render<FeedbackForm>();
@@ -103,7 +120,8 @@ public sealed class ComponentTests
         var cut = context.Render<FeedbackForm>();
         cut.Find("#feedback-name").Change("Ada");
         cut.Find("#feedback-email").Change("ada@example.test");
-        cut.Find("#feedback-message").Change("Please add a routing example.");
+        cut.Find("#feedback-message")
+            .Change("Please add a routing example.");
         cut.Find("form").Submit();
         Assert.Contains("accepted locally for Ada", cut.Markup);
         Assert.Contains("No account was created", cut.Markup);
@@ -124,11 +142,17 @@ public sealed class ComponentTests
     public void ApiFailureBecomesRecoverableUi()
     {
         using var context = new BunitContext();
-        using var http = new HttpClient(new MissingCatalogHandler()) { BaseAddress = new Uri("http://localhost/") };
-        context.Services.AddSingleton<ICatalogQuery>(new HttpCatalogQuery(http));
+        var handler = new NotFoundHandler();
+        using var http = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("http://localhost/")
+        };
+        context.Services.AddSingleton<ICatalogQuery>(
+            new HttpCatalogQuery(http));
         var cut = context.Render<ApiDemo>();
         cut.Find("button").Click();
-        cut.WaitForAssertion(() => Assert.Contains("catalog is unavailable", cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains(
+            "catalog is unavailable", cut.Markup));
         Assert.False(cut.Find("button").HasAttribute("disabled"));
     }
 
@@ -136,25 +160,43 @@ public sealed class ComponentTests
     public void CatalogLoadsAndFiltersItsInjectedData()
     {
         using var context = new BunitContext();
-        context.Services.AddSingleton<ICatalogQuery>(new FixedCatalog());
+        context.Services.AddSingleton<ICatalogQuery>(
+            new FixedCatalog());
         context.Services.AddScoped<FavoritesState>();
-        context.Renderer.SetRendererInfo(new Microsoft.AspNetCore.Components.RendererInfo("WebAssembly", true));
+        context.Renderer.SetRendererInfo(
+            new RendererInfo("WebAssembly", true));
         var cut = context.Render<Catalog>();
-        cut.WaitForAssertion(() => Assert.Equal(2, cut.FindAll("li").Count));
+        cut.WaitForAssertion(
+            () => Assert.Equal(2, cut.FindAll("li").Count));
         cut.Find("input").Input("Blazor");
         Assert.Single(cut.FindAll("li"));
+        cut.Find("li a").MarkupMatches(
+            "<a href=\"books/2\">Blazor Field Notes</a>");
         cut.Find("button").Click();
-        Assert.Contains("Favorites in this runtime: 1", cut.Markup);
+        Assert.Contains("Favorites in this runtime: 1",
+            cut.Markup);
+        cut.Find("input").Input("Cooking");
+        Assert.Empty(cut.FindAll("li"));
+        Assert.Contains("No matching titles.", cut.Markup);
     }
 
-    private sealed class MissingCatalogHandler : HttpMessageHandler
+    private sealed class NotFoundHandler : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token) =>
-            Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken token) =>
+            Task.FromResult(
+                new HttpResponseMessage(HttpStatusCode.NotFound));
     }
+
     private sealed class FixedCatalog : ICatalogQuery
     {
-        public Task<BookItem[]> GetAsync(CancellationToken token = default) =>
-            Task.FromResult(new[] { new BookItem(1, "C# Field Notes", 24), new BookItem(2, "Blazor Field Notes", 28) });
+        public Task<BookItem[]> GetAsync(
+            CancellationToken token = default) =>
+            Task.FromResult(new[]
+            {
+                new BookItem(1, "C# Field Notes", 24),
+                new BookItem(2, "Blazor Field Notes", 28)
+            });
     }
 }

@@ -1,9 +1,36 @@
-# Chapter 14 Activity Code Delta
+# Chapter 14 activity: a very long title without its rule
 
-From Samples/ActivityInvestigations run `python create_copy.py --chapter 14 --output C:/BookExercises/Chapter14` with Python 3, choosing a new working folder outside the companion code. The script checks that its starting files are unchanged, copies the complete project and applies delta.json to the copy.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter14, the project at the end of Chapter 14, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
 
-From that new directory run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631` with the SDK that global.json selects.
+## Make the copy
 
-At a narrow viewport and zoom level (note which you used), the long identifier wraps, the article grows taller and the page has no horizontal overflow. Restore the normal title. Emulation isn't a physical-device test.
+In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
 
-To start over, make another fresh copy. Make deliberate failures only in the disposable copy, and run the check to confirm the outcome above.
+```powershell
+python create_copy.py --chapter 14 --output C:/BookExercises/Chapter14
+cd C:/BookExercises/Chapter14
+```
+
+Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
+
+## What the copy changes
+
+In LibraryDesk/LibraryDesk.Client/Pages/StyleDemo.razor, the card has a very long title with no spaces, and LibraryDesk/LibraryDesk.Client/Components/BookCard.razor.css has no overflow-wrap line.
+
+## Run it
+
+Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
+
+```powershell
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
+```
+
+Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
+
+## What you should see
+
+Open http://127.0.0.1:58631/style, turn on device emulation (Ctrl+Shift+M) and set the width to 360. The long title runs past the card's right border, and the page scrolls sideways. Stop the copy, add overflow-wrap: anywhere; as the last line inside the .book-card { } rule in LibraryDesk/LibraryDesk.Client/Components/BookCard.razor.css, run the copy again and reload: the title wraps inside the border, the card grows taller and the page doesn't scroll sideways. Click an empty part of the emulated page and zoom to 200 percent (Ctrl+Plus): the title still wraps inside the card.
+
+## Start over
+
+To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter14.md explains the answer.

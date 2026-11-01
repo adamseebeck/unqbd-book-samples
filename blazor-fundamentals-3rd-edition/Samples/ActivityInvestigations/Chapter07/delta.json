@@ -3,12 +3,17 @@
   "baseline": "Samples/Checkpoints/Chapter07",
   "deltas": [
     {
-      "file": "LibraryDesk/Components/Pages/BookDetails.razor",
-      "source_sha256": "6a948c96ff93ae2a65b58a494423b3fa7b087cd226feb0ad857087be68a5ba38",
-      "before": "@page \"/books/{Id:int}\"",
-      "after": "@page \"/books/{Id:int}\"\n@page \"/catalog-item/{Id:int}\""
+      "file": "LibraryDesk/LibraryDesk/Components/App.razor",
+      "source_sha256": "0bae188690e9fbce39d992bf4a08eed72c71eeb04f7d2f2abcb796015780fd0d",
+      "before": "<Routes />",
+      "after": "<Routes @rendermode=\"InteractiveServer\" />"
+    },
+    {
+      "file": "LibraryDesk/LibraryDesk/Components/Pages/BookDetails.razor",
+      "source_sha256": "343ee029a23b7caf1de37f85f7fecebc5613a399767e772b5c7c2e77570085d7",
+      "before": "protected override async Task OnParametersSetAsync() =>",
+      "after": "protected override async Task OnInitializedAsync() =>"
     }
   ],
-  "expected": "The new constrained alias /catalog-item/1 and /catalog-item/2 resolves the correct titles; /catalog-item/999 shows the missing-item branch. Both the original and alias routes reject a non-integer identifier through the not-found path.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "expected": "Open http://127.0.0.1:58631/books/1 and click Blazor. The address changes to /books/2, but the page still shows C# Field Notes and Price: $24.00: the instance was initialized once, with Id 1. Press F5, and Blazor Field Notes appears, because a full load creates a new instance. Stop the copy with Ctrl+C, change OnInitializedAsync back to OnParametersSetAsync and run the copy again: clicking Blazor shows Blazor Field Notes. Stop the copy again, add @page \"/catalog-item/{Id:int}\" under the first @page line and run it: /catalog-item/2 shows Blazor Field Notes, /catalog-item/999 shows No book has this identifier. and /catalog-item/abc shows Not Found."
 }

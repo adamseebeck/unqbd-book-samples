@@ -1,14 +1,6 @@
 {
   "chapter": 23,
-  "baseline": "Samples",
-  "deltas": [
-    {
-      "file": "LibraryDesk/LibraryDesk/Program.cs",
-      "source_sha256": "0767b07c032bbbb583f3ecedbec34def58d5adddffd51d84237f5967838a33ce",
-      "before": "new { Status = \"ok\" }",
-      "after": "new { Status = \"ok\", Revision = \"local-review\" }"
-    }
-  ],
-  "expected": "The changed health endpoint returns status ok and revision local-review when this built copy runs in Production. Both local sign-in roles and sign-out stay absent: GET requests return 404 and the controls are missing. This Production Debug copy returns 405 for valid-token POSTs to the unknown-route control and all three lab paths, while the published Release package returns 404. POSTs without a token return 400 before routing. This marker change is a local exercise; it doesn't deploy anything or change the finished server and PWA packages.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "baseline": "Samples/Checkpoints/Chapter23",
+  "deltas": [],
+  "expected": "Open http://127.0.0.1:58633/healthz: the page shows {\"status\":\"ok\",\"revision\":\"local-review\"}. /lab/signin/reader shows the Not Found page, and /security has no local sign-in buttons."
 }

@@ -1,29 +1,26 @@
-# Chapter 9 Activity Answer
+# Chapter 9 activity answer
 
-- Replace the server query in a disposable copy with a deterministic implementation returning two different book records. Keep the interface and component unchanged, build, and check that the displayed count and titles change.
-- The supplied MemoryCatalogQuery is the reference structure. Explain why making FavoritesState a singleton would be an unrelated and unsafe change.
+The activity swaps the registered ICatalogQuery for a second implementation, then registers FavoritesState as a singleton, both in a copy, to see what a registration controls.
 
-## Solved Source and Execution
+## What you should see
 
-Complete executable extension: `../ActivitySolutions/Chapter09`. Run and test commands are in that checkpoint's README.
+After you change MemoryCatalogQuery to ShortCatalogQuery in the AddSingleton registration in the copy's server Program.cs:
 
-## Reference Implementation
+- /services shows Registered query returns 2 books. and the titles Routing Field Notes and State Field Notes. ServicesDemo.razor didn't change.
+- /books/3 shows No book has this identifier., because BookDetails uses the same registration. (/books/1 now shows Routing Field Notes.)
 
-- `../Checkpoints/Chapter09/LibraryDesk.Client/Models/BookItem.cs`
-- `../Checkpoints/Chapter09/LibraryDesk.Client/Services/ICatalogQuery.cs`
-- `../Checkpoints/Chapter09/LibraryDesk/Services/MemoryCatalogQuery.cs`
-- `../Checkpoints/Chapter09/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter09/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter09/LibraryDesk.Client/Pages/ServicesDemo.razor`
+After you also change `builder.Services.AddScoped<FavoritesState>();` to `builder.Services.AddSingleton<FavoritesState>();`:
 
-## Expected Reasoning
+- Open /favorites in two tabs and click Favorite C# in the first. The second tab changes to Favorites: 1 as well, without a reload.
 
-The component depends on a query contract, while each runtime supplies an implementation with a suitable lifetime. The public stateless query and scoped favorites service illustrate different ownership requirements.
+## Files involved
 
-## Production Notes
+- Samples/ActivityInvestigations/Chapter09: the copy's change and its README.
+- In the copy: LibraryDesk/LibraryDesk/Services/MemoryCatalogQuery.cs, which holds ShortCatalogQuery above MemoryCatalogQuery, and LibraryDesk/LibraryDesk/Program.cs, where you change the two registrations.
+- Unchanged consumers: LibraryDesk/LibraryDesk.Client/Pages/ServicesDemo.razor, LibraryDesk/LibraryDesk/Components/Pages/BookDetails.razor and LibraryDesk/LibraryDesk.Client/Components/FavoritesSummary.razor.
 
-A service boundary is useful when it hides a real responsibility. Avoid adding interfaces for every arithmetic helper merely to imitate architecture. The catalog contract earns its place because server memory and browser HTTP are different implementations of the same reader-facing operation. Tests can fail that operation without hosting a remote website.
+## Why
 
-Keep browser configuration public by design.
+Components ask for ICatalogQuery, not for a class. The registration in Program.cs decides which class they get, so changing one line changed every page that injects the service. That is the point of registering an interface.
 
-An injected service can outlive the component using it. Dispose resources at their actual owning boundary and avoid making a service own an element reference or a renderer callback indefinitely. For database-backed components, short-lived per-operation contexts often fit better than a circuit-long context. This book's in-memory query doesn't exercise a database provider's concurrency behavior; test that against your real provider.
+The lifetime matters as much as the class. A scoped FavoritesState gives each circuit, and so each tab, its own list. A singleton is one instance for the whole server, so both tabs share it, and FavoritesSummary in the second tab hears the Changed event raised by the first. On a real site every visitor would now share one favorites list, which is why FavoritesState is scoped.

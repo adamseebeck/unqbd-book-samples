@@ -1,9 +1,38 @@
-# Chapter 23 Activity Code Delta
+# Chapter 23 activity: a revision on /healthz
 
-From Samples/ActivityInvestigations run `python create_copy.py --chapter 23 --output C:/BookExercises/Chapter23` with Python 3, choosing a new working folder outside the companion code. The script checks that its starting files are unchanged, copies the complete project and applies delta.json to the copy.
+Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter23, the project at the end of Chapter 23, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
 
-From that new directory run `dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Production --urls http://127.0.0.1:58631` with the SDK that global.json selects.
+## Make the copy
 
-The changed health endpoint returns status ok and revision local-review when this built copy runs in Production. Both local sign-in roles and sign-out stay absent: GET requests return 404 and the controls are missing. This Production Debug copy returns 405 for valid-token POSTs to the unknown-route control and all three lab paths, while the published Release package returns 404. POSTs without a token return 400 before routing. This marker change is a local exercise; it doesn't deploy anything or change the finished server and PWA packages.
+In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
 
-To start over, make another fresh copy. Make deliberate failures only in the disposable copy, and run the check to confirm the outcome above.
+```powershell
+python create_copy.py --chapter 23 --output C:/BookExercises/Chapter23
+cd C:/BookExercises/Chapter23
+```
+
+Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
+
+## What you change
+
+The copy is the finished app at the end of Chapter 23, unchanged. You make the change yourself: in LibraryDesk/LibraryDesk/Program.cs, give the /healthz reply a second property, Revision = "local-review".
+
+## Run it
+
+Publish the copy and run its server artifact in Production with the commands from Chapter 23, from the copy's folder:
+
+```powershell
+dotnet publish LibraryDesk/LibraryDesk/LibraryDesk.csproj -c Release -o artifacts/server
+cd artifacts/server
+dotnet LibraryDesk.dll --contentRoot . --urls http://127.0.0.1:58633 --environment Production
+```
+
+Run the artifact rather than dotnet run: outside Development, dotnet run doesn't serve the Blazor script and the scoped styles, so the pages would lose their interactivity and part of their styling. Press Ctrl+C in the terminal when you're done.
+
+## What you should see
+
+Open http://127.0.0.1:58633/healthz: the page shows {"status":"ok","revision":"local-review"}. /lab/signin/reader shows the Not Found page, and /security has no local sign-in buttons.
+
+## Start over
+
+To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter23.md explains the answer.

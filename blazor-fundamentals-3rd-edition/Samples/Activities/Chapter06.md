@@ -1,34 +1,34 @@
-# Chapter 6 Activity Answer
+# Chapter 6 activity answer
 
-- Use the supplied favorites page as the answer reference. Add two books, repeat one Add, then use Clear.
-- Verify counts of one, two, two, and zero. Navigate with a full reload and explain why the in-memory count can reset.
-- Extend the service only through its methods, and confirm a second browser circuit begins with its own favorites set.
-- Add a Remove C# button to FavoritesDemo using Favorites.Remove(1), without exposing its collection for mutation.
-- Add both books, remove C# twice, and check that one favorite remains, with identifier 2. Verify that another independent circuit or scope stays empty.
+The activity has you add a Remove C# button to the favorites page, in a copy, and check how the shared FavoritesState service responds.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the copy's LibraryDesk/LibraryDesk.Client/Pages/FavoritesDemo.razor, the new button goes above FavoritesSummary:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter06`. Its README describes the expected result and how to start over.
+```razor
+<button @onclick="() => Favorites.Remove(1)">Remove C#</button>
+<FavoritesSummary />
+```
 
-## Reference Implementation
+It is written the same way as the Favorite buttons, with Remove in place of Add. No other file changes.
 
-- `../Checkpoints/Chapter06/LibraryDesk.Client/Services/FavoritesState.cs`
-- `../Checkpoints/Chapter06/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter06/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter06/LibraryDesk.Client/Components/FavoritesSummary.razor`
-- `../Checkpoints/Chapter06/LibraryDesk.Client/Components/ThemeLabel.razor`
-- `../Checkpoints/Chapter06/LibraryDesk.Client/Pages/FavoritesDemo.razor`
+## What you should see
 
-## Expected Reasoning
+- On /favorites, the page shows Favorite C#, Favorite Blazor and Remove C# above the summary.
+- Click Favorite C# and Favorite Blazor: the summary shows Favorites: 2 and Saved IDs: 1, 2.
+- Click Remove C#: Favorites: 1 and Saved IDs: 2. Click it again: nothing changes.
+- Open /favorites in a second tab: it starts at Favorites: 0.
+- dotnet test Tests/Chapter06.Tests.csproj ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time. Before you add the button it ends with Build failed with 1 error(s); that error is the failing test, not a compile error.
 
-The favorites example separates component, service, and cascading state. Its scope, notification, and disposal contracts explain both live updates and the limits of in-memory persistence.
+## Files involved
 
-## Production Notes
+- Samples/ActivityInvestigations/Chapter06: the copy's README and its test.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/FavoritesDemo.razor, the page you edit.
+- LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs and LibraryDesk/LibraryDesk.Client/Components/FavoritesSummary.razor, unchanged.
 
-Memory grows with the number of favorites and the number of active server circuits. This exercise accepts any positive identifier to focus on state; a real write boundary must also check that the item exists and that the current user can store it. Persist authenticated favorites behind a server API with ownership checks rather than trusting a browser identifier.
+## Why
 
-Persist only the state the product needs.
+The button changes favorites only through FavoritesState's Remove method; it never touches the set directly. Remove raises Changed only when an ID was really removed, so the second click raises nothing and the summary stays as it is. FavoritesSummary listens for Changed and renders again, which is how a sibling component sees the change. The second tab starts at 0 because FavoritesState is registered as scoped: each circuit, and so each tab, gets its own instance.
 
-Reconnection can restore an existing retained circuit, but server restart, expiry, and a newly selected Auto runtime require a recovery design. .NET 11 offers additional circuit persistence and opt-in pause features; they have serialization and hosting constraints and are not enabled by the scoped registration shown here. This example keeps favorites only in the live service instance; it isn't distributed persistence.
+The test renders the page twice, in two separate service scopes, clicks your button in one of them, and checks that only that summary changed.

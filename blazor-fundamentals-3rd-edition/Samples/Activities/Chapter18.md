@@ -1,28 +1,23 @@
-# Chapter 18 Activity Answer
+# Chapter 18 activity answer
 
-- Run the supplied suite and inspect each test name and outcome. In a disposable copy, replace the FavoritesState HashSet with a List and change Add to append and notify unconditionally.
-- This deliberately permits duplicates: check that the favorites behavior test fails, then restore the HashSet implementation and rerun. Removing only the conditional notification would not defeat HashSet deduplication.
-- The exact reversible change and its copy script are in Samples/ActivityInvestigations/Chapter18. Do not add a test that merely compares service source text.
+The activity shows a component test catching a real bug, and you fix it: in the copy, FavoritesState stores its IDs in a List, which lets the same ID in twice.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+From the copy's folder:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter18`. Its README describes the expected result and how to start over.
+```powershell
+dotnet test LibraryDesk.Tests --filter FavoritesRefresh
+```
 
-## Reference Implementation
+- The filter runs only FavoritesRefreshSiblingsAndIgnoreDuplicates, and it fails after a few seconds. Its error message names WaitForFailedException, because WaitForAssertion kept retrying until its time ran out; ignore its advice about slower hardware. The real cause is the line under it that starts with ----: Assert.Equal() Failure: Strings differ, with Expected: "Favorites: 1" and Actual: "Favorites: 2". The output reads Test summary: total: 1, failed: 1, succeeded: 0, skipped: 0, and the last line says Build failed with 1 error(s). That error is the failing test, not a compile error.
+- After you put the original lines back, `private readonly HashSet<int> ids = [];` and `if (ids.Add(id)) Changed?.Invoke();`, the same command's output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
 
-- `../LibraryDesk.Tests/LibraryDesk.Tests.csproj`
-- `../LibraryDesk.Tests/ComponentTests.cs`
+## Files involved
 
-## Expected Reasoning
+- Samples/ActivityInvestigations/Chapter18: the copy's change and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs (the bug and your fix) and LibraryDesk.Tests/ComponentTests.cs (the test that catches it).
 
-Component tests check rendering contracts quickly; runtime and browser tests cover what they can't. Pinned APIs and real assertions make the suite reproducible and useful.
+## Why
 
-## Production Notes
-
-Keep failure cases deliberate and bounded. Tests should not call public demonstration APIs, production user stores, mail senders, or payment endpoints. The query replacements make the required data and failure explicit. A test suite that depends on an unrelated external service can report network availability as an application regression.
-
-Use browser tests for browser behavior.
-
-The suite's assertions are intentionally focused. It does not mirror every implementation line or promise complete accessibility from a markup check. Extend it when a reproduced defect reveals a missing contract, such as an older HTTP response replacing a newer filter result.
+The test clicks Favorite C# twice and expects the summary to say Favorites: 1. A HashSet ignores the second Add, and its Add returns false, so the original code raises Changed only for a real change. A List accepts the duplicate, so the count becomes 2 and the test fails with the exact text the user would see. --filter matches test names that contain FavoritesRefresh, so you get a quick answer from one test before you run the whole suite.

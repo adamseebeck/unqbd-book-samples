@@ -1,25 +1,38 @@
-# Chapter 1 Activity Answer
+# Chapter 1 activity answer
 
-- Open the Home component and replace the introductory paragraph with a description of your own public catalog. Keep the link as a native anchor.
-- Before adding a button, write down where its eventual handler must execute. The supplied Home file is the reference solution for a static landing page; Chapter 3 supplies the interactive counter.
+The activity has two parts, written in a text file because there is no project yet: your catalog description as a paragraph element, and a render mode choice, from the rows of Figure 1.1, for three features.
 
-## Solved Source and Execution
+## Your catalog description
 
-Exact static-copy delta: `../ActivitySolutions/Chapter01/Home.razor`; its README names the target project.
+Any two sentences that describe a catalog you would like to build are right. Write them in the same shape as the first paragraph of LibraryDesk's Home page: an opening `<p>`, your sentences on their own lines, then `</p>`. For example:
 
-## Reference Implementation
+```razor
+<p>
+    A small catalog of the field guides in our team library,
+    with the price and a short note for each.
+    Anyone can browse it; only staff can change it.
+</p>
+```
 
-- `../global.json`
-- `../LibraryDesk/LibraryDesk/Components/Pages/Home.razor`
+Keep the file. In Chapter 3 you paste this element into LibraryDesk/Components/Pages/Home.razor in place of the first `<p>` element. The rest of the page stays as Chapter 1 printed it.
 
-## Expected Reasoning
+## Which row and which line each feature needs
 
-A component model and an execution model answer different questions. LibraryDesk will use static pages for content and explicit interactive boundaries for behavior, while keeping private decisions on the server.
+| Feature | Row in Figure 1.1 | Render mode line | Why |
+|---|---|---|---|
+| A link to the catalog page | Static SSR | No line | Following a link is something plain HTML does. The browser requests the new address and the server renders it, so no C# needs to run after the page arrives. |
+| A Favorite button that updates a count on the page | An interactive row: Interactive Server, Interactive WebAssembly or Interactive Auto | For example `@rendermode InteractiveServer` | A click must run C# to add the book and change the count. With static SSR the button would appear, but clicking it would do nothing, because nothing stays running after the HTML is sent. |
+| A search box that filters the book list as you type | An interactive row, as for the Favorite button | For example `@rendermode InteractiveServer` | Every keystroke must run C# to filter the list and render the new result. Static SSR could only filter after a full form post. |
 
-## Production Notes
+Any of the three interactive modes works for the button and the search box: `@rendermode InteractiveServer`, `@rendermode InteractiveWebAssembly` or `@rendermode InteractiveAuto`. The choice between them is about where the code runs: on the server over a circuit, in the browser after a download, or first one and then the other. LibraryDesk uses Interactive Server for its first interactive page in Chapter 3, and Chapter 16 compares all four modes side by side.
 
-Server interactivity requires server memory and an active network path for each connected circuit. WebAssembly moves component work to the browser but adds startup downloads and exposes its assemblies and configuration to the user. Static rendering avoids an interactive runtime for content that needs only links and form posts. None of these choices is always faster. Measure the real page in your deployment environment before you choose one for speed.
+Put the line on the smallest component that needs it. A page with one Favorite button can stay static, with the line on the button's own component, as Chapter 16 shows.
 
-Never put secrets in downloadable client code.
+## Files involved
 
-The examples target .NET 11 and use the .NET 11 SDK, version 11.0.100 or later.
+- Samples/LibraryDesk/LibraryDesk/Components/Pages/Home.razor: the Home page from Chapter 1, the page your paragraph goes into.
+- Samples/global.json: the SDK pin from Chapter 1.
+
+## Why
+
+The render mode decides where a component's C# runs. Make a component interactive only when a click or a keystroke must run C#; everything else can stay static, which costs no server memory and downloads nothing extra.

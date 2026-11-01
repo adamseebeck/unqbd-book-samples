@@ -1,34 +1,32 @@
-# Chapter 21 Activity Answer
+# Chapter 21 activity answer
 
-- Use the supplied accessibility page and FeedbackForm as the answer reference. Complete empty, invalid-email, and valid-submission cases with the keyboard.
-- Check label associations, focus visibility and the status message. Run an automated audit if you have one, and note whether you also tested with a screen reader or a physical device.
-- Add a message help paragraph with a unique id explaining the five-to-three-hundred-character bound, and reference it from InputTextArea through aria-describedby.
-- Keep the existing label and validation elements. Verify the help relationship and repeat invalid/valid keyboard form cases.
+The activity adds a help text to the feedback form's Message box, in a copy, and connects it with aria-describedby. Here is the change; compare it with yours.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In the copy's LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, the help paragraph sits above the Message box, and the box's aria-describedby lists both ids:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter21`. Its README describes the expected result and how to start over.
+```razor
+    <p id="feedback-message-help">Use 5 to 300 characters. This example saves locally.</p>
+    <InputTextArea id="feedback-message"
+                   aria-required="true"
+                   aria-describedby="feedback-message-help feedback-message-error"
+                   @bind-Value="model.Message" />
+```
 
-## Reference Implementation
+## What you should see
 
-- `../Checkpoints/Chapter21/LibraryDesk.Client/Models/FeedbackInput.cs`
-- `../Checkpoints/Chapter21/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter21/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter21/LibraryDesk.Client/Components/FeedbackForm.razor`
-- `../Checkpoints/Chapter21/LibraryDesk.Client/Pages/Accessibility.razor`
-- `../Checkpoints/Chapter21/LibraryDesk/Components/Layout/MainLayout.razor`
-- `../Checkpoints/Chapter21/LibraryDesk/wwwroot/app.css`
+- Open /accessibility and inspect the Message box in the Accessibility pane: its description is the help text, Use 5 to 300 characters. This example saves locally.
+- Submit the form empty: the description is now the help text followed by The Message field is required.
+- With the keyboard only, the empty, invalid-email and valid cases behave as before: Tab reaches each box after its label, the focus outline is visible, and the status message reports the result.
+- From the copy's folder, dotnet test Tests/Chapter21.Tests.csproj runs the copy's test. The output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
 
-## Expected Reasoning
+## Files involved
 
-Semantic controls, labels, visible focus, and understandable validation are the baseline. Testing real tasks in a browser with assistive technology shows what markup inspection alone can't.
+- Samples/ActivityInvestigations/Chapter21: the README, delta.json and Tests folder that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter21, unchanged.
+- In the copy: LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor.
+- Unchanged: LibraryDesk.Tests/AccessibilityTests.cs, the suite's own check of the form's labels and descriptions.
 
-## Production Notes
+## Why
 
-Repeated components must not duplicate document ids when they appear together. The current pages render one FeedbackForm at a time, so their fixed identifiers are unambiguous. A reusable product form rendered multiple times should generate or accept a unique id prefix and keep every label and message relationship aligned.
-
-Test the task, not just the empty screen.
-
-Color contrast, zoom, reduced-motion preferences, input method, error recovery, and screen-reader behavior all belong in your product's acceptance tests. A local viewport check doesn't cover every disability or device, so note which browsers and interactions you tested and which still need testing.
+aria-describedby takes a list of ids. A screen reader reads the label as the box's name, then the text of each listed element, in order, as its description. The error element is empty until validation fails, so before a submit the description is only the help text, and after a failed submit the error follows it. The label still names the box through for and id, so adding a description changes nothing about how the box is named or reached.

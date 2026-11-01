@@ -1,6 +1,7 @@
 using Bunit;
 using LibraryDesk.Client.Components;
 using Xunit;
+
 public sealed class AccessibilityTests
 {
     [Fact]
@@ -13,11 +14,17 @@ public sealed class AccessibilityTests
         {
             var id = "feedback-" + name;
             var field = cut.Find("#" + id);
-            Assert.Equal(id + "-error", field.GetAttribute("aria-describedby"));
-            Assert.Equal("true", field.GetAttribute("aria-required"));
-            Assert.Equal("true", field.GetAttribute("aria-invalid"));
-            Assert.NotEmpty(cut.Find("#" + id + "-error .validation-message").TextContent);
-            Assert.Equal(id, cut.Find("label[for='" + id + "']").GetAttribute("for"));
+            var error = cut.Find(
+                $"#{id}-error .validation-message");
+            var label = cut.Find($"label[for='{id}']");
+            Assert.Equal($"{id}-error",
+                field.GetAttribute("aria-describedby"));
+            Assert.Equal("true",
+                field.GetAttribute("aria-required"));
+            Assert.Equal("true",
+                field.GetAttribute("aria-invalid"));
+            Assert.NotEmpty(error.TextContent);
+            Assert.Equal(id, label.GetAttribute("for"));
         }
     }
 }

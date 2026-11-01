@@ -1,24 +1,43 @@
 # Blazor Fundamentals, Third Edition: companion code
 
-Companion code for *Blazor Fundamentals, Third Edition* by Adam Seebeck: the LibraryDesk application built up across 23 chapters with .NET 11. The code is in the `Samples` folder; paths in the book such as `Samples/Checkpoints/Chapter03` refer to it.
+Companion code for *Blazor Fundamentals, Third Edition* by Adam Seebeck: the LibraryDesk application, built up across 23 chapters with .NET 11. The code is in the Samples folder; paths in the book such as Samples/Checkpoints/Chapter03 refer to it.
 
-- `Samples/Checkpoints` has nineteen minimal complete server/client checkpoints for Chapters 2 through 17, 19, 21 and 22. Each has a README with its run command.
-- `Samples/LibraryDesk` is the finished reference application. `Samples/LibraryDesk.Tests` holds Chapter 18's component tests, and `Samples/LibraryDesk.Pwa` is Chapter 20's progressive web app.
-- `Samples/Activities` maps every chapter activity to its source and expected observations. `Samples/ActivitySolutions` has solved checkpoints for Chapters 4, 5, 9 and 13.
-- `Samples/ActivityInvestigations` creates a disposable working copy for an activity: `python create_copy.py --chapter 6 --output <new folder>`.
+## Prerequisites
 
-## Requirements
+- The .NET 11 SDK, version 11.0.100 or later. Each global.json selects it and accepts later .NET 11 feature bands; the framework packages use the matching framework version: 11.0.0 with SDK 11.0.100, or a later 11.0 patch, such as 11.0.1, with a later SDK. This code uses 11.0.0.
+- Python 3. It runs the activity copy script and, in Chapters 20 and 23, serves the published offline app.
+- A current browser such as Microsoft Edge or Google Chrome.
+- A PowerShell terminal. Windows PowerShell works on Windows. On macOS or Linux, install PowerShell 7 from https://learn.microsoft.com/powershell/scripting/install/installing-powershell and start it with `pwsh`. Use that shell for the book's commands. Paths beginning with `~/` start in your home folder. On macOS and Linux, use `curl` wherever the book's Windows commands say `curl.exe`.
+- A code editor if you like: Visual Studio (a version that supports .NET 11) and Visual Studio Code with the C# Dev Kit extension both work. The command line is the route the book describes.
 
-Install the .NET 11 SDK, version 11.0.100 or later. Each project's `global.json` selects it and accepts later .NET 11 feature bands, and the framework packages use 11.0.0. Visual Studio 2026 or Visual Studio Code with C# Dev Kit both work; the command line is the reproducible route.
+## What is in Samples
 
-## Run a checkpoint
+- Samples/Checkpoints/Chapter02 to Chapter23: the LibraryDesk project at the end of each chapter, laid out like your working folder, each with a README.
+- Samples/LibraryDesk: the finished app (the solution folder with the server and client projects). Samples/LibraryDesk.Tests holds its component tests, Samples/LibraryDesk.Pwa is Chapter 20's offline app, and Samples/LibraryDesk.Pwa.Tests holds the offline app's storage tests.
+- Samples/Activities: the answer to every chapter's activity.
+- Samples/ActivityInvestigations: create_copy.py and each activity's setup. It makes a copy of a chapter's checkpoint for the activity, with any change or Tests folder the activity needs.
+- Samples/ActivitySolutions: solved copies for the activities of Chapters 4, 5, 11 and 13.
 
-Copy the checkpoint folder you want to a separate working folder, then run this from that folder:
+See Samples/README.md for the folder map and more detail.
+
+## Follow along and catch up
+
+Work through the chapters in order, in one working folder. Chapter 2 creates it, and every later chapter adds to the same project. If you skip a chapter, or your project stops working and you can't find why, copy the previous chapter's checkpoint folder, Samples/Checkpoints/ChapterNN, to a new working folder and continue there.
+
+## Run and test
+
+From the working folder, run the app, typed as one line:
 
 ```powershell
-dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
 ```
 
-Use one host at a time or choose a different port. For Chapter 18's tests, run `dotnet test LibraryDesk.Tests/LibraryDesk.Tests.csproj` from `Samples`.
+The terminal shows Now listening on: http://127.0.0.1:58631, and the app is ready in your browser at that address. Press Ctrl+C to stop it. From Chapter 18 on, run the component tests with the app stopped:
+
+```powershell
+dotnet test LibraryDesk.Tests
+```
+
+For an activity, go to Samples/ActivityInvestigations and run `python create_copy.py --chapter 6 --output ../Chapter06Practice`, replacing 6 with the chapter number and choosing a new folder. The relative output path works on each supported system. The README in the copy gives the command to run and the result to expect.
 
 Found a problem in the code? Contact us at [unqbd.com/Contact](https://www.unqbd.com/Contact).

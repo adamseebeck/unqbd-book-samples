@@ -1,0 +1,13 @@
+{
+  "chapter": 13,
+  "baseline": "Samples/Checkpoints/Chapter13",
+  "deltas": [
+    {
+      "file": "LibraryDesk/LibraryDesk.Client/Components/SelectBook.razor",
+      "source_sha256": "0d00680895aa0b64712407a9f316eb5ac0c5346faf5d9c6613d2c13d51b7435e",
+      "before": "    private Task Select() => Selected.InvokeAsync(Id);",
+      "after": "    private Task Select()\n    {\n        if (Id == 2) throw new InvalidOperationException();\n        return Selected.InvokeAsync(Id);\n    }"
+    }
+  ],
+  "expected": "On http://127.0.0.1:58631/templates, Select C# Field Notes shows Selected identifier: 1. Select Blazor Field Notes replaces the list with The catalog component failed. Reload to retry., and the line still reads Selected identifier: 1, because the exception happened before the callback reached the page. After you add new(3, \"Database Field Notes\", 26m) to the books array in TemplatesDemo.razor and run the copy again, a Select Database Field Notes button appears below the other two, and clicking it shows Selected identifier: 3. After you add the price span to the template and run the copy again, the rows read $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes and $26.00 Select Database Field Notes. The solved third book and price layout are in Samples/ActivitySolutions/Chapter13."
+}

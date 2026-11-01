@@ -1,20 +1,39 @@
+using AngleSharp.Dom;
 using Bunit;
-using Xunit;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+using LibraryDesk.Client.Pages;
 using LibraryDesk.Client.Services;
+
 public sealed class InvestigationTests
 {
-    [Fact] public void RemoveRefreshesSiblingAndDoesNotChangeAnotherScope()
+    [Fact]
+    public void RemoveRefreshesTheSummaryInOneScopeOnly()
     {
-        using var first = new BunitContext(); using var second = new BunitContext();
-        first.Services.AddScoped<FavoritesState>(); second.Services.AddScoped<FavoritesState>();
-        var cut = first.Render<LibraryDesk.Client.Pages.FavoritesDemo>();
-        var untouched = second.Render<LibraryDesk.Client.Pages.FavoritesDemo>();
-        cut.FindAll("button")[0].Click(); cut.FindAll("button")[1].Click();
-        cut.WaitForAssertion(() => Assert.Equal("Favorites: 2", cut.Find("#favorite-count").TextContent));
-        cut.Find("#remove-csharp").Click(); cut.Find("#remove-csharp").Click();
-        cut.WaitForAssertion(() => Assert.Equal("Favorites: 1", cut.Find("#favorite-count").TextContent));
-        Assert.Equal(new[] { 2 }, first.Services.GetRequiredService<FavoritesState>().Ids);
-        Assert.Equal("Favorites: 0", untouched.Find("#favorite-count").TextContent);
+        using var first = new BunitContext();
+        using var second = new BunitContext();
+        first.Services.AddScoped<FavoritesState>();
+        second.Services.AddScoped<FavoritesState>();
+        var cut = first.Render<FavoritesDemo>();
+        var other = second.Render<FavoritesDemo>();
+
+        Button(cut, "Favorite C#").Click();
+        Button(cut, "Favorite Blazor").Click();
+        cut.WaitForAssertion(() => Assert.Equal("Favorites: 2",
+            cut.Find("#favorite-count").TextContent));
+
+        Button(cut, "Remove C#").Click();
+        Button(cut, "Remove C#").Click();
+        cut.WaitForAssertion(() => Assert.Equal("Favorites: 1",
+            cut.Find("#favorite-count").TextContent));
+        Assert.Equal("Saved IDs: 2",
+            cut.Find("#favorite-ids").TextContent);
+        Assert.Equal("Favorites: 0",
+            other.Find("#favorite-count").TextContent);
     }
+
+    private static IElement Button(
+        IRenderedComponent<FavoritesDemo> cut, string text) =>
+        cut.FindAll("button")
+            .Single(b => b.TextContent.Trim() == text);
 }

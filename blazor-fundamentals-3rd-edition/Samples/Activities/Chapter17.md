@@ -1,37 +1,42 @@
-# Chapter 17 Activity Answer
+# Chapter 17 activity answer
 
-- Use the complete Catalog page and its existing services as the answer reference. Filter for Blazor, favorite it twice, clear the filter, and favorite C#.
-- Check that the current-runtime count is two. Follow /books/2 and verify the same title.
-- Reload and revisit, noting which renderer runs and explaining any reset. The UI should never say the favorites are saved.
-- Add a Clear catalog favorites button and handler to Catalog that calls Favorites.Clear and updates the current-runtime status.
-- Repeat the original two-book scenario, clear twice and check for zero state and a zero status, without adding durable storage.
+The task is a Clear catalog favorites button on /catalog that empties FavoritesState and updates the status. Here is one way to write it; compare it with yours.
 
-## Solved Source and Execution
+## The change
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+In LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor, the button sits just above the status line:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter17`. Its README describes the expected result and how to start over.
+```razor
+<button id="clear-catalog-favorites" @onclick="ClearFavorites">
+    Clear catalog favorites
+</button>
+<p role="status">@status</p>
+```
 
-## Reference Implementation
+and the method sits above Add:
 
-- `../Checkpoints/Chapter17/LibraryDesk.Client/Models/BookItem.cs`
-- `../Checkpoints/Chapter17/LibraryDesk.Client/Services/ICatalogQuery.cs`
-- `../Checkpoints/Chapter17/LibraryDesk/Services/MemoryCatalogQuery.cs`
-- `../Checkpoints/Chapter17/LibraryDesk.Client/Services/FavoritesState.cs`
-- `../Checkpoints/Chapter17/LibraryDesk.Client/Services/HttpCatalogQuery.cs`
-- `../Checkpoints/Chapter17/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter17/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter17/LibraryDesk.Client/Pages/Catalog.razor`
-- `../Checkpoints/Chapter17/LibraryDesk/Components/Pages/BookDetails.razor`
+```csharp
+    private void ClearFavorites()
+    {
+        Favorites.Clear();
+        status =
+            $"Favorites in this runtime: {Favorites.Ids.Count}.";
+    }
+```
 
-## Expected Reasoning
+## What you should see
 
-The capstone checks continuity: one domain model, stable routes, runtime-specific query implementations, and honest state lifetimes. Its renderer label and explicit local outcomes keep the integration testable.
+- Open http://127.0.0.1:58631/catalog. Favorite Blazor Field Notes and C# Field Notes: the status says Favorites in this runtime: 2.
+- Click Clear catalog favorites: Favorites in this runtime: 0.
+- Click it again: still 0.
+- From the copy's folder, dotnet test Tests/Chapter17.Tests.csproj favorites two books, clicks your button twice and checks the service and the status. The output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded. If your button has a different id, the test fails with ElementNotFoundException.
 
-## Production Notes
+## Files involved
 
-The catalog data is public, so it can safely appear in prerendered HTML and downloadable browser responses. A private catalog needs authorization at the query or endpoint boundary as well as page presentation. The capstone doesn't configure a client authentication-state provider, and Chapter 11's server security examples don't cover browser authentication.
+- Samples/ActivityInvestigations/Chapter17: the README, delta.json and Tests folder that create_copy.py uses. The copy itself is Samples/Checkpoints/Chapter17, unchanged.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/Catalog.razor (your change).
+- Unchanged: LibraryDesk/LibraryDesk.Client/Services/FavoritesState.cs, whose Clear method already exists.
 
-Never perform a write as an initialization side effect.
+## Why
 
-Catch expected transport and data-format failures without exposing internal exception text. Cancellation and missing data need distinct design choices if the source becomes a real backend. The sample keeps a short public dataset and no background refresh, so it has no conflict resolution, offline synchronization or persistence across machines.
+The page changes favorites only through FavoritesState's methods, as every other page does, and then writes the status from the service's own count, so the text always matches the real state. Clear raises Changed only when there was something to clear, and the second click finds nothing, so the count stays at 0. The status says "in this runtime" because Catalog runs in Interactive Auto: in Server mode the favorites live in the circuit's FavoritesState, in WebAssembly mode in the browser tab's, and a reload or a new runtime starts again at 0.

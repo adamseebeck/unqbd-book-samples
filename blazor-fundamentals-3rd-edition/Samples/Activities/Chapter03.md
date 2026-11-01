@@ -1,29 +1,43 @@
-# Chapter 3 Activity Answer
+# Chapter 3 activity answer
 
-- Run /run, click twice, and record the displayed value. Reload the whole document and record the new component value.
-- Change the heading through Hot Reload, then make an edit that requires restarting and compare the result. The supplied Run.razor is the answer reference: the private count belongs to the component, not durable storage.
-- Implement the heading My first server counter in the copied Run component. Check it with two clicks and a full reload, and record which source edit actually required a restart.
+The activity adds a Reset button to the counter page while dotnet watch runs, in a copy of the Chapter 3 project, and compares a change Hot Reload applies with one that needs a restart.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+- Two clicks on Add one show Current count: 2.
+- When you save the Reset button and method, the terminal reports File updated and then C# and Razor changes applied. The page shows the Reset button and still says Current count: 2: Hot Reload changed the running component without creating a new one.
+- Click Reset: Current count: 0.
+- When you change private int count; to private long count; and save, the terminal reports Restart is needed to apply the changes, gives the reason (error ENC0009) and asks Do you want to restart your app? After you press y, the app restarts and the count starts again at 0.
+- After you stop dotnet watch, dotnet test Tests/Chapter03.Tests.csproj ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time.
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter03`. Its README describes the expected result and how to start over.
+## The change
 
-## Reference Implementation
+LibraryDesk/LibraryDesk.Client/Pages/Run.razor in the copy:
 
-- `../Checkpoints/Chapter03/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter03/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter03/LibraryDesk.Client/Pages/Run.razor`
+```razor
+@page "/run"
+@rendermode InteractiveServer
+<h1>First run</h1>
+<p>Renderer: @RendererInfo.Name</p>
+<p role="status" id="count">Current count: @count</p>
+<button @onclick="Increment">Add one</button>
+<button @onclick="Reset">Reset</button>
 
-## Expected Reasoning
+@code {
+    private int count;
+    private void Increment() => count++;
+    private void Reset() => count = 0;
+}
+```
 
-The counter turns a render check into an execution check. File responsibilities, process-aware breakpoints, and explicit startup commands make later failures easier to isolate.
+## Files involved
 
-## Production Notes
+- Samples/ActivityInvestigations/Chapter03: the copy's README and its test.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/Run.razor, the page you edit.
+- Samples/Checkpoints/Chapter03: the project the copy starts from.
 
-Detailed exceptions help a local developer, but they expose internals to untrusted users. Keep the development environment local and let production use its exception handler. A browser connection failure should present a recovery path rather than an unexplained frozen page. The template's reconnection UI belongs to the same server circuit behavior; it cannot preserve state after the server has discarded that circuit.
+## Why
 
-Keep one known startup command.
+Hot Reload patches the running code where it can. A new button and a new method are additions it supports, so it applies them to the component that is already on the page, and the count you had stays. A field's type is part of the class's shape, which a running app can't change, so dotnet watch asks for a restart, and a restart creates a new component whose count starts at 0. When Hot Reload asks for a restart, restart.
 
-Note the command, environment, URL and process for each run. Those four facts keep you from mistaking an old app on another port for the current build. Local debugging shows how this sample behaves, not how it performs or stays available in production.
+The test renders Run.razor without a browser, clicks Add one twice and Reset once, and checks the count. It finds the Reset button by its text, so it passes only once your button is there.

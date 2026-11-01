@@ -1,32 +1,34 @@
-# Chapter 16 Activity Answer
+# Chapter 16 activity answer
 
-- Use the supplied Modes page as the answer reference. Record each renderer after startup, increment each counter once, and reload.
-- Then visit /auto-counter twice after allowing the client assets to download, recording its actual renderer on each visit. Explain any state reset rather than treating it as a defect in the counter.
-- Add a serializable int Step parameter, defaulting to 1, to ModeCounter and increment count by Step.
-- Set the Server, WebAssembly and Auto island parameters to 2, 3 and 4. Click each once, record the actual renderers and resulting counts, then explain the full-reload reset.
+The copy's Modes.razor passes a Step value to each island on /modes. You give ModeCounter the parameter that receives it.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+- As the copy is created, /modes shows An unhandled exception occurred while processing the request. and InvalidOperationException: Object of type 'LibraryDesk.Client.Components.ModeCounter' does not have a property matching the name 'Step'. The server can't prerender the page, because ModeCounter has no Step parameter.
+- After your change, open /modes and wait until no counter reads Static. Click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4.
+- Press F5. All three counts return to 0.
+- Chapter 18 shows how to check a parameter like Step with a component test. The copy already has one: after your change, from the copy's folder, dotnet test Tests/Chapter16.Tests.csproj checks one click with Step 2, 3 and 4. The output reads Test summary: total: 3, failed: 0, succeeded: 3, skipped: 0, and the last line starts with Build succeeded.
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter16`. Its README describes the expected result and how to start over.
+## The solved ModeCounter
 
-## Reference Implementation
+```razor
+<p data-renderer="@RendererInfo.Name">
+    Renderer: @RendererInfo.Name. Count: @count
+</p>
+<button @onclick="() => count += Step">Increment mode counter</button>
+@code {
+    [Parameter] public int Step { get; set; } = 1;
+    private int count;
+}
+```
 
-- `../Checkpoints/Chapter16/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter16/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter16/LibraryDesk.Client/Components/ModeCounter.razor`
-- `../Checkpoints/Chapter16/LibraryDesk/Components/Pages/Modes.razor`
-- `../Checkpoints/Chapter16/LibraryDesk.Client/Pages/AutoCounter.razor`
+The copy's LibraryDesk/LibraryDesk/Components/Pages/Modes.razor sets Step="2" (Server), Step="3" (WebAssembly) and Step="4" (Auto).
 
-## Expected Reasoning
+## Files involved
 
-A static parent can host explicit interactive islands, while prerender and runtime activation have different instances. Renderer identity and actual clicks make those boundaries observable.
+- Samples/ActivityInvestigations/Chapter16: the copy's change to Modes.razor, its README and its Tests folder.
+- In the copy: LibraryDesk/LibraryDesk.Client/Components/ModeCounter.razor (your change) and LibraryDesk/LibraryDesk/Components/Pages/Modes.razor.
 
-## Production Notes
+## Why
 
-Server-rendered HTML is generated for a request, not automatically at application build time. A Blazor Web App with Server interactivity still needs an ASP.NET Core host even when some routes are static. Copying its initial HTML to static storage does not preserve server endpoints or circuits. Standalone WebAssembly has a different deployment artifact, discussed in Chapter 23.
-
-Test each runtime you support.
-
-The .NET 11 template uses BasePath in the document head and includes a reconnection component for Server circuits. Having them doesn't mean subdirectory hosting or reconnection after circuit expiry works. Check asset URLs, direct routes, transport recovery and fresh state in your real deployment. Shared components that compile still need a browser test to show that WebAssembly starts and the page is interactive.
+A component accepts only the parameters it declares with [Parameter], so a Step attribute on a component without that property fails when the server renders the page. A parameter that crosses into an island must be serializable data, because the island runs in another runtime: on the server over a circuit, or in the browser. A plain int is data, so it can cross into every island. Each island is a separate instance with its own count, so the steps never mix. Auto shows WebAssembly here because the page also has a WebAssembly island (rule 1). The reload creates new instances, so every count starts again at 0.

@@ -3,7 +3,7 @@ using Xunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using LibraryDesk.Components.Pages;
+using LibraryDesk.Components;
 public sealed class InvestigationTests
 {
     [Fact]
@@ -14,9 +14,9 @@ public sealed class InvestigationTests
             .AddJsonFile("appsettings.json").AddJsonFile("appsettings.Development.json").Build();
         var sink = new CaptureProvider();
         using var factory = LoggerFactory.Create(logging => logging.AddConfiguration(config.GetSection("Logging")).AddProvider(sink));
-        var logger = factory.CreateLogger<Diagnostics>();
-        context.Services.AddSingleton<ILogger<Diagnostics>>(logger);
-        var cut = context.Render<Diagnostics>();
+        var logger = factory.CreateLogger<CatalogReadRecorder>();
+        context.Services.AddSingleton<ILogger<CatalogReadRecorder>>(logger);
+        var cut = context.Render<CatalogReadRecorder>();
         cut.Find("button").Click();
         cut.Find("button").Click();
         Assert.Contains("Reads recorded: 2", cut.Markup);

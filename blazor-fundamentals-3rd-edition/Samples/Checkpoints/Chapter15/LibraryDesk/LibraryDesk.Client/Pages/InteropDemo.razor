@@ -1,0 +1,108 @@
+@page "/interop"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<h1>JavaScript interop</h1>
+<label for="focus-target">Focus target</label>
+<input id="focus-target" @ref="target" />
+<button @onclick="Focus" disabled="@(module is null)">
+    Focus input
+</button>
+<button @onclick="ReadTime" disabled="@(module is null)">
+    Read browser time
+</button>
+<p role="status">@status</p>
+
+@code {
+    private ElementReference target;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<InteropDemo>? reference;
+    private bool disposed;
+    private string status = "Ready.";
+
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
+    {
+        if (!firstRender) return;
+        try
+        {
+            var imported =
+                await JS.InvokeAsync<IJSObjectReference>(
+                    "import", "./js/catalog.js");
+            if (disposed)
+            {
+                await ReleaseModule(imported);
+                return;
+            }
+            module = imported;
+            reference = DotNetObjectReference.Create(this);
+        }
+        catch (JSException)
+        {
+            status = "Browser module unavailable. "
+                + "Reload to retry.";
+        }
+        if (!disposed) StateHasChanged();
+    }
+
+    private async Task Focus()
+    {
+        if (module is null) return;
+        try
+        {
+            var focused = await module.InvokeAsync<bool>(
+                "focusElement", target);
+            status = focused ? "Input focused." : "Focus failed.";
+        }
+        catch (JSException)
+        {
+            status = "Focus is unavailable.";
+        }
+    }
+
+    private async Task ReadTime()
+    {
+        if (module is null) return;
+        try
+        {
+            await module.InvokeVoidAsync("notifyTime", reference);
+        }
+        catch (JSException)
+        {
+            status = "Browser time is unavailable.";
+        }
+    }
+
+    [JSInvokable]
+    public Task ReceiveTime(string isoTime)
+    {
+        if (disposed) return Task.CompletedTask;
+        status = isoTime;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (disposed) return;
+        disposed = true;
+        reference?.Dispose();
+        reference = null;
+        var owned = module;
+        module = null;
+        if (owned is not null) await ReleaseModule(owned);
+    }
+
+    private static async ValueTask ReleaseModule(
+        IJSObjectReference owned)
+    {
+        try
+        {
+            await owned.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit is already gone.
+        }
+    }
+}

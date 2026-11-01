@@ -1,5 +1,21 @@
-# Chapter 11 Executable Checkpoint
+# LibraryDesk at the end of Chapter 11
 
-Copy this complete directory to a working folder, keep its global.json active, and run `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631`. Use one host at a time or choose a different port. The generated App shell and client assembly are included; focused files are listed in the chapter. Data Protection keys in this local example are ephemeral; a real deployment needs durable key storage.
+This folder is the LibraryDesk project as it stands at the end of Chapter 11, laid out like your own working folder: global.json and the LibraryDesk solution folder (LibraryDesk.sln, the LibraryDesk server project and the LibraryDesk.Client project).
 
-Stop the Development host before you run it in Production: `dotnet run --project LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Production --urls http://127.0.0.1:58631`. This checkpoint has no Production feedback page. Check that a GET to each lab path returns 404 and that the local sign-in controls are gone. Chapter 23 tests a valid-token POST against the finished app's /static-feedback form.
+## Catch up from here
+
+If you skipped Chapter 11, or your project stopped working and you can't find why, copy this whole folder to a new working folder, such as C:/BookExercises/LibraryDesk, and continue with Chapter 12 there. Work in the copy, so this folder stays as it is.
+
+## Run it
+
+From the working folder, run this command, typed as one line:
+
+```powershell
+dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
+```
+
+The terminal shows Now listening on: http://127.0.0.1:58631. Open that address in your browser. Press Ctrl+C in the terminal to stop the app.
+
+## What Chapter 11 added
+
+Chapter 11 added http://127.0.0.1:58631/security (Security in the menu), where you sign in as the Development test accounts reader and librarian, plus the /staff and /denied pages and the /api/staff/count and /healthz endpoints.

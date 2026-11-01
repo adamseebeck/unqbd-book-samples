@@ -1,14 +1,6 @@
 {
   "chapter": 21,
   "baseline": "Samples/Checkpoints/Chapter21",
-  "deltas": [
-    {
-      "file": "LibraryDesk.Client/Components/FeedbackForm.razor",
-      "source_sha256": "cea9a718466248251f6b633277a3a296e6e7d402a4f20307b1402dd4826b3b87",
-      "before": "    <InputTextArea id=\"feedback-message\" aria-required=\"true\" aria-describedby=\"feedback-message-error\" @bind-Value=\"model.Message\" />",
-      "after": "    <p id=\"feedback-message-help\">Use 5 to 300 characters. This example saves locally.</p>\n    <InputTextArea id=\"feedback-message\" aria-required=\"true\" aria-describedby=\"feedback-message-help feedback-message-error\" @bind-Value=\"model.Message\" />"
-    }
-  ],
-  "expected": "The message textarea references the new existing help paragraph through aria-describedby, while its original label still targets the textarea. Invalid and valid form cases behave as before. Check keyboard and focus behavior in a browser, and screen-reader behavior if you have one.",
-  "status": "Run the copied project to confirm the expected outcome."
+  "deltas": [],
+  "expected": "Open http://127.0.0.1:58631/accessibility and inspect the Message box in the Accessibility pane: its description is the help text, Use 5 to 300 characters. This example saves locally. Submit the form empty: the description is now the help text followed by The Message field is required. The label, the focus outline and the status message work the same with the keyboard alone."
 }

@@ -1,30 +1,41 @@
-# Chapter 15 Activity Answer
+# Chapter 15 activity answer
 
-- Compare a disposable ordinary foreach version with the supplied VirtualDemo using the same ten thousand records. Record the rendered row counts before and after scrolling.
-- Restore Virtualize and verify later identifiers appear. The supplied fixed-height implementation is the answer reference.
-- This comparison counts rows; it isn't a latency benchmark, which needs controlled timing and a representative workload.
+The activity starts from a copy where VirtualDemo renders every row with an ordinary @foreach loop. You count its elements, then bring Virtualize back with more overscan and count again.
 
-## Solved Source and Execution
+## What you should see
 
-The solved code change applies to a complete copy of the project; use the copy script instead of editing the original sample.
+On /virtual in the copy, press F12, open the Console tab and run the line from step 4:
 
-The exact code change and its copy script are in `../ActivityInvestigations/Chapter15`. Its README describes the expected result and how to start over.
+```javascript
+document.getElementById("results").childElementCount
+```
 
-## Reference Implementation
+- As the copy is created, it prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000.
+- Your own project printed 18 in step 4: 16 rows plus the two spacers.
 
-- `../Checkpoints/Chapter15/LibraryDesk.Client/Models/BookItem.cs`
-- `../Checkpoints/Chapter15/LibraryDesk/Program.cs`
-- `../Checkpoints/Chapter15/LibraryDesk.Client/Program.cs`
-- `../Checkpoints/Chapter15/LibraryDesk.Client/Pages/VirtualDemo.razor`
+After you put Virtualize back with OverscanCount="10" and run the copy again:
 
-## Expected Reasoning
+- The line prints 32 at the top: 30 rows and the two spacers.
+- Drag the scroll bar to the middle and run it again: still 32.
 
-Virtualize reduces visible DOM work while the local data remains allocated. Render guards, paging, AOT and streaming solve different problems, so measure each one on its own.
+Write down the numbers. This comparison counts elements; it isn't a timing benchmark.
 
-## Production Notes
+## The solved loop
 
-Uniform row height simplifies the virtualizer's estimates. Rich rows that expand, wrap unpredictably, or load images later need careful measurement and possibly a different layout. Stable keys preserve row identity, but they do not fix a wrong total count or a provider that returns stale pages. Cancellation matters when scrolling triggers superseded data requests.
+```razor
+<Virtualize Items="books" Context="book" ItemSize="40"
+            OverscanCount="10">
+    <div @key="book.Id" style="height: 40px">
+        @book.Id: @book.Title
+    </div>
+</Virtualize>
+```
 
-Measure the resource you intend to reduce.
+## Files involved
 
-The .NET 11 Virtualize API also adds indexed positioning and scrolling support; check the current API documentation if you use them. This example uses the long-standing Items behavior to stay focused on windowing. It doesn't measure production latency, memory savings or WebAssembly AOT.
+- Samples/ActivityInvestigations/Chapter15: the copy's change and its README.
+- In the copy: LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor.
+
+## Why
+
+@foreach renders an element for every item, so the browser builds and lays out 10,000 rows even though the 300-pixel box shows about 8. Virtualize renders only the rows near the visible area plus OverscanCount rows on each side, and two spacer elements stand in for the rest. Raising OverscanCount from 3 to 10 adds 7 rows on each side, 14 in all, so the count goes from 18 to 32, and it stays the same wherever you scroll. More overscan means fewer blank moments during fast scrolling, at the cost of more elements. Measure the resource you want to reduce, here the element count, before you claim a speed gain.

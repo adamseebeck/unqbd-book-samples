@@ -1,0 +1,5 @@
+<button @onclick="Fail">Simulate a failure</button>
+@code {
+    private void Fail() =>
+        throw new InvalidOperationException("Simulated failure.");
+}

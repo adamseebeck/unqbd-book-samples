@@ -1,29 +1,18 @@
 # Chapter 13 activity: solved copy
 
-This folder is Samples/Checkpoints/Chapter13, the LibraryDesk project at the end of Chapter 13, with the activity solved. Compare it with your own copy. You can run the app and its test from this folder; dotnet adds bin and obj folders here as it builds, which you can delete at any time.
+Compare this solved example with your own activity copy. Work in a fresh copy if you want to run or edit it.
 
 ## The solved change
 
 LibraryDesk/LibraryDesk.Client/Pages/TemplatesDemo.razor has a third book, new(3, "Database Field Notes", 26m), in its books array, and the ItemTemplate shows each price before the button with @book.Price.ToString("C", CultureInfo.GetCultureInfo("en-US")), with @using System.Globalization at the top of the page. BookList and SelectBook are unchanged, so Select Blazor Field Notes works here: the exception for book 2 belongs to the activity copy, not to this solution.
 
-## Run it
+## Run in Visual Studio
 
-From the folder, run the command from Chapter 2, typed as one line:
+1. Copy the complete folder to a short writable working path, keeping global.json beside the LibraryDesk solution folder.
+2. In Visual Studio 2026 with .NET 11 support and the ASP.NET and web development workload, open LibraryDesk/LibraryDesk.slnx. The .sln is retained for compatibility; open only one solution file.
+3. Right-click the LibraryDesk server project and choose Set as Startup Project. Select Debug, Any CPU and its http profile. Save All and build with Ctrl+Shift+B.
+4. Press F5. Open http://127.0.0.1:58631. Shift+F5 stops this IDE run and may close its debugger browser. Stop the previous copy before running another on the same port.
 
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
+The solution includes Chapter13.Tests. Stop debugging, build, then run that project in Test Explorer. Expect one passed test.
 
-Open http://127.0.0.1:58631/templates. The rows read $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes and $26.00 Select Database Field Notes. Click Select Database Field Notes: the line reads Selected identifier: 3. Press Ctrl+C in the terminal to stop the app.
-
-## Run its test
-
-Stop the app, then run this from the folder:
-
-```powershell
-dotnet test Tests/Chapter13.Tests.csproj
-```
-
-Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded.
-
-Samples/Activities/Chapter13.md explains the answer.
+Samples/Activities/Chapter13.md explains the behavior and reasoning.

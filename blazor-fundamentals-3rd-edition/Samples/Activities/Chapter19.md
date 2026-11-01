@@ -1,5 +1,7 @@
 # Chapter 19 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter19 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The task is to keep only the latest five notices instead of twenty, and to see the hub reject a notice that is too long. Here is the change; compare it with yours.
 
 ## The change

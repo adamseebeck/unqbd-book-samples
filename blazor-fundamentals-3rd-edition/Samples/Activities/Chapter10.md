@@ -1,5 +1,7 @@
 # Chapter 10 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter10 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity makes HttpCatalogQuery ask for an address that doesn't exist, in a copy, watches the page recover, and then repairs the address.
 
 ## The change

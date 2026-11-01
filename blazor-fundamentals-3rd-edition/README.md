@@ -1,43 +1,48 @@
 # Blazor Fundamentals, Third Edition: companion code
 
-Companion code for *Blazor Fundamentals, Third Edition* by Adam Seebeck: the LibraryDesk application, built up across 23 chapters with .NET 11. The code is in the Samples folder; paths in the book such as Samples/Checkpoints/Chapter03 refer to it.
+The code is in Samples. Paths printed in the book start there.
 
-## Prerequisites
+This download follows the book's Visual Studio workflow. Use Windows, Visual Studio 2026 with .NET 11 support and the ASP.NET and web development workload, the released .NET 11 SDK 11.0.100 or later, and Edge or Chrome. Framework packages are pinned to 11.0.0; SDK and package versions use different numbering. Python 3 is needed only for the local static host in Chapters 20 and 23 and the optional exercise generator.
 
-- The .NET 11 SDK, version 11.0.100 or later. Each global.json selects it and accepts later .NET 11 feature bands; the framework packages use the matching framework version: 11.0.0 with SDK 11.0.100, or a later 11.0 patch, such as 11.0.1, with a later SDK. This code uses 11.0.0.
-- Python 3. It runs the activity copy script and, in Chapters 20 and 23, serves the published offline app.
-- A current browser such as Microsoft Edge or Google Chrome.
-- A PowerShell terminal. Windows PowerShell works on Windows. On macOS or Linux, install PowerShell 7 from https://learn.microsoft.com/powershell/scripting/install/installing-powershell and start it with `pwsh`. Use that shell for the book's commands. Paths beginning with `~/` start in your home folder. On macOS and Linux, use `curl` wherever the book's Windows commands say `curl.exe`.
-- A code editor if you like: Visual Studio (a version that supports .NET 11) and Visual Studio Code with the C# Dev Kit extension both work. The command line is the route the book describes.
+## Find the right folder
 
-## What is in Samples
+- Checkpoints/Chapter02 to Chapter23: the complete cumulative project at the end of each chapter. Start a chapter from the previous checkpoint if you need to catch up.
+- LibraryDesk: the finished server/client solution. LibraryDesk.Tests, LibraryDesk.Pwa and LibraryDesk.Pwa.Tests sit beside it and are included in LibraryDesk/LibraryDesk.slnx.
+- ActivityStarts/Chapter02 to Chapter23: prepared unsolved exercise copies, with any supplied Tests project included in the solution.
+- Activities: every activity's answer and explanation.
+- ActivitySolutions: solved project copies for Chapters 4, 5, 11 and 13.
+- ActivityInvestigations: optional Python generator and the checked exercise changes it applies.
 
-- Samples/Checkpoints/Chapter02 to Chapter23: the LibraryDesk project at the end of each chapter, laid out like your working folder, each with a README.
-- Samples/LibraryDesk: the finished app (the solution folder with the server and client projects). Samples/LibraryDesk.Tests holds its component tests, Samples/LibraryDesk.Pwa is Chapter 20's offline app, and Samples/LibraryDesk.Pwa.Tests holds the offline app's storage tests.
-- Samples/Activities: the answer to every chapter's activity.
-- Samples/ActivityInvestigations: create_copy.py and each activity's setup. It makes a copy of a chapter's checkpoint for the activity, with any change or Tests folder the activity needs.
-- Samples/ActivitySolutions: solved copies for the activities of Chapters 4, 5, 11 and 13.
+## Open, build, run and debug
 
-See Samples/README.md for the folder map and more detail.
+For a checkpoint or activity, copy the complete ChapterNN folder to a short working path. For the finished app, copy global.json and all four sibling folders, LibraryDesk, LibraryDesk.Tests, LibraryDesk.Pwa and LibraryDesk.Pwa.Tests, into one new working folder. Preserve their relative locations so the solution can load all five projects.
 
-## Follow along and catch up
+Keep global.json beside the LibraryDesk solution folder. Open LibraryDesk/LibraryDesk.slnx in Visual Studio. The older .sln is retained for compatibility; open only one solution at a time. Right-click the LibraryDesk server project and choose Set as Startup Project, then select Debug, Any CPU and http. Save All, build with Ctrl+Shift+B and press F5. The server uses http://127.0.0.1:58631. Shift+F5 stops this debug run. Stop the prior copy before starting another on the same port.
 
-Work through the chapters in order, in one working folder. Chapter 2 creates it, and every later chapter adds to the same project. If you skip a chapter, or your project stops working and you can't find why, copy the previous chapter's checkpoint folder, Samples/Checkpoints/ChapterNN, to a new working folder and continue there.
+Chapter 3 teaches breakpoints, Locals, stepping and Hot Reload. Chapter 10 extends debugging to client C# in WebAssembly. Use browser DevTools for requests, HTML, accessibility, storage and workers. View > Output with Debug selected shows server debugger output and log entries; server logs do not appear in the browser's Console.
 
-## Run and test
+## Tests
 
-From the working folder, run the app, typed as one line:
+After building, open Test > Test Explorer. Run a project or selected test from its context menu. The cumulative LibraryDesk.Tests suite has 18 tests at Chapter 18, 23 at Chapters 19 and 20, and 24 from Chapter 21 onward. LibraryDesk.Pwa.Tests has 2 tests and is included from Chapter 20. The finished solution therefore has 26 tests. Exercise Tests projects are separate; follow the chapter to select the right project or test. Passing component tests does not establish browser interactivity or offline behavior.
+
+## PWA and publishing
+
+Set LibraryDesk.Pwa as startup with its http profile to debug the separate offline reading-list app at http://127.0.0.1:58634. Restore LibraryDesk as startup for the server chapters. Right-click each app project and use Publish > Folder to build the local Release artifacts described in Chapters 11, 20 and 23. A local publish creates files; deploying to a live host is a separate action.
+
+Chapters 20 and 23 use Python's loopback static server to check the PWA's published service worker. Check Python in a new PowerShell window with python --version. Install Python 3 from python.org if needed; if your installation uses py, substitute py for python. Development F5 uses a worker that does not cache the app, so it cannot establish offline startup.
+
+## Activities
+
+Copy ActivityStarts/ChapterNN to a new working folder, open its solution and follow its README. These starts intentionally contain the investigation described in the chapter, not the finished answer. Chapter 2's SDK pin is deliberately broken (11.0.999); repair it as the task directs. Keep the cumulative project separate. To start again, use another clean copy.
+
+## Command-line alternatives
+
+Run from the outer working folder, the one holding global.json:
 
 ```powershell
 dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-The terminal shows Now listening on: http://127.0.0.1:58631, and the app is ready in your browser at that address. Press Ctrl+C to stop it. From Chapter 18 on, run the component tests with the app stopped:
-
-```powershell
 dotnet test LibraryDesk.Tests
+dotnet test LibraryDesk.Pwa.Tests
 ```
 
-For an activity, go to Samples/ActivityInvestigations and run `python create_copy.py --chapter 6 --output ../Chapter06Practice`, replacing 6 with the chapter number and choosing a new folder. The relative output path works on each supported system. The README in the copy gives the command to run and the result to expect.
-
-Found a problem in the code? Contact us at [unqbd.com/Contact](https://www.unqbd.com/Contact).
+The run command keeps its terminal busy; Ctrl+C stops that terminal-owned process. Run tests after stopping it. F5 and Shift+F5 are the primary IDE workflow. See each chapter's alternative section for the exact create and publish commands.

@@ -1,5 +1,7 @@
 # Chapter 6 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter06 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity has you add a Remove C# button to the favorites page, in a copy, and check how the shared FavoritesState service responds.
 
 ## The change
@@ -19,7 +21,7 @@ It is written the same way as the Favorite buttons, with Remove in place of Add.
 - Click Favorite C# and Favorite Blazor: the summary shows Favorites: 2 and Saved IDs: 1, 2.
 - Click Remove C#: Favorites: 1 and Saved IDs: 2. Click it again: nothing changes.
 - Open /favorites in a second tab: it starts at Favorites: 0.
-- dotnet test Tests/Chapter06.Tests.csproj ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time. Before you add the button it ends with Build failed with 1 error(s); that error is the failing test, not a compile error.
+- Stop debugging, build and run Chapter06.Tests in Test Explorer. Its one test passes after Remove C# is implemented; before that it fails because the button is missing. A test failure is different from a compiler error.
 
 ## Files involved
 

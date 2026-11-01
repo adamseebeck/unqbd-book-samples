@@ -1,5 +1,7 @@
 # Chapter 15 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter15 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity starts from a copy where VirtualDemo renders every row with an ordinary @foreach loop. You count its elements, then bring Virtualize back with more overscan and count again.
 
 ## What you should see

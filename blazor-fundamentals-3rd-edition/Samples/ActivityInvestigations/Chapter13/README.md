@@ -1,36 +1,35 @@
-# Chapter 13 activity: a failing SelectBook, a third book and prices
+# Chapter 13 activity: unsolved start
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter13, the project at the end of Chapter 13, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+This is a prepared exercise start, not a solved checkpoint. Follow the task below in a copy. Use the released .NET 11 SDK baseline from the book.
 
-## Make the copy
+Do this in a copy, so your LibraryDesk project stays as it is. The copy makes one book fail; you then add a book and a price column without touching BookList.
 
-In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
+- Stop your main IDE run with Shift+F5. In File Explorer, copy Samples/ActivityStarts/Chapter13 to a new working folder such as C:\BookExercises\Chapter13. Open the copy's LibraryDesk/LibraryDesk.slnx in Visual Studio and select LibraryDesk with its http profile. In this start, SelectBook's Select method throws for book 2 before calling the callback:
+
+```csharp
+    private Task Select()
+    {
+        if (Id == 2) throw new InvalidOperationException();
+        return Selected.InvokeAsync(Id);
+    }
+```
+
+- If the debugger pauses at the activity's deliberate throw, press F5 to continue into the boundary, as in the main walkthrough.
+- Open http://127.0.0.1:58631/templates. Click Select C# Field Notes: the line reads Selected identifier: 1. Click Select Blazor Field Notes: the fallback, The catalog component failed. Reload to retry., replaces the list, and the line still reads Selected identifier: 1, because the exception happened before the callback reached the page.
+- Stop the copy with Shift+F5. In the copy's LibraryDesk.Client/Pages/TemplatesDemo.razor, add a third book to the books array: put a comma after the Blazor Field Notes line and add `new(3, "Database Field Notes", 26m)` below it. Run the copy again and open /templates. A Select Database Field Notes button appears below the other two; click it and the line reads Selected identifier: 3. You changed no other component.
+- Stop the copy again. Change only the template so each row shows its price before the button: add `<span>@book.Price.ToString("C", CultureInfo.GetCultureInfo("en-US"))</span>` as the first line inside `<ItemTemplate Context="book">`, and add `@using System.Globalization` at the top of the page. The en-US culture prints the price in US dollars on any computer. Run the copy and open /templates: the rows read $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes and $26.00 Select Database Field Notes. BookList stays unchanged.
+- Compare with Samples/Activities/Chapter13.md. The solved third book and price layout are in Samples/ActivitySolutions/Chapter13.
+
+## Start again
+
+Copy the original Samples/ActivityStarts folder for this chapter to another new working folder. Keep your main cumulative project separate.
+
+## Optional generator
+
+Instead of copying the prepared start, open PowerShell in Samples/ActivityInvestigations and run:
 
 ```powershell
 python create_copy.py --chapter 13 --output C:/BookExercises/Chapter13
-cd C:/BookExercises/Chapter13
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
-
-## What the copy changes
-
-In LibraryDesk/LibraryDesk.Client/Components/SelectBook.razor, the Select method throws an exception for book 2 before it calls the callback.
-
-## Run it
-
-Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
-
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
-
-## What you should see
-
-On http://127.0.0.1:58631/templates, Select C# Field Notes shows Selected identifier: 1. Select Blazor Field Notes replaces the list with The catalog component failed. Reload to retry., and the line still reads Selected identifier: 1, because the exception happened before the callback reached the page. After you add new(3, "Database Field Notes", 26m) to the books array in TemplatesDemo.razor and run the copy again, a Select Database Field Notes button appears below the other two, and clicking it shows Selected identifier: 3. After you add the price span to the template and run the copy again, the rows read $24.00 Select C# Field Notes, $28.00 Select Blazor Field Notes and $26.00 Select Database Field Notes. The solved third book and price layout are in Samples/ActivitySolutions/Chapter13.
-
-## Start over
-
-To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter13.md explains the answer.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

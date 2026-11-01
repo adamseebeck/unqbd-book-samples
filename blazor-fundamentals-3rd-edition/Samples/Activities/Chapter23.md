@@ -1,5 +1,7 @@
 # Chapter 23 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter23 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity adds a revision to /healthz in a copy of the finished app, publishes the copy, and runs its server artifact in Production. Here is the change; compare it with yours.
 
 ## The change
@@ -11,12 +13,11 @@ app.MapGet("/healthz", () => Results.Ok(
     new { Status = "ok", Revision = "local-review" }));
 ```
 
-## Commands
+## Publish and run
 
-From the copy's folder, publish the server project and run the artifact with the commands from the chapter:
+In Visual Studio, right-click LibraryDesk and choose Publish. Use its Folder profile with the target ..\..\artifacts\server, relative to the server project. Publish in Release and wait for success. Then open PowerShell in the copy's outer working folder and start the artifact:
 
 ```powershell
-dotnet publish LibraryDesk/LibraryDesk/LibraryDesk.csproj -c Release -o artifacts/server
 cd artifacts/server
 dotnet LibraryDesk.dll --contentRoot . --urls http://127.0.0.1:58633 --environment Production
 ```
@@ -32,9 +33,9 @@ Press Ctrl+C in the terminal to stop the artifact.
 ## Files involved
 
 - Samples/ActivityInvestigations/Chapter23: the copy (the finished app, unchanged) and its README.
-- In the copy: LibraryDesk/LibraryDesk/Program.cs, and artifacts/server, the folder dotnet publish creates.
+- In the copy: LibraryDesk/LibraryDesk/Program.cs, and artifacts/server, the local publish target.
 - Samples/Checkpoints/Chapter23: the finished app the copy starts from, the same files as Samples/LibraryDesk.
 
 ## Why
 
-dotnet publish compiles the copy in Release and writes everything the server needs, including its static files, to artifacts/server. That folder runs anywhere ASP.NET Core is installed, with dotnet LibraryDesk.dll. The /lab sign-in endpoints and the sign-in buttons exist only when the environment is Development, so in Production the routes are never mapped and the address matches nothing. The environment comes from the --environment argument, not from the build. dotnet run outside Development doesn't serve the Blazor script and the scoped styles, so the published artifact is the right thing to run here. A revision value in the health reply tells you which build a server is running, without exposing anything private. A local publish is not a deployment: nothing leaves your computer.
+The Publish profile compiles the copy in Release and writes everything the server needs, including its static files, to artifacts/server. That folder runs anywhere ASP.NET Core is installed, with dotnet LibraryDesk.dll. The /lab sign-in endpoints and the sign-in buttons exist only when the environment is Development, so in Production the routes are never mapped and the address matches nothing. The environment comes from the --environment argument, not from the build. dotnet run outside Development doesn't serve the Blazor script and the scoped styles, so the published artifact is the right thing to run here. A revision value in the health reply tells you which build a server is running, without exposing anything private. A local publish is not a deployment: nothing leaves your computer.

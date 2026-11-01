@@ -1,46 +1,25 @@
-# Chapter 10 activity: a missing API address
+# Chapter 10 activity: unsolved start
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter10, the project at the end of Chapter 10, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
+This is a prepared exercise start, not a solved checkpoint. Follow the task below in a copy. Use the released .NET 11 SDK baseline from the book.
 
-## Make the copy
+Do this in a copy, so your LibraryDesk project stays as it is. You point HttpCatalogQuery at an address that doesn't exist, watch the page recover, and then repair it.
 
-In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
+- Stop your main IDE run with Shift+F5. In File Explorer, copy Samples/ActivityStarts/Chapter10 to a new working folder such as C:\BookExercises\Chapter10. Open the copy's LibraryDesk/LibraryDesk.slnx in Visual Studio and select LibraryDesk with its http profile. It contains the unchanged checkpoint and an exercise Tests project.
+- In the copy's LibraryDesk.Client/Services/HttpCatalogQuery.cs, change "api/books" to "api/not-present" in the GetAsync call and save the file. Then save and press F5.
+- Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You should see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it.
+- Stop the copy with Shift+F5, change "api/not-present" back to "api/books", and run the copy again. The open page still runs the client code it downloaded before, so press F5 to load the new code. Then click Load books: the text reads Loaded 3 books. and the three titles appear.
+- Compare with Samples/Activities/Chapter10.md.
+
+## Start again
+
+Copy the original Samples/ActivityStarts folder for this chapter to another new working folder. Keep your main cumulative project separate.
+
+## Optional generator
+
+Instead of copying the prepared start, open PowerShell in Samples/ActivityInvestigations and run:
 
 ```powershell
 python create_copy.py --chapter 10 --output C:/BookExercises/Chapter10
-cd C:/BookExercises/Chapter10
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
-
-## What you change
-
-Nothing in the copy is changed for you. In the copy's LibraryDesk/LibraryDesk.Client/Services/HttpCatalogQuery.cs, change "api/books" to "api/not-present" in the GetAsync call and save the file. When you have seen the result and run the test, change it back to "api/books".
-
-## Run it
-
-Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
-
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
-
-## What you should see
-
-Open http://127.0.0.1:58631/api-demo, open the Network tab and click Load books. You see a row named not-present with status 404, the text The catalog is unavailable. Try again., and an active Load books button. EnsureSuccessStatusCode turned the 404 into an HttpRequestException, and the page's second catch handled it. After you change the address back to "api/books", run the copy again and press F5 on /api-demo, Load books shows Loaded 3 books. and the three titles.
-
-## Check it with a test
-
-The copy has a Tests folder with a component test for this change. Stop the app, then run this from the copy's folder while the address is still "api/not-present":
-
-```powershell
-dotnet test Tests/Chapter10.Tests.csproj
-```
-
-The output ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, duration: ... and then Build succeeded in .... Run it before your change, or after you put "api/books" back, and it fails: the output ends with Test summary: total: 1, failed: 1, succeeded: 0, skipped: 0, duration: ... and Build failed with 1 error(s) in .... That error is the failing test, not a compile error. A component test checks component logic; check the page itself in the browser.
-
-## Start over
-
-To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter10.md explains the answer.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

@@ -1,5 +1,7 @@
 # Chapter 17 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter17 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The task is a Clear catalog favorites button on /catalog that empties FavoritesState and updates the status. Here is one way to write it; compare it with yours.
 
 ## The change
@@ -29,7 +31,7 @@ and the method sits above Add:
 - Open http://127.0.0.1:58631/catalog. Favorite Blazor Field Notes and C# Field Notes: the status says Favorites in this runtime: 2.
 - Click Clear catalog favorites: Favorites in this runtime: 0.
 - Click it again: still 0.
-- From the copy's folder, dotnet test Tests/Chapter17.Tests.csproj favorites two books, clicks your button twice and checks the service and the status. The output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded. If your button has a different id, the test fails with ElementNotFoundException.
+- Stop debugging, build and run Chapter17.Tests in Test Explorer. Its one test favorites two books, clicks your Clear button twice and checks the service and status. A different button ID makes it fail with ElementNotFoundException.
 
 ## Files involved
 

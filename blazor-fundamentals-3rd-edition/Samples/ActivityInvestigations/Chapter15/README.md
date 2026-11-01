@@ -1,36 +1,25 @@
-# Chapter 15 activity: an ordinary @foreach loop instead of Virtualize
+# Chapter 15 activity: unsolved start
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter15, the project at the end of Chapter 15, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+This is a prepared exercise start, not a solved checkpoint. Follow the task below in a copy. Use the released .NET 11 SDK baseline from the book.
 
-## Make the copy
+Do this in a copy, so your LibraryDesk project stays as it is. In the copy, VirtualDemo renders every row with an ordinary @foreach loop; you count its elements, then bring Virtualize back with more overscan.
 
-In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
+- Stop your main IDE run with Shift+F5. In File Explorer, copy Samples/ActivityStarts/Chapter15 to a new working folder such as C:\BookExercises\Chapter15. Open the copy's LibraryDesk/LibraryDesk.slnx in Visual Studio and select LibraryDesk with its http profile. VirtualDemo.razor in this start uses a foreach loop instead of Virtualize. Run it with F5.
+- Open http://127.0.0.1:58631/virtual, press F12, open Console and enter `document.getElementById("results").childElementCount`. It prints 10000: every row is in the DOM, and there are no spacers. The unchanged chapter project renders 18 elements, 16 rows and two spacers. Write down both numbers.
+- Stop the copy with Shift+F5. In the copy's LibraryDesk.Client/Pages/VirtualDemo.razor, replace the @foreach line and its braces with `<Virtualize Items="books" Context="book" ItemSize="40" OverscanCount="10">` and `</Virtualize>`, keeping the existing row div between those tags. Predict the count before you run it.
+- Run the copy again, open /virtual and run the Console line. It prints 32: 30 rows and the 2 spacers. Drag the scroll bar to the middle and run it again: still 32. This comparison counts elements; it isn't a timing benchmark, which needs controlled measurements on a realistic workload.
+- Compare with Samples/Activities/Chapter15.md.
+
+## Start again
+
+Copy the original Samples/ActivityStarts folder for this chapter to another new working folder. Keep your main cumulative project separate.
+
+## Optional generator
+
+Instead of copying the prepared start, open PowerShell in Samples/ActivityInvestigations and run:
 
 ```powershell
 python create_copy.py --chapter 15 --output C:/BookExercises/Chapter15
-cd C:/BookExercises/Chapter15
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
-
-## What the copy changes
-
-In LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor, the rows come from an ordinary @foreach loop instead of Virtualize.
-
-## Run it
-
-Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
-
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
-
-## What you should see
-
-Open http://127.0.0.1:58631/virtual, press F12, open the Console tab and run document.getElementById("results").childElementCount. It prints 10000: every row is in the DOM, and there are no spacers. The last row is 10000: Catalog title 10000. Compare it with the 18 you counted in step 4 of Chapter 15. Then stop the copy, replace the @foreach loop in LibraryDesk/LibraryDesk.Client/Pages/VirtualDemo.razor with the Virtualize element from step 1 but with OverscanCount="10", and run the copy again: the same line prints 32 (30 rows and 2 spacers), at the top and in the middle of the list.
-
-## Start over
-
-To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter15.md explains the answer.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

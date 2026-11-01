@@ -1,5 +1,7 @@
 # Chapter 8 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter08 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity raises the message minimum from 5 to 10 characters in one place, the shared model, and checks both forms.
 
 ## The change

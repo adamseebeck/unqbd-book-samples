@@ -1,5 +1,7 @@
 # Chapter 11 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter11 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity adds a second policy, Readers, that any signed-in user meets, and a GET /api/profile endpoint that requires it. You write both in a copy of the Chapter 11 checkpoint.
 
 ## The change

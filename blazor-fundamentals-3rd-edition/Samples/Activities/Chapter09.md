@@ -1,5 +1,7 @@
 # Chapter 9 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter09 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity swaps the registered ICatalogQuery for a second implementation, then registers FavoritesState as a singleton, both in a copy, to see what a registration controls.
 
 ## What you should see

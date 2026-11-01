@@ -1,36 +1,26 @@
-# Chapter 7 activity: an interactive Router and a stale page
+# Chapter 7 activity: unsolved start
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter07, the project at the end of Chapter 7, with the change below. Stop your own app with Ctrl+C first: the copy uses the same address.
+This is a prepared exercise start, not a solved checkpoint. Follow the task below in a copy. Use the released .NET 11 SDK baseline from the book.
 
-## Make the copy
+Do the first step in your running project, and the rest in a copy so your LibraryDesk project stays as it is.
 
-In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
+- With your unchanged cumulative app running and the browser's Network tab open, type http://127.0.0.1:58631/books/2 and press Enter, then click C# and Blazor. The typed address adds a document row; each link click adds a fetch row. The title always matches the number in the address.
+- Stop debugging with Shift+F5. In File Explorer, copy Samples/ActivityStarts/Chapter07 to a new working folder such as C:\BookExercises\Chapter07. Open its LibraryDesk/LibraryDesk.slnx in Visual Studio, select LibraryDesk with its http profile and press F5. This prepared start gives Routes an InteractiveServer render mode, so the Router keeps a page instance when only its parameters change. It also moves BookDetails's loading to OnInitializedAsync, creating the problem you investigate next.
+- In the copy, open http://127.0.0.1:58631/books/1 and click Blazor. The address changes to /books/2, but the page still shows C# Field Notes and Price: $24.00: the instance was initialized once, with Id 1. Press F5, and Blazor Field Notes appears, because a full load creates a new instance.
+- Stop the copy with Shift+F5, change OnInitializedAsync back to OnParametersSetAsync in the copy's BookDetails.razor, and run it again. Now clicking Blazor shows Blazor Field Notes.
+- Stop the copy with Shift+F5 again. In the copy's BookDetails.razor, add a second route template under the first @page line: `@page "/catalog-item/{Id:int}"`. Run the copy again. /catalog-item/2 shows Blazor Field Notes, /catalog-item/999 shows No book has this identifier. and /catalog-item/abc shows Not Found.
+- Compare with Samples/Activities/Chapter07.md.
+
+## Start again
+
+Copy the original Samples/ActivityStarts folder for this chapter to another new working folder. Keep your main cumulative project separate.
+
+## Optional generator
+
+Instead of copying the prepared start, open PowerShell in Samples/ActivityInvestigations and run:
 
 ```powershell
 python create_copy.py --chapter 7 --output C:/BookExercises/Chapter07
-cd C:/BookExercises/Chapter07
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script checks that the files it changes are the ones this activity was written for, copies the checkpoint, applies the change and prints the files it changed. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
-
-## What the copy changes
-
-Two lines. In LibraryDesk/LibraryDesk/Components/App.razor, `<Routes @rendermode="InteractiveServer" />` makes the Router itself interactive, so clicks are handled over the circuit and a page keeps its instance when only its parameters change. In LibraryDesk/LibraryDesk/Components/Pages/BookDetails.razor, the book is loaded in OnInitializedAsync instead of OnParametersSetAsync.
-
-## Run it
-
-Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
-
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
-
-## What you should see
-
-Open http://127.0.0.1:58631/books/1 and click Blazor. The address changes to /books/2, but the page still shows C# Field Notes and Price: $24.00: the instance was initialized once, with Id 1. Press F5, and Blazor Field Notes appears, because a full load creates a new instance. Stop the copy with Ctrl+C, change OnInitializedAsync back to OnParametersSetAsync and run the copy again: clicking Blazor shows Blazor Field Notes. Stop the copy again, add @page "/catalog-item/{Id:int}" under the first @page line and run it: /catalog-item/2 shows Blazor Field Notes, /catalog-item/999 shows No book has this identifier. and /catalog-item/abc shows Not Found.
-
-## Start over
-
-To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter07.md explains the answer.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

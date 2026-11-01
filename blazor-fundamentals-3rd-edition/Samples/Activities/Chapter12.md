@@ -1,5 +1,7 @@
 # Chapter 12 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter12 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity runs in a copy of the Chapter 12 checkpoint: first the keyboard path on /interop, then a module path that you break yourself.
 
 ## The change

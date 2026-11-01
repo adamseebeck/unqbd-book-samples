@@ -8,7 +8,15 @@ public sealed class InvestigationTests
     {
         using var context = new BunitContext();
         context.Renderer.SetRendererInfo(new RendererInfo("Test", true));
-        var cut = context.Render<LibraryDesk.Client.Components.ModeCounter>(p => p.Add(c => c.Step, step));
+        // Use the parameter name so the unsolved project still builds.
+        // The missing Step parameter is the runtime problem to investigate.
+        var cut = context.Render<LibraryDesk.Client.Components.ModeCounter>(
+            (RenderFragment)(builder =>
+            {
+                builder.OpenComponent<LibraryDesk.Client.Components.ModeCounter>(0);
+                builder.AddAttribute(1, "Step", step);
+                builder.CloseComponent();
+            }));
         cut.Find("button").Click();
         Assert.Contains($"Count: {step}", cut.Find("p").TextContent);
     }

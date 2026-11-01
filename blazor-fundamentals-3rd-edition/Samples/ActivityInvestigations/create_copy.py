@@ -86,6 +86,17 @@ shutil.copy2(activity / "README.md", output / "README.md")
 if (activity / "Tests").is_dir():
     shutil.copytree(activity / "Tests", output / "Tests",
                     ignore=shutil.ignore_patterns("bin", "obj"))
+# Include the exercise test project in the Visual Studio solution, if supplied.
+solution_path = output / "LibraryDesk" / "LibraryDesk.slnx"
+if solution_path.exists() and (output / "Tests").is_dir():
+    import xml.etree.ElementTree as ET
+    tree = ET.parse(solution_path)
+    for test_project in sorted((output / "Tests").glob("*.csproj")):
+        ET.SubElement(tree.getroot(), "Project", {
+            "Path": "../Tests/" + test_project.name})
+    ET.indent(tree, space="  ")
+    tree.write(solution_path, encoding="unicode")
+
 manifest = {"chapter": args.chapter, "changes": records,
             "expected": spec["expected"]}
 (output / "investigation-manifest.json").write_text(

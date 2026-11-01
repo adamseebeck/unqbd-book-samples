@@ -1,46 +1,26 @@
-# Chapter 21 activity: a help text for the Message box
+# Chapter 21 activity: unsolved start
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter21, the project at the end of Chapter 21, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
+This is a prepared exercise start, not a solved checkpoint. Follow the task below in a copy. Use the released .NET 11 SDK baseline from the book.
 
-## Make the copy
+Do this in a copy, so your LibraryDesk project stays as it is. The task is to add a help text to the feedback form's Message box and connect it to the box, so a screen reader reads it as part of the description.
 
-In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
+- Stop your main run with Shift+F5. Copy Samples/ActivityStarts/Chapter21 in File Explorer to a new working folder, such as C:\BookExercises\Chapter21. Open the copy's LibraryDesk/LibraryDesk.slnx in Visual Studio. Select LibraryDesk with its http profile. The solution also includes the separate Chapter21.Tests exercise project.
+- In the copy's LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, add a paragraph with the id feedback-message-help and the text Use 5 to 300 characters. This example saves locally. just above the Message box (the InputTextArea). Then change the box's aria-describedby so it lists both ids, the help first: feedback-message-help feedback-message-error.
+- Run the copy with F5 using the http profile and open http://127.0.0.1:58631/accessibility. Inspect the Message box in the Accessibility pane: its description is the help text. Submit the form empty: the description is now the help text followed by The Message field is required.
+- Repeat the empty, invalid-email and valid cases with the keyboard only, and check that the label, the focus outline and the status message still work.
+- Stop debugging and build the copy. In Test Explorer, right-click Chapter21.Tests and choose Run. Its one test checks that aria-describedby lists both IDs, that the help and label remain, and that empty and valid submits still behave correctly. It should pass. The cumulative LibraryDesk.Tests and PWA tests are separate projects.
+- Compare your change with Samples/Activities/Chapter21.md.
+
+## Start again
+
+Copy the original Samples/ActivityStarts folder for this chapter to another new working folder. Keep your main cumulative project separate.
+
+## Optional generator
+
+Instead of copying the prepared start, open PowerShell in Samples/ActivityInvestigations and run:
 
 ```powershell
 python create_copy.py --chapter 21 --output C:/BookExercises/Chapter21
-cd C:/BookExercises/Chapter21
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
-
-## What you change
-
-The copy is your LibraryDesk project at the end of Chapter 21, unchanged, plus a Tests folder. You make the change yourself: in LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, add a paragraph with the id feedback-message-help (Use 5 to 300 characters. This example saves locally.) above the Message box, and make the box's aria-describedby list both ids: feedback-message-help feedback-message-error.
-
-## Run it
-
-Run the copy with the command from Chapter 2, from the copy's folder, typed as one line:
-
-```powershell
-dotnet run --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-Press Ctrl+C in the terminal to stop it. Stop it, too, before you change a C# or Razor file, then run it again.
-
-## What you should see
-
-Open http://127.0.0.1:58631/accessibility and inspect the Message box in the Accessibility pane: its description is the help text, Use 5 to 300 characters. This example saves locally. Submit the form empty: the description is now the help text followed by The Message field is required. The label, the focus outline and the status message work the same with the keyboard alone.
-
-## Check it with a test
-
-The copy has a Tests folder with a component test for this change. Stop the app, then run this from the copy's folder:
-
-```powershell
-dotnet test Tests/Chapter21.Tests.csproj
-```
-
-Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. If a test fails, the last line reads Build failed with 1 error(s) instead; that error is the failing test, not a compile error. It checks that the Message box's aria-describedby lists both ids, that the help text and the label are in place, and that the empty and valid submits behave as before. A component test checks component logic; check the page itself in the browser.
-
-## Start over
-
-To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter21.md explains the answer.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

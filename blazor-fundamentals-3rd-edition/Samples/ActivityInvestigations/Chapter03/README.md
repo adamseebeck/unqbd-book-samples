@@ -1,46 +1,26 @@
-# Chapter 3 activity: a Reset button with Hot Reload
+# Chapter 3 activity: unsolved start
 
-Do this activity in a copy, so your LibraryDesk project stays as it is. The copy is Samples/Checkpoints/Chapter03, the project at the end of Chapter 3, unchanged; you make the change yourself. Stop your own app with Ctrl+C first: the copy uses the same address.
+This is a prepared exercise start, not a solved checkpoint. Follow the task below in a copy. Use the released .NET 11 SDK baseline from the book.
 
-## Make the copy
+Do the exercise in a copy so your main LibraryDesk project stays unchanged. Add a Reset button while the copy runs and observe what Hot Reload preserves.
 
-In a terminal, go to the companion code's Samples/ActivityInvestigations folder and run:
+- Stop your main run with Shift+F5. In File Explorer, copy Samples/ActivityStarts/Chapter03 to a new folder such as C:\BookExercises\Chapter03. Open the copy's LibraryDesk/LibraryDesk.slnx in Visual Studio. It includes the chapter checkpoint and its exercise Tests project.
+- Start the copy's http profile with F5, open /run and click Add one twice. Expect Current count: 2.
+- In LibraryDesk.Client/Pages/Run.razor, add a Reset button below Add one that calls a Reset method. Add that method inside @code and set count to 0. Save and apply Hot Reload with Alt+F10. Verify that the Reset button appears and the existing count is still 2, then click Reset and check for 0.
+- Change the count field's type to long and apply again. Read the unsupported-change message and choose Restart affected projects. Check that the new process starts the count at 0. Stop, restore int and save your finished exercise.
+- Open Test > Test Explorer, build and Run All Tests. Expect one passed test, checking two increments and a reset. Before you add Reset, the test should fail because it cannot find that button; read the test's failure detail rather than treating every failure as a compiler error. Chapter 18 explains bUnit component tests.
+- Compare with Samples/Activities/Chapter03.md.
+
+## Start again
+
+Copy the original Samples/ActivityStarts folder for this chapter to another new working folder. Keep your main cumulative project separate.
+
+## Optional generator
+
+Instead of copying the prepared start, open PowerShell in Samples/ActivityInvestigations and run:
 
 ```powershell
 python create_copy.py --chapter 3 --output C:/BookExercises/Chapter03
-cd C:/BookExercises/Chapter03
 ```
 
-Choose an output folder that doesn't exist yet, outside the companion code. The script copies the checkpoint, adds the Tests folder and prints the new folder. The copy also gets this README and an investigation-manifest.json file that lists any change the script made.
-
-## What you change
-
-Nothing in the app: the copy is Samples/Checkpoints/Chapter03 with a Tests folder added. You make the change yourself while the app runs.
-
-## Run it
-
-Start the copy with dotnet watch, typed as one line:
-
-```powershell
-dotnet watch --project LibraryDesk/LibraryDesk/LibraryDesk.csproj --no-launch-profile -- --environment Development --urls http://127.0.0.1:58631
-```
-
-Open http://127.0.0.1:58631/run. Leave dotnet watch running while you edit LibraryDesk/LibraryDesk.Client/Pages/Run.razor: add a Reset button under Add one, with @onclick="Reset", and a Reset method in @code that sets count to 0. Press Ctrl+C in the terminal when you're done.
-
-## What you should see
-
-Two clicks on Add one show Current count: 2. When you save the Reset button and method, the terminal reports File updated and then C# and Razor changes applied, and the page shows the Reset button while it still says Current count: 2. Click Reset: Current count: 0. When you change private int count; to private long count; and save, the terminal reports Restart is needed to apply the changes and asks Do you want to restart your app? Press y, and the count starts again at 0.
-
-## Check it with a test
-
-The copy has a Tests folder with a component test for this change. Stop the app, then run this from the copy's folder:
-
-```powershell
-dotnet test Tests/Chapter03.Tests.csproj
-```
-
-Near the end, the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, followed by the duration, and the last line starts with Build succeeded. If a test fails, the last line reads Build failed with 1 error(s) instead; that error is the failing test, not a compile error. Stop dotnet watch first. The test clicks Add one twice and Reset once, so it fails until you add Reset. A component test checks component logic; check the page itself in the browser.
-
-## Start over
-
-To undo your edits, make a fresh copy: run create_copy.py again with a new --output folder, or delete the copy's folder and reuse its name. The companion code and your own project are never changed. Samples/Activities/Chapter03.md explains the answer.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

@@ -1,8 +1,12 @@
 # Chapter 13 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter13 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity makes SelectBook fail for one book, in a copy, then has you add a third book and a price to the template without changing BookList.
 
 ## What you should see
+
+If the debugger pauses at the deliberate throw, press F5 to let the ErrorBoundary render its fallback. Keep exception settings unchanged.
 
 In the copy, where SelectBook's Select method throws for book 2:
 
@@ -33,7 +37,7 @@ The solved copy adds `@using System.Globalization` at the top of the page and on
 
 - Samples/ActivityInvestigations/Chapter13: the copy with the failing Select method, and its README.
 - In the copy: LibraryDesk/LibraryDesk.Client/Components/SelectBook.razor (the throw) and LibraryDesk/LibraryDesk.Client/Pages/TemplatesDemo.razor (your third book and price).
-- Samples/ActivitySolutions/Chapter13: the solved third book and price layout, without the throw. From that folder, dotnet test Tests/Chapter13.Tests.csproj runs its test; the output reads Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0, and the last line starts with Build succeeded.
+- Samples/ActivitySolutions/Chapter13: the solved third book and price layout, without the throw. Open its solution, build and run Chapter13.Tests in Test Explorer; its one test passes.
 - Unchanged: LibraryDesk/LibraryDesk.Client/Components/BookList.razor.
 
 ## Why

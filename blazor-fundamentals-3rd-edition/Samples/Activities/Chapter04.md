@@ -1,6 +1,8 @@
 # Chapter 4 activity answer
 
-The activity adds a third ToggleMessage to ComponentsDemo, with your own Message and a HiddenText of Tap to read, in a copy of Samples/Checkpoints/Chapter04 made with Copy-Item. Stop your own LibraryDesk first: the copy uses the same address.
+Use a copy of Samples/ActivityStarts/Chapter04 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
+The activity adds a third ToggleMessage to ComponentsDemo, with your own Message and a HiddenText of Tap to read, in a copy of Samples/Checkpoints/Chapter04 opened from ActivityStarts/Chapter04. Stop your own LibraryDesk first: the copy uses the same address.
 
 ## The change
 
@@ -17,13 +19,13 @@ No other file changes. ToggleMessage already has the HiddenText parameter, with 
 
 - /components shows three notes. The first two read Details hidden; the third reads Tap to read.
 - Click the middle note's button twice and the third note's button once. The first note shows Details hidden, the middle one Details hidden (two clicks showed and hid it again), and the third shows your message, here Database Field Notes is available.
-- The terminal shows six Initialized lines for one page visit: three from prerendering (C#, Blazor, then your note) and three more when the live page starts, in the same pattern step 6 showed for two notes.
+- Visual Studio's Debug output shows six Initialized lines for one page visit: three from prerendering (C#, Blazor, then your note) and three more when the live page starts, in the same pattern step 6 showed for two notes.
 
 ## Files involved
 
-- Samples/ActivitySolutions/Chapter04: the solved copy. Its changed file is LibraryDesk/LibraryDesk.Client/Pages/ComponentsDemo.razor. From that folder, dotnet test Tests/Chapter04.Tests.csproj runs its test, which renders the page without a browser, clicks the same buttons and checks the three notes. It ends with Test summary: total: 1, failed: 0, succeeded: 1, skipped: 0 and a duration, then Build succeeded in and the time.
+- Samples/ActivitySolutions/Chapter04: the solved copy. Its changed file is LibraryDesk/LibraryDesk.Client/Pages/ComponentsDemo.razor. Open its solution, build and run Chapter04.Tests in Test Explorer. Its one test renders the page without a browser, clicks the same buttons and checks the three notes.
 - Samples/Checkpoints/Chapter04/LibraryDesk/LibraryDesk.Client/Components/ToggleMessage.razor: the component, unchanged.
 
 ## Why
 
-Each ToggleMessage is a separate instance with its own private visible field, so a click on one note never changes another. Parameters set from the parent, Message and HiddenText, configure each instance; the visible field is state the instance keeps for itself. The terminal lines show the lifecycle running twice per note, once for prerendering and once when the circuit starts, which is why a one-time action never belongs in OnInitialized.
+Each ToggleMessage is a separate instance with its own private visible field, so a click on one note never changes another. Parameters set from the parent, Message and HiddenText, configure each instance; the visible field is state the instance keeps for itself. The lifecycle lines show the lifecycle running twice per note, once for prerendering and once when the circuit starts, which is why a one-time action never belongs in OnInitialized.

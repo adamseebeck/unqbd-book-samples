@@ -1,5 +1,7 @@
 # Chapter 7 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter07 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity first watches typed and clicked navigation in your running project, then uses a copy to make a page keep its instance while its parameter changes, and adds a second route template.
 
 ## What you should see

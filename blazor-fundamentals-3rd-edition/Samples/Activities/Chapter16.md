@@ -1,5 +1,7 @@
 # Chapter 16 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter16 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The copy's Modes.razor passes a Step value to each island on /modes. You give ModeCounter the parameter that receives it.
 
 ## What you should see
@@ -7,7 +9,7 @@ The copy's Modes.razor passes a Step value to each island on /modes. You give Mo
 - As the copy is created, /modes shows An unhandled exception occurred while processing the request. and InvalidOperationException: Object of type 'LibraryDesk.Client.Components.ModeCounter' does not have a property matching the name 'Step'. The server can't prerender the page, because ModeCounter has no Step parameter.
 - After your change, open /modes and wait until no counter reads Static. Click each button once. The lines read Renderer: Server. Count: 2, Renderer: WebAssembly. Count: 3 and Renderer: WebAssembly. Count: 4.
 - Press F5. All three counts return to 0.
-- Chapter 18 shows how to check a parameter like Step with a component test. The copy already has one: after your change, from the copy's folder, dotnet test Tests/Chapter16.Tests.csproj checks one click with Step 2, 3 and 4. The output reads Test summary: total: 3, failed: 0, succeeded: 3, skipped: 0, and the last line starts with Build succeeded.
+- Stop debugging, build and run Chapter16.Tests in Test Explorer. Its three cases check one click with Step 2, 3 and 4. All three pass after the fix. The test passes Step by name so the unsolved project can compile; before the fix it fails at runtime on the missing parameter, just like the page.
 
 ## The solved ModeCounter
 

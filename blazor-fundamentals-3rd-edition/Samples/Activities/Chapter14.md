@@ -1,5 +1,7 @@
 # Chapter 14 activity answer
 
+Use a copy of Samples/ActivityStarts/Chapter14 and open its LibraryDesk/LibraryDesk.slnx in Visual Studio. F5 starts the selected app; Shift+F5 stops that debug run. The chapter gives the task, and this file explains its answer.
+
 The activity gives the book card a very long title with no spaces and takes away the rule that handles it, in a copy. You write the rule back into the card's scoped stylesheet.
 
 ## What you should see

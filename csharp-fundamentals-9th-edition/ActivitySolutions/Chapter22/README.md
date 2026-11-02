@@ -1,5 +1,7 @@
 # Chapter 22 data activity
 
+In Visual Studio 2026 open Chapter22.slnx with File > Open > Project/Solution. Build the solution; use Test > Test Explorer for tests and Ctrl+F5 for console applications. Use F5 to attach the debugger and the chapter's breakpoint/stepping instructions. The terminal instructions below are the VS Code alternative.
+
 From this Chapter22 folder, run the CRUD activity:
 
 ```powershell

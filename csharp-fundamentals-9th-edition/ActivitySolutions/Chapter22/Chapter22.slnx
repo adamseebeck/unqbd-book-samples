@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SchoolMigrations/SchoolMigrations.csproj" />
+  <Project Path="SchoolRecords.csproj" />
+</Solution>

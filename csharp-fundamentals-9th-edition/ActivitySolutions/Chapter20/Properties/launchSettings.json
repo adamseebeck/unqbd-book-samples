@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Chapter20Activity": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    },
+    "Missing": {
+      "commandName": "Project",
+      "commandLineArgs": "--missing"
+    },
+    "Corrupt": {
+      "commandName": "Project",
+      "commandLineArgs": "--corrupt"
+    }
+  }
+}

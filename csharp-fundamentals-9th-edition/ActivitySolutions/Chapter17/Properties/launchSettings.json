@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "Chapter17Activity": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    },
+    "Deterministic": {
+      "commandName": "Project",
+      "commandLineArgs": "--deterministic"
+    },
+    "Fail": {
+      "commandName": "Project",
+      "commandLineArgs": "--deterministic --fail"
+    },
+    "Cancel": {
+      "commandName": "Project",
+      "commandLineArgs": "--deterministic --cancel"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="global.json" />
+  </Folder>
+  <Project Path="SimpleCalculator/SimpleCalculator.csproj" />
+  <Project Path="SimpleCalculator.Tests/SimpleCalculator.Tests.csproj" />
+</Solution>

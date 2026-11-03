@@ -23,6 +23,7 @@ Chapter 16 makes the running app observable: OpenTelemetry traces and metrics fo
 | `AdventureWorks/Observability.cs` | added |
 | `AdventureWorks/InventoryHealthCheck.cs` | added |
 | `AdventureWorks/Program.cs` | changed |
+| `AdventureWorks/Properties/launchSettings.json` | changed |
 | `AdventureWorks/StatusEndpoints.cs` | changed |
 | `InventoryService/Program.cs` | changed |
 | `AdventureWorks/CorrelationIdMiddleware.cs` | changed |
@@ -34,7 +35,7 @@ Chapter 16 makes the running app observable: OpenTelemetry traces and metrics fo
 | (command) `dotnet add AdventureWorks package --version 11.0.0 Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore` | creates or edits project files |
 | (command) `dotnet add AdventureWorks.Tests package Microsoft.Extensions.Diagnostics.Testing@10.11.0` | creates or edits project files |
 
-The reader types 261 lines of code: 218 in 4 new files and 43 new or changed in existing files, plus 13 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 282 lines of code: 220 in 4 new files and 62 new or changed in existing files, plus 13 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -277,7 +278,7 @@ info : Writing assets file to disk. Path: AdventureWorks\obj\project.assets.json
 
 Observability.cs registers OrderTelemetry, subscribes traces to the Microsoft.AspNetCore and AdventureWorks.Orders sources (AddSource) and metrics to three meters (AddMeter; the two registrations are separate), and picks the exporter from configuration: `Telemetry:Exporter` console writes to the app's window, otlp sends to `Telemetry:OtlpEndpoint`, and anything else collects without exporting. It also registers the two readiness checks, each tagged ready.
 
-Create `AdventureWorks/Observability.cs` (70 lines).
+Create `AdventureWorks/Observability.cs` (72 lines).
 
 Observability.cs, part 1 of 3 (6 lines):
 
@@ -330,15 +331,17 @@ public static class Observability
                 metrics.AddMeter(OrderTelemetry.Name,
                     "Microsoft.AspNetCore.Hosting",
                     "System.Net.Http");
+                // Every 30 s, so a request's spans stay on screen
+                // between two dumps of every metric.
                 if (exporter == "console")
-                    metrics.AddConsoleExporter((_, r) =>
-                        r.PeriodicExportingMetricReaderOptions
 ```
 
-Observability.cs, part 3 of 3 (23 lines):
+Observability.cs, part 3 of 3 (25 lines):
 
 ```csharp
-                            .ExportIntervalMilliseconds = 2000);
+                    metrics.AddConsoleExporter((_, r) =>
+                        r.PeriodicExportingMetricReaderOptions
+                            .ExportIntervalMilliseconds = 30_000);
                 else if (exporter == "otlp")
                     metrics.AddOtlpExporter(o =>
                         o.Endpoint = new Uri(endpoint!));
@@ -421,6 +424,43 @@ In `AdventureWorks/Program.cs`, add these lines after the line `builder.Services
 
 ```csharp
 builder.Services.AddStoreObservability(builder.Configuration);
+```
+
+A second launch profile, telemetry, turns on the console exporter and JSON logs with scopes through environment variables, the same settings as `--Telemetry:Exporter=console --Logging:Console:FormatterName=json --Logging:Console:FormatterOptions:IncludeScopes=true`. Visual Studio's F5 with the telemetry profile and `dotnet run --project AdventureWorks --launch-profile telemetry` then run the app the same way, and the https profile stays quiet.
+
+In `AdventureWorks/Properties/launchSettings.json`, replace these lines. The last lines of the file: the https profile ends, and the telemetry profile follows it.
+
+```json
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+```
+
+With these:
+
+```json
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "telemetry": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl":
+        "https://localhost:7001;http://localhost:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Telemetry__Exporter": "console",
+        "Logging__Console__FormatterName": "json",
+        "Logging__Console__FormatterOptions__IncludeScopes":
+          "true"
+      }
+    }
+  }
+}
 ```
 
 ### Step 3: Live and ready
@@ -578,13 +618,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+7/x0/?0] (5s 685ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+7/x0/?0] (8s 251ms)
 Test run summary: Passed!
   total: 7
   failed: 0
   succeeded: 7
   skipped: 0
-  duration: 6s 846ms
+  duration: 9s 932ms
 ```
 
 ## Program.cs at the checkpoint (89 lines)
@@ -733,7 +773,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   Healthy
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 800e3256c043f8e1899b838b35d2eb18)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 9db00d5aa5421a97df8520266e4d4cdb)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -745,7 +785,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 36f3e2f1b01838423f97eaec38ba350d)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 74df6d1457d368c4eadd96d71b718b89)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -782,7 +822,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYATFtcEYUDucpOX7a19p5RnfFYUBMGXr8wcxhmq5SoFPxjsrmEyJU9umRwI5FxEEdgGoy6YtTJxQ--nX5Y2RNFwoQMk2ch5zSYRZGKGQazdiC_0k390nNRRAIV4A_XIk1wRQovjzIIElBJw_bpEefQMrDUTd99V306CJCwBETC6w"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqY2Odbob5pvG8wv6bfQMdpoSxwVXqo2yQTyuoqQ0wMNsNkqyvcSKEg-RZj6u9VVbgQvtyiXPXpTRY4nVrvaCLsFA9EUCWoOZM2nZZRivLa1m1NZynaoFlgqwVhEQts3nPsSWunR2xTyO8Fs4mgUrrGNWWIPiaSeMsbzCSHvbdIzeA"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
@@ -802,7 +842,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbT2mNb86WlpC-dX7wV0NeHM4Y_Ir9rIBl6FESvGHfb6vIPcfT4-2kQuBhSLnnXjY8PVpfvNcyK8aLhTRCea0mqGGOXk3aAkdli3Zt0DpCYTq_pY2BsaXbshZ-8hfFsSyb31CeH99IFYDRZvRjnvMQuU6-V5v_A3Q3H3fkFvn7qOQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZlICNOFqsSduIvnK0fP6ro0EHcdYAGWOXhBVZ_luge52IAICnP3XzdulV2CAKQ5m1At4UnOGNymzSDzYo8RJUaZPInUoz1xr5zc5E9Okac9lIwyC8fonLrGhstkIKjw81sSssNcUk4FMgI_Of_y-G2rQYtI3Fumo08e_vrSCrw2A"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -814,7 +854,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `dotnet test --project AdventureWorks.Tests`: total 7, succeeded 7 (OrderTelemetryTests adds one); the unit filter 3. The Visual Studio 2026 rebuild built all five projects without warnings.
 - requests.http 18 of 18, and the README's curl.exe run 18 of 18: live and ready 200 ("Healthy"); no X-Correlation-ID, or "bad value", came back as a 32-character trace ID (for example 7643067327491606d8b997321be28070), and "order-lab-1" came back unchanged; with InventoryService slowed to 1.5 s through /control/delay, ready answered 503 "Degraded" after the one-second timeout while live answered 200; after /control/reset, ready answered 200 again.
 - InventoryService stopped (nothing on 127.0.0.1:42132): live 200 "Healthy", ready 503 "Degraded". Accuracy 16.1 holds here: on Windows a refused loopback connection takes about two seconds, so the one-second timeout fires first and the check reports Degraded, not Unhealthy; Linux normally refuses at once (Unhealthy). Both are 503.
-- With `--Telemetry:Exporter=console`, one order and a three-second wait printed the spans and metrics (excerpt; the orders.create span is a child of the framework's POST /api/orders/ server span, same trace ID, ParentSpanId 6a2a7943e6b37a92 = its SpanId):
+- With `--Telemetry:Exporter=console`, one order and a 32-second wait (the metric export runs every 30 seconds) printed the spans and metrics (excerpt; the orders.create span is a child of the framework's POST /api/orders/ server span, same trace ID, ParentSpanId 6a2a7943e6b37a92 = its SpanId):
 
   ```text
   Activity.TraceId:            3a3ebd9f92d038dcc8d5b7347588dbf5
@@ -838,6 +878,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   ```
 
   The server span carried http.request.method, url.scheme, url.path, http.route, http.response.status_code, server.address, server.port and network.protocol.version with no ASP.NET Core instrumentation package (accuracy 16.2, 16.3); the hosting meter's http.server.request.duration appeared too. Checked.
+- The telemetry launch profile (review 16-S2), `dotnet run --project AdventureWorks --no-build --launch-profile telemetry` with no other argument, gave the same output as the three command-line arguments: the seven spans as their requests ended (POST /dev/sign-in/{name}, GET /api/csrf, orders.create, POST /api/orders/, orders.cancel, DELETE /api/orders/{id:int}, GET /health/live), JSON log lines whose Scopes carry `"CorrelationId":"order-lab-1"` (9 of them for the order), and one metric export 30 seconds after startup: 4 metrics, about 113 lines, then nothing more until the next 30 seconds. Before the change the exporter reprinted every metric every 2 seconds, about 195 lines each time after Step 3's requests (review 16-S1), so a request's spans scrolled away within seconds. Checked.
 - JSON logs by configuration only (`--Logging:Console:FormatterName=json --Logging:Console:FormatterOptions:IncludeScopes=true`): a request with X-Correlation-ID: order-lab-1 logged lines whose Scopes carry `"CorrelationId":"order-lab-1"`. Checked.
 - The delete-race probe from Chapter 11 passed against this checkpoint too (24 of 24), now through MeteredOrderService.
 
@@ -946,13 +987,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+8/x0/?0] (6s 119ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+8/x0/?0] (8s 006ms)
 Test run summary: Passed!
   total: 8
   failed: 0
   succeeded: 8
   skipped: 0
-  duration: 7s 262ms
+  duration: 10s 011ms
 ```
 
 ### Activity requests and responses
@@ -971,7 +1012,7 @@ Test run summary: Passed!
   Healthy
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 055e58ca0cb535578586a782cf3152c1)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 814354173fc72bfe56a331340d846a7d)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -983,7 +1024,7 @@ Test run summary: Passed!
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 77b7ad6d87abdd23724814354632eb1d)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 95bf0e032d4d2efdce8d821372f4debd)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -1020,7 +1061,7 @@ Test run summary: Passed!
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb4MePKu_4dxuwZpq1pRKCbwMUVXvhTy3LPv3g5Hokwuv3eOD9D25chzcnMBILKnIu6nqsrubjGmeVrSo4WLvT4TKWz2Vzs8V_LlZeBOuQ47jS_rJGX1T9xxsIYmtyFRHCZ2pIGfeB1u5ehN19NUoKemt98NyiXYPdIeXEjEq9ATg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaK8QNXI4yQtgGGBfAOeaIWNVC189xK0Vdp0wgjfrCrRzA_ENyLm5itil21GS7Jrb5K5P4V9CZQxzqCVOjQx6PdbOKffhN3_vhQfIxBJWXI0R5wmWYoXZQ9fNfkWxsg9d0Pse_PFAoqIqoBVoybP21cGO5QO7ZlkP4dlXAL84nLqw"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
@@ -1040,7 +1081,7 @@ Test run summary: Passed!
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZGOT8A6Royxd-XHjHbTcr-JIQEqlrRpcSF7Y6nbsADGTquIPYcWDtEa3lS7NboPoZ0zTd8NIvLaouL2SLAMs3ZTT1ap1p0elAfAKzfipIoUYOUV22R4CmxV24ZFdCOhLQrJl_ghI2EI-qyvW5FZ6ViwhtYG7hLP7rO5WAfbTh01A"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqawW8cZYUm_k8Jwp111T8jkDI9m-4UdM3tNwXuaRN-cy-j62EPZJAK3OCnnFkMZJ5fmY-oREWyR8ImLExyzukPcXTiaUAftjse61hsUERJB8NTRm0sgSZ9KHL6ORdcMSy9qtbKG0wW22BcQJoXdIA1OqBbI3Cuuu8ZDklFZThx-_Q"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -1065,6 +1106,8 @@ Test run summary: Passed!
 - AddSource subscribes to traces and AddMeter to metrics; they are separate lists (16.5).
 - Metric tags stay bounded: operation (create, cancel, update) and outcome (the OrderOutcome names). The order number goes on the span only (16.10).
 - By default ASP.NET Core maps Degraded to 200; ResultStatusCodes maps it to 503 here (16.9), so a slow warehouse takes the instance out of rotation.
+- Review 16-S1: ExportIntervalMilliseconds is 30,000 for the console exporter, so the spans of a request stay on screen between metric dumps; the lesson is unchanged (the counter and the histogram still print, every 30 seconds). Say "within 30 seconds the counter follows", not two.
+- Review 16-S2: the telemetry profile sets the three settings as environment variables in launchSettings.json (Telemetry__Exporter, Logging__Console__FormatterName, Logging__Console__FormatterOptions__IncludeScopes), which every launcher that reads the profile applies: Visual Studio's F5 with telemetry chosen on the Start button, `dotnet run --launch-profile telemetry`, and VS Code with C# Dev Kit, which reads launchSettings.json (its "Configuring C# debugging" page). The https profile stays the default and stays quiet. The `dotnet run` route was run here; VS Code's F5 was not, so the chapter's VS Code step should name the profile and keep the dotnet run command as its fallback.
 - The readiness client is a plain named client ("inventory-health") with a one-second timeout, not the resilience-wrapped InventoryClient, so a probe never waits for retries.
 - OpenTelemetry 1.20.1 for all four packages, the newest on nuget.org on November 3, 2026 (the chapter printed 1.19.1, and 1.19.0 for the HttpClient instrumentation). Microsoft.Extensions.Diagnostics.Testing 10.11.0 matches the other Microsoft.Extensions packages in the app (Http.Resilience 10.11.0).
 - Program.cs is 89 lines.

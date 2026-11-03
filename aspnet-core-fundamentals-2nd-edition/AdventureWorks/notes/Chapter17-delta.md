@@ -177,7 +177,7 @@ The template "Console App" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 90 ms).
+  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 145 ms).
 Restore succeeded.
 ```
 
@@ -219,13 +219,13 @@ info : X.509 certificate chain validation will use the default trust store selec
 info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
 info : Adding PackageReference for package 'BenchmarkDotNet' into project 'AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj'.
 info : Restoring packages for AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj...
-info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
-info : Package 'BenchmarkDotNet' is compatible with all the specified frameworks in project 'AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj'.
-info : PackageReference for package 'BenchmarkDotNet' version '0.16.0-preview.2' added to file 'AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj'.
-info : Generating MSBuild file AdventureWorks.Benchmarks\obj\AdventureWorks.Benchmarks.csproj.nuget.g.props.
-(3 more lines)
+info :   GET https://api.nuget.org/v3/vulnerabilities/index.json
+info :   OK https://api.nuget.org/v3/vulnerabilities/index.json 111ms
+info :   GET https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
+info :   GET https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info :   OK https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json 4ms
+info :   OK https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json 12ms
+(6 more lines)
 ```
 
 Replace the whole of `AdventureWorks.Benchmarks/Program.cs` with the following.
@@ -437,7 +437,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqain6JzyQsly19LHhL62AoJoKCx6AnxCVG06RXOIzNE4EWrK-GiIauRr_KZ8XKdEwLLw3_Re02iAw241KvXjm8Y17Ln_eT9WsxbLJakYIQT4rk0RKOhlUplGfGL3rwThGYhy_LesEEzVCkoDe6-cfatIvIMDQeeK2mca1LTQdvB7A"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZJnqTYIBZIJhwrxJHoLU3v7juy8zovEa4MwfyElJfLimh1DluPTrRmWzZSOlLvARIc4leLntt9HC3dPQ00_n1jsI25K7kvXcuQOidqSGh1qsddWCNHcPF9HiV2UFCvFiVAuGICNHZv9KFOtDAxnNiT1QImkzllvmw7chDT4dBVEQ"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -449,13 +449,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-7876f94450d3b37b29e85c8790527484-8c70da55306a12f2-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-b0387e956a6488c094fbbae0121f86b5-b3b12daabd55896b-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-cbf0dcf737f9cb5823821341266b3283-ffc11fbc88dbe89d-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-497535242450c3b640f2c988c55ffdf4-16c7dbf37929ed2b-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -467,13 +467,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb49p9FeCk-hiMrAwZTb-xsLqvtmbopJ1Hs0vhYIzMpLyVudAaK3sTSsq9aSvfrOak1b1JATRdfQV7SXRTsnK-i72-C5MHw_k4908M-m-YYO-RraDgEVl-5Q22-OptZxwNS14tj_NAxnK3HtTMIuXmoevEUyfVryT1TW-zTs8X-Cg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaP_JTIeI4Bd2Iyvq-ubSuQx69mqYKq7MxTAjjchjiNLOCfuDzu4fFmuxUeREc7pswqg8o39PCSFz0N6rCv6Ys_eFzWvUcFkDRD6NmV8-MVICFMR3ZP3bSxkMkcOwH0hSWor7onvQ3pCoFCeTn_Q91lmsKLoAuFImDST9V_ud7Fow"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-b1944987dcbacec0fd7d588022fda26c-d217b9a37c7a5424-03","correlationId":"b1944987dcbacec0fd7d588022fda26c"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-04bf1c1f47d9ff182fa26a380b132793-feed14adf90500de-03","correlationId":"04bf1c1f47d9ff182fa26a380b132793"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -607,7 +607,7 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqabn9PQVc7GSOu4beIMp6aFh3QPzm1yRpge8dppETt37Jw3KdAKJLMtWgb-9x4MXj0nO1B8to0CtGUT_hwcWdnc3bt6VouX_YhpNPKWjX15TLOeERA91fcbzVTqM68OC4ggkhT9ztNnLYdANsUOdUOG8ep1UASUFMXpEDMHRoaIpg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYIIQ0Xr5pIY1zTymyZrTLHShFaAPhL_XIyLxdncJ9RB-lu8NrWxHWTq2M8reupb8TSPyibwSJxf0e7bU5kd88RDP965hoAPbMN38-Ef-s9kZ3CeiVsY0kwbzcsEYofTzw_Ywr_Tzoeue7NCMjmr7uGtsICXkjoUxV5cBaDt36Xgg"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -619,13 +619,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-4cf8104e362387ae19d2f1f6ba2cfabc-16ff36a5c731ef96-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-496cbe8853ad0d2b4510a0e63eb039e3-4f87580f2e82a3de-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-66b1a6f425a0ff588252a8c67801696d-7a585cb8b2788d28-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-b63df5b9526a5e12a9b56fcddf3a4c5e-776b14dc3af3156a-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -637,13 +637,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZJcgFD_JwLBl6LD6ShJHqeHK0w5J2N1OO6tZz2Cf76pqy4sOCd99hH300HkqB8HURGFPBd6h1_tTDUV-JeMO-CJXHr-HSick5lOxuEAbxiYEL3_rwBdl2qFrkh8OX_7BFqa1RyfUZvTAPsImBDJNLy1Xa6AwwqmEPU6bq5xWsPYw"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb5YZnxvXNxBMfgmYSGTKsMZUMJFisfw2ztIAuiGt2sHlyym1PP8I2GGgGjZv5VVxi_Y8ZxWv0ranxLOhOOydKL4Cw_UGqGoamq7hnHzFnLbT0dbex26krCnNn-p9g_55AUXEdfhQTxcQ4J08ZmA2pvEh02KkTHui-TLf07adbKsA"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-c22c329a84cbb88af56eab89cf81e142-be48277737aef3af-03","correlationId":"c22c329a84cbb88af56eab89cf81e142"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-8dca5a7238bc7e24e51dfdd437753eba-d60ad1e4e978b6e4-03","correlationId":"8dca5a7238bc7e24e51dfdd437753eba"}
   ```
 
 - `POST /dev/sign-out` returned **204**

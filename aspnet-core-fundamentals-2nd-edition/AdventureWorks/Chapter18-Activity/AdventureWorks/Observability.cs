@@ -42,10 +42,12 @@ public static class Observability
                 metrics.AddMeter(OrderTelemetry.Name,
                     "Microsoft.AspNetCore.Hosting",
                     "System.Net.Http");
+                // Every 30 s, so a request's spans stay on screen
+                // between two dumps of every metric.
                 if (exporter == "console")
                     metrics.AddConsoleExporter((_, r) =>
                         r.PeriodicExportingMetricReaderOptions
-                            .ExportIntervalMilliseconds = 2000);
+                            .ExportIntervalMilliseconds = 30_000);
                 else if (exporter == "otlp")
                     metrics.AddOtlpExporter(o =>
                         o.Endpoint = new Uri(endpoint!));

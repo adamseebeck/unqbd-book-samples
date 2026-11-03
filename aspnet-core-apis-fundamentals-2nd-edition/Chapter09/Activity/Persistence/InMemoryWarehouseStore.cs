@@ -2,7 +2,7 @@ using WarehouseApi.Models;
 
 namespace WarehouseApi.Persistence;
 
-// Registered as a Singleton: every request reads and writes these collections
+// Registered as a Singleton: all requests share these collections
 public class InMemoryWarehouseStore
 {
     // One lock guards every collection; services hold it for each read and each write

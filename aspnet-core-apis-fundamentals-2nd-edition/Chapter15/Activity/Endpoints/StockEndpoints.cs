@@ -83,7 +83,7 @@ public static class StockEndpoints
 
             if (!result.Success)
             {
-                // 400, 404, 409, or 422, written through IProblemDetailsService like every other error
+                // 400, 404, 409, or 422, written through IProblemDetailsService like the endpoints' other errors
                 return Results.Problem(result.ErrorMessage, statusCode: result.StatusCode);
             }
 

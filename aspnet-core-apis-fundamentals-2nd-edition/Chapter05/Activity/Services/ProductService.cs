@@ -33,7 +33,7 @@ public class ProductService : IProductService
             query = query.Where(p => p.IsActive == isActive);
         }
 
-        // Sort before paging so a page holds the same products on every request
+        // Sort before paging so an unchanged catalog pages the same way on every request
         var result = query
             .OrderBy(p => p.Sku)
             .Skip((parameters.PageNumber - 1) * parameters.PageSize)

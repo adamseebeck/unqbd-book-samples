@@ -63,7 +63,7 @@ public class FulfillmentProcessorBackgroundService : BackgroundService
             wait.CancelAfter(_sweepInterval);
             try
             {
-                // The job in progress continues after shutdown starts; only the deadline cancels it
+                // An ERP call in progress continues after shutdown starts; only the deadline cancels it
                 await ProcessAsync(await _queue.DequeueAsync(wait.Token), stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

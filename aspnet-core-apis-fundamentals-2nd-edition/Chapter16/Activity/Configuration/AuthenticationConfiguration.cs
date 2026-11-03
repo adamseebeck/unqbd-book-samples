@@ -18,7 +18,7 @@ public static class AuthenticationConfiguration
         var hasAudience = !string.IsNullOrEmpty(bearerSettings["ValidAudience"]) ||
             bearerSettings.GetSection("ValidAudiences").GetChildren().Any();
 
-        // Elsewhere an identity provider issues the tokens; without it every request would fail later
+        // Elsewhere an identity provider issues the tokens; without it every token would fail validation later
         if (!environment.IsDevelopment() && (string.IsNullOrEmpty(bearerSettings["Authority"]) || !hasAudience))
         {
             throw new InvalidOperationException(

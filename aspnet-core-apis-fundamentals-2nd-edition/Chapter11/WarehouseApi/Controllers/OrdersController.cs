@@ -69,7 +69,7 @@ public class OrdersController : ControllerBase
                 return Problem(detail: "Idempotency key reused with a different request payload.", statusCode: StatusCodes.Status422UnprocessableEntity, title: "Idempotency Key Reused");
             }
 
-            // The first request and every retry get 201 with the same order and Location
+            // The first request and each retry within 24 hours get 201 with the same order and Location
             return CreatedAtAction(
                 nameof(GetById),
                 new { id = createdOrder.Id },

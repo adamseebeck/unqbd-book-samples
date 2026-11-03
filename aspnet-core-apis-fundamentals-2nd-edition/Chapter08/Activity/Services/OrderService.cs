@@ -108,7 +108,7 @@ public class OrderService : IOrderService
                 throw new InvalidOperationException($"Cannot transition from {currentStatus} to {newStatus}");
             }
 
-            // Fails only if another request changed the status after it was read; then read it again
+            // Fails only if another request changed or removed the order after it was read; then read it again
             if (_repository.TryUpdateStatus(id, currentStatus, newStatus))
             {
                 return Task.FromResult<OrderResponse?>(MapToResponse(order));

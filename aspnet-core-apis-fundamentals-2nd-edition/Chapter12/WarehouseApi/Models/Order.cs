@@ -11,6 +11,6 @@ public class Order
     public string? FulfillmentWarehouseCode { get; set; }
     public List<OrderLine> Lines { get; set; } = new();
 
-    // Two requests that change the same order cannot both succeed
+    // Of two requests that change the same order from the same read, only the first save succeeds
     public byte[] RowVersion { get; set; } = [];
 }

@@ -41,7 +41,7 @@ public class ProductService : IProductService
                 query = query.Where(p => p.IsActive == isActive.Value);
             }
 
-            // Sort before paging so a page holds the same products on every request
+            // Sort before paging so an unchanged catalog pages the same way on every request
             var matches = query.OrderBy(p => p.Sku).ToList();
             var items = matches
                 .Skip(pagination.Skip)

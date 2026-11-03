@@ -68,7 +68,7 @@ builder.Services.AddOpenApi(ApiVersionConstants.V2DocumentName, options => optio
 // Built-in Minimal API validation
 builder.Services.AddValidation();
 
-// IProblemDetailsService for every error response, each one with the request's correlation ID
+// IProblemDetailsService, and the request's correlation ID on every Problem Details response
 builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>

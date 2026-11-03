@@ -13,7 +13,7 @@ public class NotFoundException : DomainException
     public string ResourceId { get; }
 
     // A missing resource means nothing beyond its status code, so it keeps the standard type and title
-    // that ASP.NET Core gives every other 404: GetById and a cancellation answer a missing order alike
+    // that ASP.NET Core's Problem Details use for 404: GetById and a cancellation answer a missing order alike
     public override string ErrorType => "https://tools.ietf.org/html/rfc9110#section-15.5.5";
     public override string Title => "Not Found";
     public override int StatusCode => StatusCodes.Status404NotFound;

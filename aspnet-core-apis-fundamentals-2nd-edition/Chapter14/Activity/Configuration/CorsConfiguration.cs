@@ -17,7 +17,7 @@ public static class CorsConfiguration
                 policy.WithOrigins(allowedOrigins)
                     .WithMethods("GET", "POST", "PUT", "DELETE")
                     .WithHeaders("Authorization", "Content-Type", "Idempotency-Key", "X-Correlation-ID")
-                    // Scripts read only the headers listed here, including the version announcements
+                    // Besides safelisted headers such as Content-Type, scripts read only the headers listed here
                     .WithExposedHeaders(
                         "X-Correlation-ID", "Location", "WWW-Authenticate",
                         "api-supported-versions", "api-deprecated-versions", "Deprecation", "Sunset", "Link")

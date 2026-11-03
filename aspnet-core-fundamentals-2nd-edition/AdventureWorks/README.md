@@ -2,7 +2,7 @@
 
 One AdventureWorks outdoor-gear store app that grows through the book. The reader creates it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own.
 
-This folder currently holds Chapters 1 to 6. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder currently holds Chapters 1 to 9. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
 
 ## Folders
 
@@ -42,3 +42,6 @@ Every checkpoint has a `requests.http` file with each request and the status you
 | 4 | The product catalog (`/api/catalog`), a custom route constraint, named endpoints and links, OpenAPI, feature files |
 | 5 | The product API as controllers (`/api/v1/products`) and Minimal APIs (`/api/v2/products`) over one store, with validation and filters |
 | 6 | Razor Pages over the same store: product list and edit pages with a version check, a View Component and an Admin area |
+| 7 | The order form with a private upload, `/api/orders/validate`, built-in Minimal API validation, an async SKU check, static files and en/fr request localization |
+| 8 | ASP.NET Core Identity on SQLite (`adventureworks.db`), sign-in and profile pages, JWT and refresh tokens for `/api/auth`, a Bearer-only loyalty API, a Development seed and test sign-in |
+| 9 | Authorization: a fallback policy with every public endpoint marked, Admin, age, department and resource-based order policies, order delete and archive, the X-CSRF-TOKEN header |

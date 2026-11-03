@@ -1,0 +1,233 @@
+# AdventureWorks: Chapter 9 Activity solution
+
+This is a worked solution to the chapter's Activity, built in a copy of the Chapter 9 checkpoint. Try the Activity yourself first. The next chapter starts from `../Chapter09`, not from this folder.
+
+It adds a Shipping staff account, sam, and `ShippingHolds.cs`: `POST /api/orders/{id}/hold`, guarded by the Department:Shipping policy, and `GET /api/policies/department/{name}`, which shows that the provider builds only the Finance and Shipping department policies.
+
+## Run it
+
+From this folder, the one that holds global.json:
+
+```shell
+cd AdventureWorks
+dotnet user-secrets set FeatureFlags:MaxCartItems 30
+dotnet user-secrets set Training:Password "Practice-Pass-2026!"
+cd ..
+dotnet run --project AdventureWorks
+```
+
+The two secrets are Chapter 2's harmless setting and Chapter 8's test-account password; set them once, because every later checkpoint keeps the same UserSecretsId. Any password with 12 or more characters, upper and lower case letters, a digit and a symbol works; requests.http uses this one. The first run creates adventureworks.db in the AdventureWorks folder and five test accounts: casey, jordan, morgan, riley and avery, each at @adventure-works.test. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+
+## Sending requests
+
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+
+The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
+
+```powershell
+Remove-Item cookies.txt -ErrorAction SilentlyContinue
+
+# Public endpoints stay public under the fallback policy.
+# Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/catalog
+
+# Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/v1/products
+
+# Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Products
+
+# Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/health
+
+# Everything else needs a signed-in user: an order. Expect 401
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1
+
+# A product write needs the Admin role. Expect 401
+@'
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+'@ | Set-Content body.json
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    -H "Content-Type: application/json" `
+    --data-binary "@body.json" `
+    https://localhost:7001/api/v1/products
+
+# A page redirects to sign in instead. Expect 302
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Admin
+
+# Anonymous archive. Expect 401
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1/archive
+
+# casey: a customer who owns orders 1 and 3. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/casey
+
+# The owner reads her order. Expect 200 with "orderNumber":
+# "AW-0001"
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1
+
+# Order 2 is jordan's. Expect 403
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/2
+
+# casey's antiforgery token for API writes. Expect 200
+curl.exe -s -D - -o caseyToken.json -b cookies.txt `
+    -c cookies.txt https://localhost:7001/api/csrf
+$caseyToken = Get-Content caseyToken.json | ConvertFrom-Json
+
+# Owner, but not in Finance: the endpoint policy refuses.
+# Expect 403
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    -H "X-CSRF-TOKEN: $($caseyToken.token)" `
+    https://localhost:7001/api/orders/1/archive
+
+# Born 1990: the age policy allows the restricted page. Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Products/Restricted
+
+# Not an Admin: no product writes. Expect 403
+@'
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+'@ | Set-Content body.json
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    -H "Content-Type: application/json" `
+    --data-binary "@body.json" `
+    https://localhost:7001/api/v2/products
+
+# A page sends a signed-in user who fails its policy to the
+# access-denied page. Expect 302
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Products/Edit/1
+
+# morgan: Finance staff who owns no orders. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/morgan
+
+# Finance staff may read any order. Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1
+
+# Expect 200
+curl.exe -s -D - -o morganToken.json -b cookies.txt `
+    -c cookies.txt https://localhost:7001/api/csrf
+$morganToken = Get-Content morganToken.json | ConvertFrom-Json
+
+# In Finance, but not the owner: the resource rule refuses.
+# Expect 403
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    -H "X-CSRF-TOKEN: $($morganToken.token)" `
+    https://localhost:7001/api/orders/1/archive
+
+# jordan: a business buyer in Finance who owns order 2. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/jordan
+
+# Expect 200
+curl.exe -s -D - -o jordanToken.json -b cookies.txt `
+    -c cookies.txt https://localhost:7001/api/csrf
+$jordanToken = Get-Content jordanToken.json | ConvertFrom-Json
+
+# Both rules pass, but the write has no antiforgery token.
+# Expect 400
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/2/archive
+
+# Finance and owner, with the token. Expect 204
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    -H "X-CSRF-TOKEN: $($jordanToken.token)" `
+    https://localhost:7001/api/orders/2/archive
+
+# The flag changed only on the allowed request. Expect 200 with
+# "archived": true
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/2
+
+# riley: born 2010. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/riley
+
+# Under 21: sent to the access-denied page. Expect 302
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Products/Restricted
+
+# avery: the Admin. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/avery
+
+# Expect 200
+curl.exe -s -D - -o averyToken.json -b cookies.txt `
+    -c cookies.txt https://localhost:7001/api/csrf
+$averyToken = Get-Content averyToken.json | ConvertFrom-Json
+
+# Only the Admin role may delete an order. Expect 204
+curl.exe -i -w "\n" -X DELETE -b cookies.txt -c cookies.txt `
+    -H "X-CSRF-TOKEN: $($averyToken.token)" `
+    https://localhost:7001/api/orders/3
+
+# Gone. Expect 404
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/3
+
+# The Admin may write products. Expect 201
+@'
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+'@ | Set-Content body.json
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    -H "Content-Type: application/json" `
+    --data-binary "@body.json" `
+    https://localhost:7001/api/v2/products
+
+# And open the Admin area and the product editor. Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Admin
+
+# Expect 200
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/Products/Edit/1
+
+# Expect 204
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-out
+
+# The Activity: anonymous callers cannot place a hold. Expect 401
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1/hold
+
+# sam: Shipping staff. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/sam
+
+# Department:Shipping allows the hold. Expect 200 with
+# {"orderId":1,"held":true}
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1/hold
+
+# The provider builds the two known department policies.
+# Expect 200 with "exists": true
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/policies/department/Shipping
+
+# Any other department gets no policy at all. Expect 200 with
+# "exists": false
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/policies/department/Marketing
+
+# morgan is in Finance, not Shipping. Expect 200
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-in/morgan
+
+# Expect 403
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/api/orders/1/hold
+```

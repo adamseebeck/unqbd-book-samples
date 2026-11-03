@@ -191,6 +191,19 @@ curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
     --data-binary "@body.json" `
     https://localhost:7001/api/admin/inventory/transfer
 
+# The same location twice: StockTransfer's own Validate rule
+# refuses it before the endpoint runs. Expect 400 with {"To":["Use
+# two different locations."]}
+@'
+{ "productId": 1, "from": "Main", "to": "Main",
+  "quantity": 3 }
+'@ | Set-Content body.json
+curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
+    -H "Content-Type: application/json" `
+    -H "X-CSRF-TOKEN: $($averyToken.token)" `
+    --data-binary "@body.json" `
+    https://localhost:7001/api/admin/inventory/transfer
+
 # The unique index refuses a second HLM-1001. Expect 400 with
 # "title": "Invalid request"
 @'

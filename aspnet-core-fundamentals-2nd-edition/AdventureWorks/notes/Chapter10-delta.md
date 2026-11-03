@@ -1389,7 +1389,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ## Requests and real responses
 
-`requests.http` holds these requests in this order; 26 of 26 returned their commented status. The README has the same requests as curl.exe commands for Windows PowerShell 5.1, which also passed when run as printed.
+`requests.http` holds these requests in this order; 27 of 27 returned their commented status. The README has the same requests as curl.exe commands for Windows PowerShell 5.1, which also passed when run as printed.
 
 - `GET /api/catalog` returned **200**
 
@@ -1418,7 +1418,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"87298432-29f4-42bc-9784-d9abd78f8c66","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"510661d0-df2e-4dd9-8396-daaf95851f0b","items":[{"productId":2,"qu...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"bd62f6ad-0df6-4748-bca6-b568bf1aaabb","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"d2027c1a-20d2-46c3-843d-01ac88b5b3da","items":[{"productId":2,"qu...
   ```
 
 - `GET /api/orders/report` returned **200**
@@ -1436,43 +1436,43 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/report?page=0` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"page":["The field page must be between 1 and 1000."]},"traceId":"00-530a3691760e4144c...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"page":["The field page must be between 1 and 1000."]},"traceId":"00-c7d716c6fc16b73ba...
   ```
 
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZioc83_XkYvpzeqLH78WHw5eRrWHiUS_r2mbfik2JeKyDHjxbnG2eMtzz8dTnEPTTr83P71Y4IgLxzKC63QXNBCeOgCRGyiWOL3H6GQsvKPDU6wK7CqjG7LnQ3yRtugOr536x_Cn3xdwhQTy76V26tkAahmdYppxxvf8-pQXy5NQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYvxRU5Pc7H9CQsqyWmM8iPOIsSGhFrAJCPt6LhaJn9_DgOi3RYyq-IdKeM1tryDuu6SqyZ-Ty6Ml-CIp8q61SQ4AGe7tjQ6XaFkla-yNEbPiGqcNZg9ygDDpvlNVe3pCWQxhNOrADtHaDG_8v66_GYhMCZ60fBr2UhpFFOKc3TJg"}
   ```
 
 - `PUT /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"87298432-29f4-42bc-9784-d9abd78f8c66","total":49.99,"status":"Pending","archived":false,"notes":"Leave it at the side door.","version":"c1582688-fc62-4b22-b3ad-90b1717bb7d5","it...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"bd62f6ad-0df6-4748-bca6-b568bf1aaabb","total":49.99,"status":"Pending","archived":false,"notes":"Leave it at the side door.","version":"c0129c2c-a911-42c3-875f-fc96e1889d32","it...
   ```
 
 - `PUT /api/orders/1` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"The order has changed","status":409,"detail":"Read the order again and send its current version.","traceId":"00-4c6b9f744b7024ccab4c7f93d3b63250-21d8...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"The order has changed","status":409,"detail":"Read the order again and send its current version.","traceId":"00-c21b1f4e2f67c67e06d7914f67a5f140-f62a...
   ```
 
 - `PUT /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"87298432-29f4-42bc-9784-d9abd78f8c66","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"e4e41ccf-fc0e-4cf9-80c1-42b76ea1b4c5","items":[{"productId":2,"qu...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"bd62f6ad-0df6-4748-bca6-b568bf1aaabb","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"3bbce45f-c17b-4dbc-95ac-4b7e2e2d6c7d","items":[{"productId":2,"qu...
   ```
 
 - `PUT /api/orders/2` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-4cbf85c7397468d422edaedc7e50eef2-8ad726577b20a461-02","correlationId":"badf9947986745f58604f1c8a1a7f3e6"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-2302e241afd1692d858d98119cc99e38-594961694a21d519-02","correlationId":"f971d5df273e4993a97240d66a52db92"}
   ```
 
 - `GET /api/admin/inventory/1` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-ae1530aaefadddb3a1affa585f632228-bd16146c82a06977-02","correlationId":"fddfab5afd2145a6b11e79e9f1044669"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-e139f9f13c000ef96e62a5aae32c1d7b-92ee7caa9c6f6439-02","correlationId":"63cbd6ed150d486bb2452f695b57d1b4"}
   ```
 
 - `POST /dev/sign-in/avery` returned **200**
@@ -1484,7 +1484,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaY11FkYGq6GTS129efLSvhizDsmZeZiQtdrRGNaXsT26ep3fDEBex6uDi9WC1zLARGNPQ-nbJ3sngXQhw9-gixofBzAyoIVaCbafI2hxm3jVMiZqr45IwJN8Mqa1hJxNAW6xyI5pmq2WlRxtAwaBxSmgs_LQIiubS9d0mpPprRSA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZ58IEVjy_FR_dtuNLqBByeHDUQk35yFSXY_YWtzLitLWvT-eXbnY1Aw_y6N55aP4lC477SxHnPw5a7kVfQjxI6M9Ap_wjQOl3SHvdA0hwjHrOH_vpD3R2_paGbke-RO2K4D455RrB6TrVYs4zcBiQTmG2ZUXd9BrB5NOb0bhGeiQ"}
   ```
 
 - `GET /api/admin/inventory/1` returned **200**
@@ -1502,7 +1502,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/inventory/transfer` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Not enough stock","status":409,"detail":"Overflow has fewer than 50.","traceId":"00-351040b27fa540131a15afce25f9204a-750076126df95607-02","correlatio...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Not enough stock","status":409,"detail":"Overflow has fewer than 50.","traceId":"00-a5531bc4176f10dca23e8431fa4a1f82-b0a1b96bd272331f-02","correlatio...
   ```
 
 - `GET /api/admin/inventory/1` returned **200**
@@ -1517,10 +1517,16 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   [{"location":"Main","quantity":10},{"location":"Overflow","quantity":0}]
   ```
 
+- `POST /api/admin/inventory/transfer` returned **400**
+
+  ```text
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"To":["Use two different locations."]},"traceId":"00-532cca48fa9250ba7cadedc1cb5c5562-...
+  ```
+
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-85100db6e014ba7deedd54bb33bef903-83eab88b8cb3c96a-02","...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-b1c8f78b48d416a1effce56b3e243372-7add703610c602f5-02","...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/5)
@@ -1534,14 +1540,14 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `DELETE /api/v2/products/1` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-10233c2b5095d9217eaf7706dbc586a6-738872153af9ec56-02","cor...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-bbf853e2b8a2d36d78219269f0c473db-564b9e9efdedfea4-02","cor...
   ```
 
 - `POST /dev/sign-out` returned **204**
 
 ### Other runs
 
-- requests.http ran twice against the same database (the requests run, then the README's curl.exe run): 26 of 26 both times, because every change the file makes is undone by a later request.
+- requests.http ran twice against the same database (the requests run, then the README's curl.exe run): 27 of 27 both times, because every change the file makes is undone by a later request.
 - Persistence: one process saved a note on order AW-0003; a new process on the same database read it back, then cleared it. Checked.
 - Production: with the database deleted, `dotnet tool restore` and `dotnet ef database update -s ..\AdventureWorks` (the tool's default environment is Production) created the schema; started in Production, the test sign-in answered 302 and `/api/catalog` 200 with no products, because nothing migrates or seeds outside Development. Checked.
 - Chapter 9's EnsureCreated database (with its -wal and -shm files) under Chapter 10's code: startup fails with `SQLite Error 1: 'table "AspNetRoles" already exists'`, thrown by MigrateAsync. Checked; this is why Step 1 drops the database.
@@ -1582,7 +1588,7 @@ The original Activity asked for SQL Server "if available" without steps (C10-6),
 - The seed's fixed IDs need IDENTITY_INSERT on SQL Server; `SaveWithIdsAsync` turns it on for one table inside a transaction, so all three statements share one connection.
 - A `sqlserver` launch profile sets `Database__Provider`; the ef tools need the variable set in the session.
 
-Checked: the build, the Visual Studio rebuild (four projects) and the migration on RC3; requests.http and the README's curl.exe commands both passed on a LocalDB instance (SQL Server 2025 LocalDB, 17.0) with the sqlserver profile, the same 26 statuses as on SQLite, including the 409 from the CHECK constraint and the 400s from the unique index and the restricted delete; the https profile still runs on SQLite (26 of 26). The check dropped its SQL Server database afterward.
+Checked: the build, the Visual Studio rebuild (four projects) and the migration on RC3; requests.http and the README's curl.exe commands both passed on a LocalDB instance (SQL Server 2025 LocalDB, 17.0) with the sqlserver profile, the same 27 statuses as on SQLite, including the 409 from the CHECK constraint and the 400s from the unique index and the restricted delete; the https profile still runs on SQLite (27 of 27). The check dropped its SQL Server database afterward.
 
 The reader-path check rebuilt `AdventureWorks/Chapter10-Activity` from the Chapter 10 checkpoint: no differences.
 The Activity adds 103 lines of code: 33 in 1 new file and 70 new or changed in existing files, plus 8 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
@@ -1928,12 +1934,12 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 
 ### Activity requests and responses
 
-26 of 26 requests in `Chapter10-Activity/requests.http` returned their commented status. They ran on SQL Server LocalDB with the sqlserver profile. The last five, where the constraint errors come from SQL Server (2601 and 547) instead of SQLite:
+27 of 27 requests in `Chapter10-Activity/requests.http` returned their commented status. They ran on SQL Server LocalDB with the sqlserver profile. The last five, where the constraint errors come from SQL Server (2601 and 547) instead of SQLite:
 
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-f443b3424ff4fda6553eca9de3315ecd-2a637699768425e1-02","...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-d7ec693dcf9edc242f85ae780bf1373f-f6ea9d49ed8581a9-02","...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/6)
@@ -1947,7 +1953,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - `DELETE /api/v2/products/1` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-53622c05364c4f4364f014247d4bb346-7116ed6c883ca674-02","cor...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-432670eacb7f11141e0c6207bcc0c2d3-057476a28465f101-02","cor...
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -1978,5 +1984,6 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - Accuracy 10.2: nothing here uses lazy loading. GetByIdAsync loads the items with Include; the report is a projection, so SQL computes only the columns it returns.
 - SQLite reports a delete refused by ON DELETE RESTRICT as SQLITE_CONSTRAINT_TRIGGER (1811), not SQLITE_CONSTRAINT_FOREIGNKEY (787, which NO ACTION gives). Checked with the app (the 400) and with SQLite directly.
 - SQLite ignores HasMaxLength (TEXT has no length); the API's validation enforces the lengths, and SQL Server enforces them in the Activity (nvarchar(8) for Sku).
+- Review P13: StockTransfer's Validate rule now has a request. A transfer from Main to Main answers 400 before the endpoint runs, with `"errors":{"To":["Use two different locations."]}` (Chapter 7's AddValidation runs the type's Validate method), on SQLite and on SQL Server.
 - EF Core logs each SQL command at Information, so the Development console shows them, and it logs a failed SaveChanges at Error ("An exception occurred in the database while saving changes") even when the code catches the exception and answers 400 or 409. Expect those entries after the constraint requests.
 - Program.cs is 77 lines.

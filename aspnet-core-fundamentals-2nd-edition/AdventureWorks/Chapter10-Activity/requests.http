@@ -145,6 +145,17 @@ X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
   "quantity": 3 }
 
 ###
+# The same location twice: StockTransfer's own Validate rule
+# refuses it before the endpoint runs. Expect 400 with
+# {"To":["Use two different locations."]}
+POST {{host}}/api/admin/inventory/transfer
+Content-Type: application/json
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+{ "productId": 1, "from": "Main", "to": "Main",
+  "quantity": 3 }
+
+###
 # The unique index refuses a second HLM-1001.
 # Expect 400 with "title": "Invalid request"
 POST {{host}}/api/v2/products

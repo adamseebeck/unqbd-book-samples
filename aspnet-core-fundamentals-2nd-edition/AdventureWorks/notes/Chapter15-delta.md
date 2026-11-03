@@ -4,13 +4,14 @@ Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Ch
 
 ## What the chapter adds
 
-Chapter 15 adds `AdventureWorks.Tests` to the running app's solution: unit tests for the order rules and integration tests that run the whole app in memory.
+Chapter 15 adds `AdventureWorks.Tests` to the running app's solution: a few focused unit tests for the order rules and integration tests that run the whole app in memory through one small factory.
 
 - global.json gains `"test": { "runner": "Microsoft.Testing.Platform" }`, so `dotnet test` runs the xUnit v3 project on Microsoft.Testing.Platform (the C# book's verified setup).
-- `AdventureWorks.Tests.csproj`, written by hand in an empty folder: OutputType Exe, xunit.v3.mtp-v2 4.0.1, Microsoft.AspNetCore.Mvc.Testing 11.0.0, a reference to the web project. `dotnet sln add` puts it in AdventureWorks.slnx (five projects).
-- Unit (Category=Unit): `Fakes.cs` (FakeOrders, one class for IOrderRepository and IOrderWriter, and FakeUnitOfWork), `FakeCatalog.cs`, `OrderServiceTests.cs` (prices from the catalog, one line per product, unknown products, a taken number, another owner's order) and `ArchitectureTests.cs` (Core uses no ASP.NET Core, EF Core or other AdventureWorks assembly).
-- Integration (Category=Integration): `StoreFactory` (WebApplicationFactory<Program> in the Testing environment, an in-memory SQLite database built from the migrations, the Test scheme, a stub for InventoryService, seeded catalog and one customer), `TestAuthHandler`, `StubInventory`, `StoreApiTests` (public catalog, 401 for orders, 201 with Location and ETag, stock from the stub) and `StockFailureTests` (503 after one call and two retries, in a factory of its own).
+- `AdventureWorks.Tests.csproj`, written by hand in an empty folder: OutputType Exe, xunit.v3.mtp-v2 4.0.1, Microsoft.AspNetCore.Mvc.Testing 11.0.0, Moq 4.21.0 (the chapter's pinned version and the newest on nuget.org on November 3), a reference to the web project. `dotnet sln add` puts it in AdventureWorks.slnx (five projects).
+- Unit (Category=Unit): `OrderServiceTests.cs`, two tests with Moq standing in for the four contracts (prices come from the catalog; an order deleted before the save is NotFound), and `ArchitectureTests.cs` (Core uses no ASP.NET Core, EF Core or other AdventureWorks assembly).
+- Integration (Category=Integration): `StoreFactory` (WebApplicationFactory<Program> in the Testing environment, an in-memory SQLite database built from the migrations, the Test scheme, the seeded catalog and one customer, and CreateCustomerAsync for a signed-in client with the antiforgery header), `TestAuthHandler`, and `StoreApiTests` (401 for orders without a user; 201 with Location and ETag, then the order's total).
 - The app itself does not change: Program.cs is still 88 lines.
+- Lean pass (coordinator, November 3): the checkpoint dropped the hand-written fakes (FakeOrders, FakeUnitOfWork, FakeCatalog, 109 lines), three of the five service tests, the public-catalog test, and the inventory stub with its two tests (moved to the Activity, where the one-test override needs it). Test code went from 523 to 292 lines.
 
 ## Files added or changed
 
@@ -18,24 +19,22 @@ Chapter 15 adds `AdventureWorks.Tests` to the running app's solution: unit tests
 | --- | --- |
 | `global.json` | changed |
 | `AdventureWorks.Tests/AdventureWorks.Tests.csproj` | added |
-| `AdventureWorks.Tests/Unit/Fakes.cs` | added |
-| `AdventureWorks.Tests/Unit/FakeCatalog.cs` | added |
 | `AdventureWorks.Tests/Unit/OrderServiceTests.cs` | added |
 | `AdventureWorks.Tests/Unit/ArchitectureTests.cs` | added |
 | `AdventureWorks.Tests/Integration/StoreFactory.cs` | added |
 | `AdventureWorks.Tests/Integration/TestAuthHandler.cs` | added |
-| `AdventureWorks.Tests/Integration/StubInventory.cs` | added |
 | `AdventureWorks.Tests/Integration/StoreApiTests.cs` | added |
-| `AdventureWorks.Tests/Integration/StockFailureTests.cs` | added |
 | (command) `dotnet sln add AdventureWorks.Tests` | creates or edits project files |
+
+The reader types 297 lines of code: 292 in 6 new files and 5 new or changed in existing files, plus 4 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
-Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 96 of 96 files identical and no differences.
+Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 92 of 92 files identical and no differences.
 
 ### Step 1: A test project on Microsoft.Testing.Platform
 
-The working folder's global.json selects Microsoft.Testing.Platform as the test runner, so `dotnet test` runs the xUnit v3 project directly. Create the AdventureWorks.Tests folder empty and write its project file by hand: a test project made from a template and then edited keeps a stale restore, and its first `dotnet test` can report that no test projects were found. The project is an executable (OutputType Exe), references xunit.v3.mtp-v2 and Microsoft.AspNetCore.Mvc.Testing, and references the web project, which brings Core and Infrastructure with it.
+The working folder's global.json selects Microsoft.Testing.Platform as the test runner, so `dotnet test` runs the xUnit v3 project directly. Create the AdventureWorks.Tests folder empty and write its project file by hand: a test project made from a template and then edited keeps a stale restore, and its first `dotnet test` can report that no test projects were found. The project is an executable (OutputType Exe), references xunit.v3.mtp-v2, Microsoft.AspNetCore.Mvc.Testing and Moq, and references the web project, which brings Core and Infrastructure with it.
 
 In `global.json`, replace these lines. The last two lines of global.json: the sdk section ends, and a test section follows it.
 
@@ -54,7 +53,7 @@ With these:
 }
 ```
 
-Create `AdventureWorks.Tests/AdventureWorks.Tests.csproj` (21 lines).
+Create `AdventureWorks.Tests/AdventureWorks.Tests.csproj` (22 lines).
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -70,6 +69,7 @@ Create `AdventureWorks.Tests/AdventureWorks.Tests.csproj` (21 lines).
     <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"
       Version="11.0.0" />
+    <PackageReference Include="Moq" Version="4.21.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,243 +94,75 @@ Project `AdventureWorks.Tests\AdventureWorks.Tests.csproj` added to the solution
 
 ### Step 2: Unit tests for the order rules
 
-OrderService lives in Core and depends only on Core interfaces (Chapter 11), so its tests need no host, no HTTP and no database: hand-written fakes stand in for the repository, the writer, the catalog and the unit of work. Each test passes TestContext.Current.CancellationToken, which xUnit v3 cancels when a run is stopped. The architecture test checks Chapter 2's rule on the compiled Core assembly.
+OrderService lives in Core and depends only on Core interfaces (Chapter 11), so its tests need no host, no HTTP and no database: Moq stands in for the repository, the writer, the catalog and the unit of work, and each test sets up only the calls its rule needs. One test checks that prices come from the catalog; the other that an order deleted before the save answers NotFound (Chapter 11). Each passes TestContext.Current.CancellationToken, which xUnit v3 cancels when a run is stopped. The architecture test checks Chapter 2's rule on the compiled Core assembly.
 
-Create `AdventureWorks.Tests/Unit/Fakes.cs` (66 lines).
+Create `AdventureWorks.Tests/Unit/OrderServiceTests.cs` (60 lines).
 
-Fakes.cs, part 1 of 2 (31 lines):
-
-```csharp
-using AdventureWorks.Core;
-
-namespace AdventureWorks.Tests.Unit;
-
-// Hand-written stand-ins for the contracts OrderService uses.
-// The writer and the repository share one list, as the real pair
-// share one DbContext.
-public sealed class FakeOrders : IOrderRepository, IOrderWriter
-{
-    public List<Order> Saved { get; } = [];
-    public string? StagedStatus { get; private set; }
-
-    public Task<Order?> GetByIdAsync(int id) =>
-        Task.FromResult(Saved.FirstOrDefault(o => o.Id == id));
-
-    public Task<Order?> GetByNumberAsync(string orderNumber) =>
-        Task.FromResult(Saved.FirstOrDefault(o =>
-            o.OrderNumber == orderNumber));
-
-    public Task<OrderSummary[]> ListAsync(
-        string ownerId, int page, int pageSize) =>
-        Task.FromResult(Array.Empty<OrderSummary>());
-
-    public Task<int> CountAsync(string ownerId) =>
-        Task.FromResult(Saved.Count(o => o.OwnerId == ownerId));
-
-    public Task<bool> ArchiveAsync(int id) =>
-        Task.FromResult(false);
-
-    public Task<bool> DeleteAsync(int id) =>
-        Task.FromResult(false);
-```
-
-Fakes.cs, part 2 of 2 (34 lines):
-
-```csharp
-    public Task<string> NextOrderNumberAsync(
-        CancellationToken ct) =>
-        Task.FromResult($"AW-{Saved.Count + 101:0000}");
-
-    public void Add(NewOrder order) => Saved.Add(new Order(
-        Saved.Count + 101, order.OrderNumber, order.OwnerId,
-        order.Items.Sum(i => i.Quantity * i.UnitPrice),
-        OrderStatus.Pending, false, null, Guid.NewGuid(),
-        order.Items));
-
-    public Task<bool> SetStatusAsync(int id, string status,
-        Guid version, CancellationToken ct)
-    {
-        StagedStatus = status;
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> SetNotesAsync(int id, string? notes,
-        Guid version, CancellationToken ct) =>
-        Task.FromResult(true);
-}
-
-public sealed class FakeUnitOfWork : IUnitOfWork
-{
-    public int Saves { get; private set; }
-    public Exception? Failure { get; set; }
-
-    public Task SaveChangesAsync(CancellationToken ct)
-    {
-        Saves++;
-        return Failure is null
-            ? Task.CompletedTask : Task.FromException(Failure);
-    }
-}
-```
-
-Create `AdventureWorks.Tests/Unit/FakeCatalog.cs` (43 lines).
-
-FakeCatalog.cs, part 1 of 2 (20 lines):
+OrderServiceTests.cs, part 1 of 2 (29 lines):
 
 ```csharp
 using AdventureWorks.Core;
-
-namespace AdventureWorks.Tests.Unit;
-
-// The catalog OrderService reads prices from. Only the method
-// the service calls is real; the rest fail if a test calls one.
-public sealed class FakeCatalog(params Product[] products)
-    : IProductService
-{
-    public Task<Product[]> GetByIdsAsync(int[] ids,
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(products
-            .Where(p => ids.Contains(p.Id)).ToArray());
-
-    public Task<Product?> GetByIdAsync(int id) =>
-        throw new NotSupportedException();
-
-    public Task<Product?> GetBySkuAsync(string sku,
-        CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException();
-```
-
-FakeCatalog.cs, part 2 of 2 (22 lines):
-
-```csharp
-    public Task<Product[]> SearchAsync(
-        string? query, int page, int pageSize) =>
-        throw new NotSupportedException();
-
-    public Task<Product[]> ListByCategoryAsync(string category) =>
-        throw new NotSupportedException();
-
-    public Task<Product> CreateAsync(
-        CreateProductRequest request) =>
-        throw new NotSupportedException();
-
-    public Task<bool> UpdateAsync(
-        int id, UpdateProductRequest request) =>
-        throw new NotSupportedException();
-
-    public Task<UpdateOutcome> UpdateAsync(int id,
-        UpdateProductRequest request, int expectedVersion) =>
-        throw new NotSupportedException();
-
-    public Task<bool> DeleteAsync(int id) =>
-        throw new NotSupportedException();
-}
-```
-
-Create `AdventureWorks.Tests/Unit/OrderServiceTests.cs` (93 lines).
-
-OrderServiceTests.cs, part 1 of 3 (30 lines):
-
-```csharp
-using AdventureWorks.Core;
+using Moq;
 using Xunit;
 
 namespace AdventureWorks.Tests.Unit;
 
-// Chapter 11's rules, tested without HTTP or a database.
+// Chapter 11's rules without HTTP or a database. Moq stands in
+// for the four contracts OrderService depends on.
 [Trait("Category", "Unit")]
 public sealed class OrderServiceTests
 {
-    static readonly Product Helmet = new(1, "Trail Helmet",
-        "HLM-1001", 29.99m, "accessories", 1);
-    static readonly Product Tent = new(4, "Two-Person Tent",
-        "TNT-4001", 189.00m, "camping", 1);
+    readonly Mock<IOrderRepository> _orders = new();
+    readonly Mock<IOrderWriter> _writer = new();
+    readonly Mock<IProductService> _catalog = new();
+    readonly Mock<IUnitOfWork> _unitOfWork = new();
 
-    readonly FakeOrders _orders = new();
-    readonly FakeUnitOfWork _unitOfWork = new();
-    readonly OrderService _service;
+    OrderService Service() => new(_orders.Object, _writer.Object,
+        _catalog.Object, _unitOfWork.Object);
 
-    public OrderServiceTests() => _service = new OrderService(
-        _orders, _orders, new FakeCatalog(Helmet, Tent),
-        _unitOfWork);
-
-    static CreateOrderRequest Lines(
-        params (int ProductId, int Quantity)[] lines) => new()
-    {
-        Items = [.. lines.Select(l => new OrderLineRequest
-        {
-            ProductId = l.ProductId, Quantity = l.Quantity
-        })]
-    };
-```
-
-OrderServiceTests.cs, part 2 of 3 (30 lines):
-
-```csharp
     [Fact]
     public async Task PricesComeFromTheCatalog()
     {
-        var result = await _service.CreateAsync(
-            "casey", Lines((1, 2), (4, 1)),
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal(OrderOutcome.Created, result.Outcome);
-        Assert.Equal(248.98m, result.Order!.Total);
-        Assert.Equal("casey", result.Order.OwnerId);
-        Assert.Equal(1, _unitOfWork.Saves);
-    }
-
-    [Fact]
-    public async Task OneLinePerProduct()
-    {
-        var result = await _service.CreateAsync(
-            "casey", Lines((1, 1), (1, 2)),
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal(OrderOutcome.Invalid, result.Outcome);
-        Assert.Equal(0, _unitOfWork.Saves);
-    }
-
-    [Fact]
-    public async Task UnknownProductsAreRefused()
-    {
-        var result = await _service.CreateAsync(
-            "casey", Lines((99, 1)),
-            TestContext.Current.CancellationToken);
+        _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Product(4, "Two-Person Tent",
+                "TNT-4001", 189.00m, "camping", 1)]);
+        NewOrder? staged = null;
+        _writer.Setup(w => w.Add(It.IsAny<NewOrder>()))
+            .Callback((NewOrder order) => staged = order);
 ```
 
-OrderServiceTests.cs, part 3 of 3 (31 lines):
+OrderServiceTests.cs, part 2 of 2 (30 lines):
 
 ```csharp
-        Assert.Equal(OrderOutcome.Invalid, result.Outcome);
-        Assert.Empty(_orders.Saved);
+        await Service().CreateAsync("casey", new()
+        {
+            Items = [new() { ProductId = 4, Quantity = 2 }]
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(189.00m, staged!.Items[0].UnitPrice);
+        Assert.Equal("casey", staged.OwnerId);
     }
 
+    // Deleted after the service read it: the save finds no row.
     [Fact]
-    public async Task ATakenNumberIsAConflict()
+    public async Task AnOrderDeletedBeforeTheSaveIsNotFound()
     {
-        _unitOfWork.Failure = new OrderNumberConflictException(
-            new InvalidOperationException("unique index"));
+        _orders.Setup(o => o.GetByIdAsync(7)).ReturnsAsync(
+            new Order(7, "AW-0007", "casey", 29.99m,
+                OrderStatus.Pending, false, null, Guid.NewGuid(),
+                []));
+        _writer.Setup(w => w.SetStatusAsync(7, It.IsAny<string>(),
+                It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _unitOfWork.Setup(u => u.SaveChangesAsync(
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new OrderDeletedException(new()));
 
-        var result = await _service.CreateAsync(
-            "casey", Lines((1, 1)),
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal(OrderOutcome.Conflict, result.Outcome);
-    }
-
-    [Fact]
-    public async Task AnotherOwnersOrderIsNotFound()
-    {
-        await _service.CreateAsync("casey", Lines((1, 1)),
-            TestContext.Current.CancellationToken);
-
-        var result = await _service.CancelAsync(
-            "jordan", _orders.Saved[0].Id,
+        var result = await Service().CancelAsync("casey", 7,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(OrderOutcome.NotFound, result.Outcome);
-        Assert.Null(_orders.StagedStatus);
     }
 }
 ```
@@ -365,14 +197,16 @@ public sealed class ArchitectureTests
 
 ### Step 3: The whole app in a factory
 
-WebApplicationFactory<Program> starts the real app in memory: its Program.cs, middleware, endpoints and EF Core code. StoreFactory runs it in the Testing environment and replaces three things: the SQLite file with an in-memory SQLite database kept alive by one open connection (built from the same migrations), Identity's cookie with a Test scheme that signs a request in from a header, and InventoryService with a stub message handler. Program needs no `public partial class Program`: since .NET 10 a source generator makes the top-level Program public. The factory finds the web project's folder from the MvcTestingAppManifest.json file that Microsoft.AspNetCore.Mvc.Testing writes beside the tests, not from the solution file.
+WebApplicationFactory<Program> starts the real app in memory: its Program.cs, middleware, endpoints and EF Core code. StoreFactory runs it in the Testing environment and replaces two things: the SQLite file with an in-memory SQLite database kept alive by one open connection (built from the same migrations), and Identity's cookie with a Test scheme that signs a request in from a header. CreateCustomerAsync returns a client signed in as the seeded customer, with the antiforgery header order changes need, so each test starts in one line. Program needs no `public partial class Program`: since .NET 10 a source generator makes the top-level Program public. The factory finds the web project's folder from the MvcTestingAppManifest.json file that Microsoft.AspNetCore.Mvc.Testing writes beside the tests, not from the solution file.
 
-Create `AdventureWorks.Tests/Integration/StoreFactory.cs` (105 lines).
+Create `AdventureWorks.Tests/Integration/StoreFactory.cs` (107 lines).
 
-StoreFactory.cs, part 1 of 4 (29 lines):
+StoreFactory.cs, part 1 of 4 (28 lines):
 
 ```csharp
 using System.Data;
+using System.Net.Http.Json;
+using System.Text.Json;
 using AdventureWorks.Infrastructure;
 using AdventureWorks.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -388,9 +222,8 @@ using Microsoft.Extensions.Hosting;
 
 namespace AdventureWorks.Tests.Integration;
 
-// The whole app in memory, in the Testing environment, with three
-// replacements: an in-memory SQLite database, a Test sign-in
-// scheme, and a stub for the warehouse's stock service.
+// The whole app in memory, in the Testing environment, with two
+// replacements: an in-memory SQLite database and a Test sign-in.
 public sealed class StoreFactory : WebApplicationFactory<Program>
 {
     public const string Customer = "test-customer";
@@ -399,11 +232,9 @@ public sealed class StoreFactory : WebApplicationFactory<Program>
     // The in-memory database lives as long as this connection.
     private readonly SqliteConnection _connection =
         new("Data Source=:memory:");
-
-    public StubInventory Inventory { get; } = new();
 ```
 
-StoreFactory.cs, part 2 of 4 (31 lines):
+StoreFactory.cs, part 2 of 4 (28 lines):
 
 ```csharp
     protected override void ConfigureWebHost(
@@ -432,9 +263,6 @@ StoreFactory.cs, part 2 of 4 (31 lines):
                 o.DefaultChallengeScheme = Test;
                 o.DefaultForbidScheme = Test;
             });
-            services.AddHttpClient<InventoryClient>()
-                .ConfigurePrimaryHttpMessageHandler(
-                    () => Inventory);
         });
     }
 ```
@@ -468,11 +296,13 @@ StoreFactory.cs, part 3 of 4 (24 lines):
     }
 ```
 
-StoreFactory.cs, part 4 of 4 (18 lines):
+StoreFactory.cs, part 4 of 4 (24 lines):
 
 ```csharp
-    // A client signed in as the test customer, over HTTPS.
-    public HttpClient CreateCustomer()
+    // A client signed in as the test customer, over HTTPS, with
+    // the antiforgery header that order changes require.
+    public async Task<HttpClient> CreateCustomerAsync(
+        CancellationToken ct)
     {
         var client = CreateClient(new()
         {
@@ -480,6 +310,10 @@ StoreFactory.cs, part 4 of 4 (18 lines):
         });
         client.DefaultRequestHeaders.Add(
             TestAuthHandler.Header, Customer);
+        var csrf = await client.GetFromJsonAsync<JsonElement>(
+            "/api/csrf", ct);
+        client.DefaultRequestHeaders.Add("X-CSRF-TOKEN",
+            csrf.GetProperty("token").GetString());
         return client;
     }
 
@@ -533,47 +367,11 @@ public sealed class TestAuthHandler(
 }
 ```
 
-Create `AdventureWorks.Tests/Integration/StubInventory.cs` (31 lines).
+The integration tests share one factory (one app, one database) through IClassFixture.
 
-```csharp
-using System.Net;
-using System.Net.Http.Json;
+Create `AdventureWorks.Tests/Integration/StoreApiTests.cs` (43 lines).
 
-namespace AdventureWorks.Tests.Integration;
-
-// Answers InventoryClient's calls in place of InventoryService:
-// seven of every SKU, or the status a test sets.
-public sealed class StubInventory : HttpMessageHandler
-{
-    private int _calls;
-
-    public HttpStatusCode Status { get; set; } =
-        HttpStatusCode.OK;
-    public int Calls => _calls;
-
-    protected override Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
-    {
-        Interlocked.Increment(ref _calls);
-        var sku = request.RequestUri!.Segments[^1];
-        var response = Status == HttpStatusCode.OK
-            ? new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = JsonContent.Create(
-                    new { Sku = sku, Available = 7 })
-            }
-            : new HttpResponseMessage(Status);
-        return Task.FromResult(response);
-    }
-}
-```
-
-The integration tests share one factory (one app, one database) through IClassFixture. The failure test gets a factory of its own, because the failing stub trips Chapter 12's circuit breaker, which would leak into other tests.
-
-Create `AdventureWorks.Tests/Integration/StoreApiTests.cs` (73 lines).
-
-StoreApiTests.cs, part 1 of 2 (34 lines):
+StoreApiTests.cs, part 1 of 2 (20 lines):
 
 ```csharp
 using System.Net;
@@ -589,30 +387,16 @@ namespace AdventureWorks.Tests.Integration;
 public sealed class StoreApiTests(StoreFactory factory)
     : IClassFixture<StoreFactory>
 {
-    static CancellationToken Ct =>
-        TestContext.Current.CancellationToken;
-
-    [Fact]
-    public async Task TheCatalogIsPublic()
-    {
-        var client = factory.CreateClient();
-
-        var catalog = await client.GetFromJsonAsync<JsonElement>(
-            "/api/catalog", Ct);
-
-        Assert.Equal(4, catalog.GetProperty("items")
-            .GetArrayLength());
-    }
-
     [Fact]
     public async Task OrdersNeedASignedInUser()
     {
         var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/orders", Ct);
+        var response = await client.GetAsync("/api/orders",
+            TestContext.Current.CancellationToken);
 ```
 
-StoreApiTests.cs, part 2 of 2 (38 lines):
+StoreApiTests.cs, part 2 of 2 (22 lines):
 
 ```csharp
         Assert.Equal(HttpStatusCode.Unauthorized,
@@ -622,72 +406,20 @@ StoreApiTests.cs, part 2 of 2 (38 lines):
     [Fact]
     public async Task APlacedOrderHasALocationAndAnETag()
     {
-        var client = factory.CreateCustomer();
-        var token = await client.GetFromJsonAsync<JsonElement>(
-            "/api/csrf", Ct);
-        client.DefaultRequestHeaders.Add("X-CSRF-TOKEN",
-            token.GetProperty("token").GetString());
+        var ct = TestContext.Current.CancellationToken;
+        var client = await factory.CreateCustomerAsync(ct);
 
         var response = await client.PostAsJsonAsync("/api/orders",
             new { Items = new[] { new { ProductId = 4,
-                Quantity = 1 } } }, Ct);
+                Quantity = 1 } } }, ct);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(response.Headers.ETag);
         var order = await client.GetFromJsonAsync<JsonElement>(
-            response.Headers.Location, Ct);
+            response.Headers.Location, ct);
         Assert.Equal(189.00m,
             order.GetProperty("total").GetDecimal());
     }
-
-    [Fact]
-    public async Task StockComesFromTheStub()
-    {
-        var client = factory.CreateClient();
-
-        var stock = await client.GetFromJsonAsync<JsonElement>(
-            "/api/catalog/1/availability", Ct);
-
-        Assert.Equal(7,
-            stock.GetProperty("available").GetInt32());
-        Assert.True(factory.Inventory.Calls >= 1);
-    }
-}
-```
-
-Create `AdventureWorks.Tests/Integration/StockFailureTests.cs` (31 lines).
-
-```csharp
-using System.Net;
-using Xunit;
-
-namespace AdventureWorks.Tests.Integration;
-
-// A factory of its own, so the failing stub and the circuit
-// breaker it trips cannot affect the other test classes.
-[Trait("Category", "Integration")]
-public sealed class StockFailureTests : IDisposable
-{
-    private readonly StoreFactory _factory = new();
-
-    [Fact]
-    public async Task AFailingWarehouseIs503()
-    {
-        _factory.Inventory.Status =
-            HttpStatusCode.ServiceUnavailable;
-        var client = _factory.CreateClient();
-
-        var response = await client.GetAsync(
-            "/api/catalog/2/availability",
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal(HttpStatusCode.ServiceUnavailable,
-            response.StatusCode);
-        // One call and two retries.
-        Assert.Equal(3, _factory.Inventory.Calls);
-    }
-
-    public void Dispose() => _factory.Dispose();
 }
 ```
 
@@ -707,33 +439,33 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
-      Failed to determine the https port for redirect.
-warn: Polly[3]
-      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '0', Execution Time: 20.8069ms
-warn: Polly[0]
-      Resilience event occurred. EventName: 'OnRetry', Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503'
-warn: Polly[3]
-(12 more lines)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+5/x0/?0] (4s 578ms)
+Test run summary: Passed!
+  total: 5
+  failed: 0
+  succeeded: 5
+  skipped: 0
+  duration: 5s 737ms
 ```
 
-Run this from the working folder. The command is longer than the print line; type it as one line.
+Run this from the working folder. The backtick at the end of the first line continues the command on the next line in PowerShell.
 
-```shell
-dotnet test --project AdventureWorks.Tests --filter-trait "Category=Unit"
+```powershell
+dotnet test --project AdventureWorks.Tests `
+    --filter-trait "Category=Unit"
 ```
 
 It prints:
 
 ```text
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+6/x0/?0] (647ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+3/x0/?0] (683ms)
 Test run summary: Passed!
-  total: 6
+  total: 3
   failed: 0
-  succeeded: 6
+  succeeded: 3
   skipped: 0
-  duration: 1s 050ms
+  duration: 1s 036ms
 ```
 
 ## Program.cs at the checkpoint (88 lines)
@@ -925,12 +657,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ### Other runs
 
-- `dotnet test --project AdventureWorks.Tests`: total 11, failed 0, succeeded 11, about 9 seconds on RC3; `--filter-trait "Category=Unit"`: total 6, succeeded 6. The Visual Studio 2026 rebuild built all five projects without warnings.
+- `dotnet test --project AdventureWorks.Tests`: total 5, failed 0, succeeded 5 on RC3; `--filter-trait "Category=Unit"`: total 3, succeeded 3. The Visual Studio 2026 rebuild built all five projects without warnings.
 - The tests need neither the app nor InventoryService running; requests.http (the app's) still gave its 6 statuses, and the README's curl.exe run matched.
+- The delete-race probe from Chapter 11 (`tools/scenarios/ch13-delete-race.http`) passed against this checkpoint too: 24 of 24.
 
 ## A breakpoint for this chapter
 
-Set a breakpoint in `AdventureWorks.Tests/Integration/StoreApiTests.cs` on line 53:
+Set a breakpoint in `AdventureWorks.Tests/Integration/StoreApiTests.cs` on line 36:
 
 ```csharp
 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -941,59 +674,37 @@ Press F5 (the https profile), then send the test APlacedOrderHasALocationAndAnET
 ```text
 response.StatusCode = Created [HttpStatusCode]
 response.Headers.Location = https://localhost/api/orders/1 [Uri]
-response.Headers.ETag = "6ea6db29-4021-4bb8-9db0-0563a1cfd346" [EntityTagHeaderValue]
-factory.Inventory.Calls = 0 [Int32]
+response.Headers.ETag = "a46fc093-3a50-40a4-ad20-0ea2dfad7c1d" [EntityTagHeaderValue]
+client.DefaultRequestHeaders.Count() = 2 [Int32]
 ```
 
-The whole request ran in memory: the Test scheme signed the request in from its header, the antiforgery check passed with the token from /api/csrf, Chapter 11's service saved the order to the in-memory database, and Chapter 13's endpoint set the Location and ETag. The Location host is localhost, the factory's test server. Step Over the asserts, then into the GET of the Location.
+The whole request ran in memory: the Test scheme signed the request in from its header, the antiforgery check passed with the token CreateCustomerAsync fetched from /api/csrf, Chapter 11's service saved the order to the in-memory database, and Chapter 13's endpoint set the Location and ETag. The Location host is localhost, the factory's test server. Step Over the asserts, then into the GET of the Location.
 
 ## What the Activity adds
 
-The original Activity's tests carry over to this app (Chapter15-Activity, `ActivityTests.cs`, Moq 4.20.72 added with `dotnet add package`):
+The original Activity's ideas carry over to this app (Chapter15-Activity, `ActivityTests.cs`; Moq is already in the checkpoint, so no package command):
 
-- A Moq mock of IProductService: the service calls GetByIdsAsync once, with product 1 and the caller's own cancellation token (Verify with It.Is for the array, because Moq compares arguments with Equals).
-- A cancelled request: the mock's callback calls ThrowIfCancellationRequested, the service throws OperationCanceledException, and the unit of work saved nothing.
-- WithWebHostBuilder: a second factory with a failing stock stub answers 503 for one test, and the shared factory still answers 200 for the same route. The shared factory's CreateHost runs again for the second factory, so StoreFactory seeds only what is missing and opens the connection only once.
+- Moq's Verify: the service calls GetByIdsAsync once, with product 1 and the caller's own cancellation token (It.Is for the array, because Moq compares arguments with Equals).
+- A cancelled request: the catalog mock throws OperationCanceledException, the service lets it through, and the unit of work's SaveChangesAsync was never called.
+- WithWebHostBuilder: a second factory whose InventoryClient uses StubInventory, a handler that answers every call with 503 and counts them, for one test only. The stock route answers 503 after three calls, one and Chapter 12's two retries. The shared factory's CreateHost runs again for the second factory, so StoreFactory seeds only what is missing and opens the connection only once.
 
-Checked: total 14, succeeded 14; the unit filter 8. `dotnet add package` rewrote the hand-wrapped PackageReference and ProjectReference lines in the test project as single lines; the Activity's project file is the tool's output.
+Checked: total 8, succeeded 8; the unit filter 5.
 
 The reader-path check rebuilt `AdventureWorks/Chapter15-Activity` from the Chapter 15 checkpoint: no differences.
+The Activity adds 103 lines of code: 103 in 1 new file and 0 new or changed in existing files, plus 1 command line. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
-### Activity: a mock, a cancelled request and a one-test override
+### Activity: a verified call, a cancelled request and a one-test override
 
-Work in a copy of the Chapter 15 checkpoint folder; Chapter 16 starts from the checkpoint. A Moq mock of IProductService records how the service calls the catalog, so a test can verify the call and the cancellation token it received. A cancelled request must throw and save nothing. WithWebHostBuilder makes a second factory with one more replacement (a failing stock stub) for one test, and the shared factory still answers normally.
+Work in a copy of the Chapter 15 checkpoint folder; Chapter 16 starts from the checkpoint. Moq's Verify checks that the service passed the caller's cancellation token to the catalog. A cancelled request must throw and save nothing. WithWebHostBuilder makes a second factory with one more replacement for one test: a stub that answers every stock call with 503, so the endpoint answers 503 after one call and Chapter 12's two retries.
 
-Run this from the `AdventureWorks.Tests` folder.
+Create `AdventureWorks.Tests/ActivityTests.cs` (103 lines).
 
-```shell
-dotnet add package Moq@4.20.72
-```
-
-It prints:
-
-```text
-info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
-info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
-info : Adding PackageReference for package 'Moq' into project 'AdventureWorks.Tests\AdventureWorks.Tests.csproj'.
-info : Restoring packages for AdventureWorks.Tests\AdventureWorks.Tests.csproj...
-info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
-info : Package 'Moq' is compatible with all the specified frameworks in project 'AdventureWorks.Tests\AdventureWorks.Tests.csproj'.
-info : PackageReference for package 'Moq' version '4.20.72' added to file 'AdventureWorks.Tests\AdventureWorks.Tests.csproj'.
-info : Generating MSBuild file AdventureWorks.Tests\obj\AdventureWorks.Tests.csproj.nuget.g.props.
-(3 more lines)
-```
-
-Create `AdventureWorks.Tests/ActivityTests.cs` (99 lines).
-
-ActivityTests.cs, part 1 of 3 (30 lines):
+ActivityTests.cs, part 1 of 3 (34 lines):
 
 ```csharp
 using System.Net;
 using AdventureWorks.Core;
 using AdventureWorks.Tests.Integration;
-using AdventureWorks.Tests.Unit;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -1001,42 +712,35 @@ using Xunit;
 
 namespace AdventureWorks.Tests;
 
-// Activity: a mock that checks how the service calls the catalog,
-// and a cancelled request that must save nothing.
+// Activity: what the service passes to the catalog, and a
+// cancelled request that must save nothing.
 [Trait("Category", "Unit")]
 public sealed class OrderServiceMockTests
 {
-    static readonly Product Helmet = new(1, "Trail Helmet",
-        "HLM-1001", 29.99m, "accessories", 1);
-
     readonly Mock<IProductService> _catalog = new();
-    readonly FakeOrders _orders = new();
-    readonly FakeUnitOfWork _unitOfWork = new();
+    readonly Mock<IUnitOfWork> _unitOfWork = new();
 
-    OrderService Service() => new(_orders, _orders,
-        _catalog.Object, _unitOfWork);
+    OrderService Service() => new(Mock.Of<IOrderRepository>(),
+        Mock.Of<IOrderWriter>(), _catalog.Object,
+        _unitOfWork.Object);
 
     static CreateOrderRequest OneHelmet() => new()
     {
         Items = [new() { ProductId = 1, Quantity = 1 }]
     };
-```
 
-ActivityTests.cs, part 2 of 3 (33 lines):
-
-```csharp
     [Fact]
     public async Task TheCatalogGetsTheCallersToken()
     {
-        _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync([Helmet]);
         using var request = new CancellationTokenSource();
 
-        var result = await Service().CreateAsync(
-            "casey", OneHelmet(), request.Token);
+        await Service().CreateAsync("casey", OneHelmet(),
+            request.Token);
+```
 
-        Assert.Equal(OrderOutcome.Created, result.Outcome);
+ActivityTests.cs, part 2 of 3 (39 lines):
+
+```csharp
         _catalog.Verify(c => c.GetByIdsAsync(
             It.Is<int[]>(ids => ids.SequenceEqual(new[] { 1 })),
             request.Token), Times.Once);
@@ -1047,54 +751,66 @@ ActivityTests.cs, part 2 of 3 (33 lines):
     {
         _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
                 It.IsAny<CancellationToken>()))
-            .Returns((int[] _, CancellationToken token) =>
-            {
-                token.ThrowIfCancellationRequested();
-                return Task.FromResult(new[] { Helmet });
-            });
+            .ThrowsAsync(new OperationCanceledException());
         using var request = new CancellationTokenSource();
         await request.CancelAsync();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
             () => Service().CreateAsync(
                 "casey", OneHelmet(), request.Token));
-```
 
-ActivityTests.cs, part 3 of 3 (34 lines):
-
-```csharp
-        Assert.Equal(0, _unitOfWork.Saves);
-        Assert.Empty(_orders.Saved);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 }
 
-// Activity: WithWebHostBuilder changes one test's app only.
+// Activity: WithWebHostBuilder changes one test's app only; the
+// class's shared factory keeps the real InventoryClient.
 [Trait("Category", "Integration")]
 public sealed class StockOverrideTests(StoreFactory factory)
     : IClassFixture<StoreFactory>
 {
     [Fact]
-    public async Task AnOverrideStaysInItsOwnTest()
+    public async Task AFailingWarehouseIs503()
     {
+        var stub = new StubInventory(
+            HttpStatusCode.ServiceUnavailable);
         using var failing = factory.WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services =>
                 services.AddHttpClient<InventoryClient>()
-                    .ConfigurePrimaryHttpMessageHandler(() =>
-                        new StubInventory
-                        {
-                            Status =
-                                HttpStatusCode.ServiceUnavailable
-                        })));
-        var ct = TestContext.Current.CancellationToken;
+                    .ConfigurePrimaryHttpMessageHandler(
+                        () => stub)));
+```
 
-        var changed = await failing.CreateClient().GetAsync(
-            "/api/catalog/4/availability", ct);
-        var normal = await factory.CreateClient().GetAsync(
-            "/api/catalog/4/availability", ct);
+ActivityTests.cs, part 3 of 3 (28 lines):
+
+```csharp
+        var response = await failing.CreateClient().GetAsync(
+            "/api/catalog/4/availability",
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable,
-            changed.StatusCode);
-        Assert.Equal(HttpStatusCode.OK, normal.StatusCode);
+            response.StatusCode);
+        // One call and Chapter 12's two retries.
+        Assert.Equal(3, stub.Calls);
+    }
+}
+
+// Answers InventoryClient's calls in place of InventoryService
+// with one status, and counts them.
+public sealed class StubInventory(HttpStatusCode status)
+    : HttpMessageHandler
+{
+    private int _calls;
+
+    public int Calls => _calls;
+
+    protected override Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref _calls);
+        return Task.FromResult(new HttpResponseMessage(status));
     }
 }
 ```
@@ -1111,14 +827,14 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
-      Failed to determine the https port for redirect.
-warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
-      Failed to determine the https port for redirect.
 warn: Polly[3]
-      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '0', Execution Time: 28.2723ms
+      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '0', Execution Time: 23.4749ms
+warn: Polly[0]
+      Resilience event occurred. EventName: 'OnRetry', Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503'
 warn: Polly[3]
-(26 more lines)
+      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '1', Execution Time: 0.1343ms
+warn: Polly[0]
+(12 more lines)
 ```
 
 ### Activity requests and responses
@@ -1194,10 +910,11 @@ The feature: ten or more of one product cost 10% less each, rounded to the cent.
     }
 ```
 
-`AdventureWorks.Tests/Unit/VolumeDiscountTests.cs`:
+`AdventureWorks.Tests/Unit/VolumeDiscountTests.cs` (Moq, like the checkpoint's unit tests; each test reads the unit price the service staged through IOrderWriter.Add):
 
 ```csharp
 using AdventureWorks.Core;
+using Moq;
 using Xunit;
 
 namespace AdventureWorks.Tests.Unit;
@@ -1206,40 +923,44 @@ namespace AdventureWorks.Tests.Unit;
 [Trait("Category", "Unit")]
 public sealed class VolumeDiscountTests
 {
-    static readonly Product Helmet = new(1, "Trail Helmet",
-        "HLM-1001", 29.99m, "accessories", 1);
+    readonly Mock<IProductService> _catalog = new();
+    readonly Mock<IOrderWriter> _writer = new();
+    NewOrder? _staged;
 
-    readonly FakeOrders _orders = new();
-
-    OrderService Service() => new(_orders, _orders,
-        new FakeCatalog(Helmet), new FakeUnitOfWork());
-
-    static CreateOrderRequest Helmets(int quantity) => new()
+    public VolumeDiscountTests()
     {
-        Items = [new() { ProductId = 1, Quantity = quantity }]
-    };
+        _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Product(1, "Trail Helmet",
+                "HLM-1001", 29.99m, "accessories", 1)]);
+        _writer.Setup(w => w.Add(It.IsAny<NewOrder>()))
+            .Callback((NewOrder order) => _staged = order);
+    }
 
-    [Fact]
-    public async Task NineHelmetsPayTheListPrice()
+    // The unit price OrderService staged for that many helmets.
+    async Task<decimal> UnitPriceFor(int helmets)
     {
-        var result = await Service().CreateAsync("casey",
-            Helmets(9), TestContext.Current.CancellationToken);
-
-        Assert.Equal(29.99m, result.Order!.Items[0].UnitPrice);
+        var service = new OrderService(
+            Mock.Of<IOrderRepository>(), _writer.Object,
+            _catalog.Object, Mock.Of<IUnitOfWork>());
+        await service.CreateAsync("casey", new()
+        {
+            Items = [new() { ProductId = 1, Quantity = helmets }]
+        }, TestContext.Current.CancellationToken);
+        return _staged!.Items[0].UnitPrice;
     }
 
     [Fact]
-    public async Task TenHelmetsCostTenPercentLess()
-    {
-        var result = await Service().CreateAsync("casey",
-            Helmets(10), TestContext.Current.CancellationToken);
+    public async Task NineHelmetsPayTheListPrice() =>
+        Assert.Equal(29.99m, await UnitPriceFor(9));
 
-        Assert.Equal(26.99m, result.Order!.Items[0].UnitPrice);
-    }
+    [Fact]
+    public async Task TenHelmetsCostTenPercentLess() =>
+        Assert.Equal(26.99m, await UnitPriceFor(10));
 }
 ```
 
-Run the tests from the working folder. On RC3, the full suite reports total 13, failed 1, succeeded 12, and exits with code 2; the discount tests alone:
+Run the tests from the working folder. On RC3, the full suite reports total 7, failed 1, succeeded 6, and exits with code 2; the discount tests alone:
 
 ```powershell
 dotnet test --project AdventureWorks.Tests --filter-class `
@@ -1257,7 +978,7 @@ Test run summary: Failed!
   succeeded: 1
 ```
 
-Set a breakpoint in `AdventureWorks.Core/OrderService.cs` on line 100:
+Set a breakpoint in `AdventureWorks.Core/OrderService.cs` on line 111:
 
 ```csharp
         if (!discounted) return price;
@@ -1279,7 +1000,7 @@ The fix is one character: change `>` to `>=`.
         var discounted = quantity >= DiscountQuantity;
 ```
 
-With the fix, the full suite on RC3: total 13, failed 0, succeeded 13. The lab folder keeps the bug, so readers can find it themselves; the fixed variant was built and run in a scratch copy only.
+With the fix, the full suite on RC3: total 7, failed 0, succeeded 7. The lab folder keeps the bug, so readers can find it themselves; the fixed variant was built and run in a scratch copy only.
 
 ## The chapter's current listings: replaced, kept or removed
 
@@ -1287,12 +1008,13 @@ With the fix, the full suite on RC3: total 13, failed 0, succeeded 13. The lab f
 | --- | --- | --- |
 | AdventureWorks.slnx with Domain, Api, Tests (new solution) | Replaced | The running app's AdventureWorks.slnx gains AdventureWorks.Tests; Core is the domain project (C15 inventory: no second Order type). |
 | Domain Order(Guid, ProductId, Quantity) | Removed | The tests use the app's Core types and Chapter 11's OrderService. |
-| Tests csproj | Replaced | Hand-written in an empty folder (the C# book's MTP finding), xunit.v3.mtp-v2 4.0.1 and Mvc.Testing; no Moq in the checkpoint (the Activity adds it). |
-| The test factory | Replaced | StoreFactory: Testing environment, in-memory SQLite from the migrations, the Test scheme, the inventory stub. Role "Administrator" is gone (the app's role is "Admin", Chapter 9). |
+| Tests csproj | Replaced | Hand-written in an empty folder (the C# book's MTP finding), xunit.v3.mtp-v2 4.0.1, Mvc.Testing and Moq. |
+| The test factory | Replaced | StoreFactory: Testing environment, in-memory SQLite from the migrations, the Test scheme, CreateCustomerAsync. Role "Administrator" is gone (the app's role is "Admin", Chapter 9). |
 | `public partial class Program { }` | Removed | Not needed since .NET 10 (accuracy 15.3). |
 
 ## Notes for the writers
 
+- Moq, not hand-written fakes (coordinator, November 3): one line of setup per call a test needs, instead of 109 lines of fakes that implement every member of IOrderRepository, IOrderWriter, IUnitOfWork and IProductService. The pinned version, 4.21.0, is on nuget.org (the newest on November 3, 2026, and the version the chapter already pins) and restored cleanly with warnings as errors (no vulnerability warnings). It is a lib-only package: the nupkg holds lib/net462, net6.0, netstandard2.0 and netstandard2.1, a readme, an icon and its signature, and no analyzers, build or buildTransitive folder, so nothing runs at build time; its one dependency for net6.0, Castle.Core 5.2.1, is lib-only too. Moq.dll contains no SponsorLink type or string; its one mention of Devlooped is the AssemblyCompany attribute. License BSD-3-Clause.
 - Accuracy 15.1: the solution file is not the content-root marker. Microsoft.AspNetCore.Mvc.Testing writes MvcTestingAppManifest.json beside the test assembly, mapping the AdventureWorks assembly to its project folder, and WebApplicationFactory reads that; it searches for a solution file only when the manifest has no entry.
 - Accuracy 15.2: ArchitectureTests reads the assemblies Core's compiled code uses (GetReferencedAssemblies). A package reference whose types are never used is not recorded there, so this test does not catch it; say so beside the test.
 - Accuracy 15.3: no `public partial class Program { }` anywhere; .NET 10's source generator makes the top-level Program public.

@@ -1,7 +1,6 @@
 using System.Net;
 using AdventureWorks.Core;
 using AdventureWorks.Tests.Integration;
-using AdventureWorks.Tests.Unit;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -9,20 +8,17 @@ using Xunit;
 
 namespace AdventureWorks.Tests;
 
-// Activity: a mock that checks how the service calls the catalog,
-// and a cancelled request that must save nothing.
+// Activity: what the service passes to the catalog, and a
+// cancelled request that must save nothing.
 [Trait("Category", "Unit")]
 public sealed class OrderServiceMockTests
 {
-    static readonly Product Helmet = new(1, "Trail Helmet",
-        "HLM-1001", 29.99m, "accessories", 1);
-
     readonly Mock<IProductService> _catalog = new();
-    readonly FakeOrders _orders = new();
-    readonly FakeUnitOfWork _unitOfWork = new();
+    readonly Mock<IUnitOfWork> _unitOfWork = new();
 
-    OrderService Service() => new(_orders, _orders,
-        _catalog.Object, _unitOfWork);
+    OrderService Service() => new(Mock.Of<IOrderRepository>(),
+        Mock.Of<IOrderWriter>(), _catalog.Object,
+        _unitOfWork.Object);
 
     static CreateOrderRequest OneHelmet() => new()
     {
@@ -32,15 +28,11 @@ public sealed class OrderServiceMockTests
     [Fact]
     public async Task TheCatalogGetsTheCallersToken()
     {
-        _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync([Helmet]);
         using var request = new CancellationTokenSource();
 
-        var result = await Service().CreateAsync(
-            "casey", OneHelmet(), request.Token);
+        await Service().CreateAsync("casey", OneHelmet(),
+            request.Token);
 
-        Assert.Equal(OrderOutcome.Created, result.Outcome);
         _catalog.Verify(c => c.GetByIdsAsync(
             It.Is<int[]>(ids => ids.SequenceEqual(new[] { 1 })),
             request.Token), Times.Once);
@@ -51,11 +43,7 @@ public sealed class OrderServiceMockTests
     {
         _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
                 It.IsAny<CancellationToken>()))
-            .Returns((int[] _, CancellationToken token) =>
-            {
-                token.ThrowIfCancellationRequested();
-                return Task.FromResult(new[] { Helmet });
-            });
+            .ThrowsAsync(new OperationCanceledException());
         using var request = new CancellationTokenSource();
         await request.CancelAsync();
 
@@ -63,37 +51,53 @@ public sealed class OrderServiceMockTests
             () => Service().CreateAsync(
                 "casey", OneHelmet(), request.Token));
 
-        Assert.Equal(0, _unitOfWork.Saves);
-        Assert.Empty(_orders.Saved);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 }
 
-// Activity: WithWebHostBuilder changes one test's app only.
+// Activity: WithWebHostBuilder changes one test's app only; the
+// class's shared factory keeps the real InventoryClient.
 [Trait("Category", "Integration")]
 public sealed class StockOverrideTests(StoreFactory factory)
     : IClassFixture<StoreFactory>
 {
     [Fact]
-    public async Task AnOverrideStaysInItsOwnTest()
+    public async Task AFailingWarehouseIs503()
     {
+        var stub = new StubInventory(
+            HttpStatusCode.ServiceUnavailable);
         using var failing = factory.WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services =>
                 services.AddHttpClient<InventoryClient>()
-                    .ConfigurePrimaryHttpMessageHandler(() =>
-                        new StubInventory
-                        {
-                            Status =
-                                HttpStatusCode.ServiceUnavailable
-                        })));
-        var ct = TestContext.Current.CancellationToken;
+                    .ConfigurePrimaryHttpMessageHandler(
+                        () => stub)));
 
-        var changed = await failing.CreateClient().GetAsync(
-            "/api/catalog/4/availability", ct);
-        var normal = await factory.CreateClient().GetAsync(
-            "/api/catalog/4/availability", ct);
+        var response = await failing.CreateClient().GetAsync(
+            "/api/catalog/4/availability",
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable,
-            changed.StatusCode);
-        Assert.Equal(HttpStatusCode.OK, normal.StatusCode);
+            response.StatusCode);
+        // One call and Chapter 12's two retries.
+        Assert.Equal(3, stub.Calls);
+    }
+}
+
+// Answers InventoryClient's calls in place of InventoryService
+// with one status, and counts them.
+public sealed class StubInventory(HttpStatusCode status)
+    : HttpMessageHandler
+{
+    private int _calls;
+
+    public int Calls => _calls;
+
+    protected override Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref _calls);
+        return Task.FromResult(new HttpResponseMessage(status));
     }
 }

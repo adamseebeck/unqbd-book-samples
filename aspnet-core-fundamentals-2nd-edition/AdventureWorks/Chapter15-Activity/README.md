@@ -2,7 +2,7 @@
 
 This is a worked solution to the chapter's Activity, built in a copy of the Chapter 15 checkpoint. Try the Activity yourself first. The next chapter starts from `../Chapter15`, not from this folder.
 
-`ActivityTests.cs` adds a Moq mock that verifies the catalog call and its cancellation token, a cancelled request that saves nothing, and a WithWebHostBuilder override that fails stock calls for one test only.
+`ActivityTests.cs` adds a Moq Verify of the catalog call and its cancellation token, a cancelled request that saves nothing, and a WithWebHostBuilder override whose stub fails stock calls for one test only (503 after one call and two retries).
 
 ## Run it
 

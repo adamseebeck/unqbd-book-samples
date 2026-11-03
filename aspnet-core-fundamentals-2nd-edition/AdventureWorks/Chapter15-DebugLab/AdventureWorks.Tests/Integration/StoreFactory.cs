@@ -1,4 +1,6 @@
 using System.Data;
+using System.Net.Http.Json;
+using System.Text.Json;
 using AdventureWorks.Infrastructure;
 using AdventureWorks.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -14,9 +16,8 @@ using Microsoft.Extensions.Hosting;
 
 namespace AdventureWorks.Tests.Integration;
 
-// The whole app in memory, in the Testing environment, with three
-// replacements: an in-memory SQLite database, a Test sign-in
-// scheme, and a stub for the warehouse's stock service.
+// The whole app in memory, in the Testing environment, with two
+// replacements: an in-memory SQLite database and a Test sign-in.
 public sealed class StoreFactory : WebApplicationFactory<Program>
 {
     public const string Customer = "test-customer";
@@ -25,8 +26,6 @@ public sealed class StoreFactory : WebApplicationFactory<Program>
     // The in-memory database lives as long as this connection.
     private readonly SqliteConnection _connection =
         new("Data Source=:memory:");
-
-    public StubInventory Inventory { get; } = new();
 
     protected override void ConfigureWebHost(
         IWebHostBuilder builder)
@@ -54,9 +53,6 @@ public sealed class StoreFactory : WebApplicationFactory<Program>
                 o.DefaultChallengeScheme = Test;
                 o.DefaultForbidScheme = Test;
             });
-            services.AddHttpClient<InventoryClient>()
-                .ConfigurePrimaryHttpMessageHandler(
-                    () => Inventory);
         });
     }
 
@@ -85,8 +81,10 @@ public sealed class StoreFactory : WebApplicationFactory<Program>
         return host;
     }
 
-    // A client signed in as the test customer, over HTTPS.
-    public HttpClient CreateCustomer()
+    // A client signed in as the test customer, over HTTPS, with
+    // the antiforgery header that order changes require.
+    public async Task<HttpClient> CreateCustomerAsync(
+        CancellationToken ct)
     {
         var client = CreateClient(new()
         {
@@ -94,6 +92,10 @@ public sealed class StoreFactory : WebApplicationFactory<Program>
         });
         client.DefaultRequestHeaders.Add(
             TestAuthHandler.Header, Customer);
+        var csrf = await client.GetFromJsonAsync<JsonElement>(
+            "/api/csrf", ct);
+        client.DefaultRequestHeaders.Add("X-CSRF-TOKEN",
+            csrf.GetProperty("token").GetString());
         return client;
     }
 

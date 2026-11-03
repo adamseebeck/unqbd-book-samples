@@ -1,4 +1,5 @@
 using AdventureWorks.Core;
+using Moq;
 using Xunit;
 
 namespace AdventureWorks.Tests.Unit;
@@ -7,34 +8,38 @@ namespace AdventureWorks.Tests.Unit;
 [Trait("Category", "Unit")]
 public sealed class VolumeDiscountTests
 {
-    static readonly Product Helmet = new(1, "Trail Helmet",
-        "HLM-1001", 29.99m, "accessories", 1);
+    readonly Mock<IProductService> _catalog = new();
+    readonly Mock<IOrderWriter> _writer = new();
+    NewOrder? _staged;
 
-    readonly FakeOrders _orders = new();
-
-    OrderService Service() => new(_orders, _orders,
-        new FakeCatalog(Helmet), new FakeUnitOfWork());
-
-    static CreateOrderRequest Helmets(int quantity) => new()
+    public VolumeDiscountTests()
     {
-        Items = [new() { ProductId = 1, Quantity = quantity }]
-    };
+        _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Product(1, "Trail Helmet",
+                "HLM-1001", 29.99m, "accessories", 1)]);
+        _writer.Setup(w => w.Add(It.IsAny<NewOrder>()))
+            .Callback((NewOrder order) => _staged = order);
+    }
 
-    [Fact]
-    public async Task NineHelmetsPayTheListPrice()
+    // The unit price OrderService staged for that many helmets.
+    async Task<decimal> UnitPriceFor(int helmets)
     {
-        var result = await Service().CreateAsync("casey",
-            Helmets(9), TestContext.Current.CancellationToken);
-
-        Assert.Equal(29.99m, result.Order!.Items[0].UnitPrice);
+        var service = new OrderService(
+            Mock.Of<IOrderRepository>(), _writer.Object,
+            _catalog.Object, Mock.Of<IUnitOfWork>());
+        await service.CreateAsync("casey", new()
+        {
+            Items = [new() { ProductId = 1, Quantity = helmets }]
+        }, TestContext.Current.CancellationToken);
+        return _staged!.Items[0].UnitPrice;
     }
 
     [Fact]
-    public async Task TenHelmetsCostTenPercentLess()
-    {
-        var result = await Service().CreateAsync("casey",
-            Helmets(10), TestContext.Current.CancellationToken);
+    public async Task NineHelmetsPayTheListPrice() =>
+        Assert.Equal(29.99m, await UnitPriceFor(9));
 
-        Assert.Equal(26.99m, result.Order!.Items[0].UnitPrice);
-    }
+    [Fact]
+    public async Task TenHelmetsCostTenPercentLess() =>
+        Assert.Equal(26.99m, await UnitPriceFor(10));
 }

@@ -1,6 +1,6 @@
 # AdventureWorks: Chapter 15 checkpoint
 
-The AdventureWorks store app at the end of Chapter 15. It adds `AdventureWorks.Tests`, an xUnit v3 project on Microsoft.Testing.Platform (selected in global.json): unit tests for Chapter 11's OrderService with hand-written fakes, an architecture test for Core, and integration tests that run the whole app in memory through `WebApplicationFactory<Program>` in the Testing environment, with an in-memory SQLite database, a Test sign-in scheme and a stub for InventoryService. Chapter 16 starts from this folder.
+The AdventureWorks store app at the end of Chapter 15. It adds `AdventureWorks.Tests`, an xUnit v3 project on Microsoft.Testing.Platform (selected in global.json): two unit tests for Chapter 11's OrderService with Moq, an architecture test for Core, and two integration tests that run the whole app in memory through one `WebApplicationFactory<Program>` in the Testing environment, with an in-memory SQLite database and a Test sign-in scheme. Chapter 16 starts from this folder.
 
 | Folder | Project |
 | --- | --- |

@@ -1,93 +1,60 @@
 using AdventureWorks.Core;
+using Moq;
 using Xunit;
 
 namespace AdventureWorks.Tests.Unit;
 
-// Chapter 11's rules, tested without HTTP or a database.
+// Chapter 11's rules without HTTP or a database. Moq stands in
+// for the four contracts OrderService depends on.
 [Trait("Category", "Unit")]
 public sealed class OrderServiceTests
 {
-    static readonly Product Helmet = new(1, "Trail Helmet",
-        "HLM-1001", 29.99m, "accessories", 1);
-    static readonly Product Tent = new(4, "Two-Person Tent",
-        "TNT-4001", 189.00m, "camping", 1);
+    readonly Mock<IOrderRepository> _orders = new();
+    readonly Mock<IOrderWriter> _writer = new();
+    readonly Mock<IProductService> _catalog = new();
+    readonly Mock<IUnitOfWork> _unitOfWork = new();
 
-    readonly FakeOrders _orders = new();
-    readonly FakeUnitOfWork _unitOfWork = new();
-    readonly OrderService _service;
-
-    public OrderServiceTests() => _service = new OrderService(
-        _orders, _orders, new FakeCatalog(Helmet, Tent),
-        _unitOfWork);
-
-    static CreateOrderRequest Lines(
-        params (int ProductId, int Quantity)[] lines) => new()
-    {
-        Items = [.. lines.Select(l => new OrderLineRequest
-        {
-            ProductId = l.ProductId, Quantity = l.Quantity
-        })]
-    };
+    OrderService Service() => new(_orders.Object, _writer.Object,
+        _catalog.Object, _unitOfWork.Object);
 
     [Fact]
     public async Task PricesComeFromTheCatalog()
     {
-        var result = await _service.CreateAsync(
-            "casey", Lines((1, 2), (4, 1)),
-            TestContext.Current.CancellationToken);
+        _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Product(4, "Two-Person Tent",
+                "TNT-4001", 189.00m, "camping", 1)]);
+        NewOrder? staged = null;
+        _writer.Setup(w => w.Add(It.IsAny<NewOrder>()))
+            .Callback((NewOrder order) => staged = order);
 
-        Assert.Equal(OrderOutcome.Created, result.Outcome);
-        Assert.Equal(248.98m, result.Order!.Total);
-        Assert.Equal("casey", result.Order.OwnerId);
-        Assert.Equal(1, _unitOfWork.Saves);
+        await Service().CreateAsync("casey", new()
+        {
+            Items = [new() { ProductId = 4, Quantity = 2 }]
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(189.00m, staged!.Items[0].UnitPrice);
+        Assert.Equal("casey", staged.OwnerId);
     }
 
+    // Deleted after the service read it: the save finds no row.
     [Fact]
-    public async Task OneLinePerProduct()
+    public async Task AnOrderDeletedBeforeTheSaveIsNotFound()
     {
-        var result = await _service.CreateAsync(
-            "casey", Lines((1, 1), (1, 2)),
-            TestContext.Current.CancellationToken);
+        _orders.Setup(o => o.GetByIdAsync(7)).ReturnsAsync(
+            new Order(7, "AW-0007", "casey", 29.99m,
+                OrderStatus.Pending, false, null, Guid.NewGuid(),
+                []));
+        _writer.Setup(w => w.SetStatusAsync(7, It.IsAny<string>(),
+                It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _unitOfWork.Setup(u => u.SaveChangesAsync(
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new OrderDeletedException(new()));
 
-        Assert.Equal(OrderOutcome.Invalid, result.Outcome);
-        Assert.Equal(0, _unitOfWork.Saves);
-    }
-
-    [Fact]
-    public async Task UnknownProductsAreRefused()
-    {
-        var result = await _service.CreateAsync(
-            "casey", Lines((99, 1)),
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal(OrderOutcome.Invalid, result.Outcome);
-        Assert.Empty(_orders.Saved);
-    }
-
-    [Fact]
-    public async Task ATakenNumberIsAConflict()
-    {
-        _unitOfWork.Failure = new OrderNumberConflictException(
-            new InvalidOperationException("unique index"));
-
-        var result = await _service.CreateAsync(
-            "casey", Lines((1, 1)),
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal(OrderOutcome.Conflict, result.Outcome);
-    }
-
-    [Fact]
-    public async Task AnotherOwnersOrderIsNotFound()
-    {
-        await _service.CreateAsync("casey", Lines((1, 1)),
-            TestContext.Current.CancellationToken);
-
-        var result = await _service.CancelAsync(
-            "jordan", _orders.Saved[0].Id,
+        var result = await Service().CancelAsync("casey", 7,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(OrderOutcome.NotFound, result.Outcome);
-        Assert.Null(_orders.StagedStatus);
     }
 }

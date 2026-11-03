@@ -1,6 +1,6 @@
 # Chapter 8 delta: Authentication and Identity
 
-Generated October 30, 2026 (ET) from the companion checkpoint `AdventureWorks/Chapter08` and the operations that rebuild it from the Chapter 7 checkpoint. Every snippet below is copied from the checkpoint files, and every output and response was captured from a run on the .NET 11 RC3 SDK (shown here with the release version numbers the book uses).
+Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Chapter08` and the operations that rebuild it from the Chapter 7 checkpoint. Every snippet below is copied from the checkpoint files, and every output and response was captured from a run on the .NET 11 RC3 SDK (shown here with the release version numbers the book uses).
 
 ## What the chapter adds
 
@@ -1061,6 +1061,34 @@ The Bearer handler has validated the token and built the principal from its clai
 
 The Activity needs no new production code; it exercises the checkpoint (sign in, inspect the cookie flags, call the Bearer API, rotate and replay a refresh token, change the stored loyalty number). The companion's copy adds `LoyaltyEditor.cs`, a Development-only `PUT /dev/loyalty/{name}` that changes the stored value the way a back-office tool would, so the last step can be scripted. Checked: signed in as casey, `/api/account/me` lists `["AW-001"]`; after the change, signing out and in again lists `["AW-901"]`, exactly once, because the transformation skips a principal that already has the claim and the claim is not stored in the cookie.
 
+The concurrent-refresh step is scripted too: `RefreshRace.ps1` in the Activity folder signs in casey, then sends two refreshes of the same refresh token from one HttpClient before either answers, for five rounds. Run on RC3 in Windows PowerShell 5.1 (`.\RefreshRace.ps1` from the working folder, with the Activity app running), it printed:
+
+```text
+Round 1: 401 and 200
+Round 2: 200 and 401
+Round 3: 401 and 200
+Round 4: 200 and 401
+Round 5: 401 and 200
+```
+
+Every round took the [ConcurrencyCheck] path, not the "already consumed" check: the app's log shows both requests reading the token, then two updates of the same row, and the second changes nothing, so SaveChangesAsync throws DbUpdateConcurrencyException and the endpoint answers 401 (round 1, trimmed):
+
+```text
+Selected endpoint HTTP: POST /api/auth/refresh => Refresh
+Selected endpoint HTTP: POST /api/auth/refresh => Refresh
+SELECT ... FROM "RefreshTokens" AS "r" WHERE "r"."TokenHash" = @hash
+SELECT ... FROM "RefreshTokens" AS "r" WHERE "r"."TokenHash" = @hash
+UPDATE "RefreshTokens" SET "ConsumedByHash" = @p0
+WHERE "Id" = @p1 AND "ConsumedByHash" IS NULL
+INSERT INTO "RefreshTokens" (...) VALUES (...)
+POST /api/auth/refresh elapsed 166.9428 ms
+UPDATE "RefreshTokens" SET "ConsumedByHash" = @p0
+WHERE "Id" = @p1 AND "ConsumedByHash" IS NULL
+POST /api/auth/refresh elapsed 322.9177 ms
+```
+
+Across the five rounds the log has ten such UPDATE statements (two per round) and only five refresh-token INSERTs from the winners. EF Core logs no error for the losing save, so the 401 is the only visible sign. For comparison, two curl.exe calls started with Start-Job also answered 200 and 401 in each of three rounds, but the log had four UPDATEs for six refreshes: only one loser reached the concurrency check, and the other two failed at the earlier "already consumed" check, because each job starts its own PowerShell and the calls begin at slightly different times.
+
 The reader-path check rebuilt `AdventureWorks/Chapter08-Activity` from the Chapter 8 checkpoint: no differences.
 
 ### Activity: change a stored claim value
@@ -1108,6 +1136,53 @@ In `AdventureWorks/Program.cs`, add these lines after the line `app.MapDevelopme
 ```csharp
     app.MapLoyaltyEditor();
 ```
+
+### Activity: two refreshes of one token at the same moment
+
+The [ConcurrencyCheck] on ConsumedByHash is what stops a stolen refresh token from being used twice at once. A .http file sends one request at a time. Two curl.exe calls started with Start-Job do overlap, but each job starts its own PowerShell, so the second call often arrives after the first has saved and fails at the earlier "already consumed" check instead. This script sends both requests from one HttpClient before either answers, five rounds, each with a fresh sign-in. It is in the working folder, not in the app.
+
+Create `RefreshRace.ps1` (36 lines).
+
+```powershell
+# Two refreshes of one refresh token, sent at the same moment.
+# One rotates the token (200); the other loses (401): at the
+# check for a consumed token if the first has already saved, or
+# at the [ConcurrencyCheck] on ConsumedByHash if both read the
+# token before either saved. The app's log tells them apart.
+# Run it in Windows PowerShell 5.1 while the app is running:
+#   .\RefreshRace.ps1
+# If scripts are disabled on your machine, paste these lines
+# into the PowerShell window instead.
+param(
+    [string]$Password = "Practice-Pass-2026!",
+    [int]$Rounds = 5)
+
+Add-Type -AssemblyName System.Net.Http
+$client = New-Object System.Net.Http.HttpClient
+$auth = "https://localhost:7001/api/auth"
+
+function Send([string]$path, [string]$json) {
+    $content = New-Object System.Net.Http.StringContent(
+        $json, [Text.Encoding]::UTF8, "application/json")
+    $client.PostAsync("$auth/$path", $content)
+}
+
+$email = "casey@adventure-works.test"
+foreach ($round in 1..$Rounds) {
+    $login = (Send "login" ('{"email":"' + $email +
+        '","password":"' + $Password + '"}')).Result
+    $tokens = $login.Content.ReadAsStringAsync().Result |
+        ConvertFrom-Json
+    $body = '{"token":"' + $tokens.refreshToken + '"}'
+    # Both requests start before either answers.
+    $pair = @((Send "refresh" $body), (Send "refresh" $body))
+    [Threading.Tasks.Task]::WaitAll($pair)
+    $codes = $pair | ForEach-Object { [int]$_.Result.StatusCode }
+    "Round {0}: {1}" -f $round, ($codes -join " and ")
+}
+```
+
+Run it from the working folder in Windows PowerShell 5.1 while the app runs: `.\RefreshRace.ps1`. If scripts are disabled on the machine, paste its lines into the window instead. The output and the app's log are under "What the Activity adds" above.
 
 ### Activity requests and responses
 

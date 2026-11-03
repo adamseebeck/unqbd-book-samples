@@ -4,6 +4,8 @@ This is a worked solution to the chapter's Activity, built in a copy of the Chap
 
 It adds `LoyaltyEditor.cs`, a Development-only `PUT /dev/loyalty/{name}` that changes a stored loyalty number, so you can watch the claim change after you sign in again, exactly once.
 
+`RefreshRace.ps1` sends two refreshes of the same refresh token at the same moment, five times, and prints each pair of statuses: one 200 and one 401, the request that lost at the [ConcurrencyCheck] on ConsumedByHash. Run it from this folder in Windows PowerShell 5.1 while the app runs (`.\RefreshRace.ps1`), or paste its lines into the window if scripts are disabled.
+
 ## Run it
 
 From this folder, the one that holds global.json:

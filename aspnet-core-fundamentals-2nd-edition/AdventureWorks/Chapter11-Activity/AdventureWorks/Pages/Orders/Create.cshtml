@@ -1,0 +1,22 @@
+@page
+@model AdventureWorks.Pages.Orders.CreateModel
+@{
+    ViewData["Title"] = "Check an order";
+}
+<h1>Check an order</h1>
+@if (Model.StatusMessage is not null)
+{
+    <p role="status">@Model.StatusMessage</p>
+}
+<form method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All"></div>
+    <label asp-for="Input.ProductId"></label>
+    <input asp-for="Input.ProductId" />
+    <label asp-for="Input.Quantity"></label>
+    <input asp-for="Input.Quantity" />
+    <label asp-for="Input.Email"></label>
+    <input asp-for="Input.Email" />
+    <label asp-for="Upload"></label>
+    <input asp-for="Upload" type="file" />
+    <button type="submit">Validate</button>
+</form>

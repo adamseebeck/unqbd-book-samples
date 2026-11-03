@@ -1,0 +1,120 @@
+# Chapter 11 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development,
+# with Chapter 8's Training:Password User Secret set).
+# Each "Expect" line is the status you should see. Send them in
+# order. Each run places one new order and cancels it, so the
+# file can run again against the same database.
+
+@host = https://localhost:7001
+
+###
+# Placing an order needs a signed-in user. Expect 401
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "items": [ { "productId": 1, "quantity": 2 } ] }
+
+###
+# casey. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# Expect 200
+# @name token
+GET {{host}}/api/csrf
+
+###
+# Two helmets and a tent. The unitPrice in the request is
+# ignored: the catalog sets each price, and the total is
+# 2 x 29.99 + 189.00. Expect 201 with "total": 248.98
+# @name created
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [
+    { "productId": 1, "quantity": 2, "unitPrice": 0.01 },
+    { "productId": 4, "quantity": 1 } ] }
+
+###
+# The new order, at its Location.
+# Expect 200 with "status": "Pending"
+GET {{host}}/api/orders/{{created.response.body.$.id}}
+
+###
+# No lines. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [] }
+
+###
+# A quantity of zero. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [ { "productId": 1, "quantity": 0 } ] }
+
+###
+# The same product twice. Expect 400 with "detail": "Use
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [ { "productId": 1, "quantity": 1 },
+    { "productId": 1, "quantity": 2 } ] }
+
+###
+# A product the store does not sell. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [ { "productId": 99, "quantity": 1 } ] }
+
+###
+# A write without the antiforgery header. Expect 400
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{ "items": [ { "productId": 1, "quantity": 1 } ] }
+
+###
+# jordan may not cancel casey's order. Expect 200
+POST {{host}}/dev/sign-in/jordan
+
+###
+# Expect 200
+# @name jordanToken
+GET {{host}}/api/csrf
+
+###
+# Expect 403
+POST {{host}}/api/orders/{{created.response.body.$.id}}/cancel
+X-CSRF-TOKEN: {{jordanToken.response.body.$.token}}
+
+###
+# casey again. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# Expect 200
+# @name caseyToken
+GET {{host}}/api/csrf
+
+###
+# Expect 200 with "status": "Cancelled"
+POST {{host}}/api/orders/{{created.response.body.$.id}}/cancel
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+###
+# Expect 400 with "detail": "The order is already cancelled."
+POST {{host}}/api/orders/{{created.response.body.$.id}}/cancel
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out

@@ -9,7 +9,7 @@ RUN dotnet tool restore \
         -p:UseAppHost=false \
     && dotnet publish InventoryService -c Release \
         -o /app/inventory -p:UseAppHost=false \
-    && dotnet ef migrations bundle -r linux-x64 \
+    && dotnet ef migrations bundle \
         --project AdventureWorks.Infrastructure \
         --startup-project AdventureWorks -o /app/efbundle \
     && mkdir /data

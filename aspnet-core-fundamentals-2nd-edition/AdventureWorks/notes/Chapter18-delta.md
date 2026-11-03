@@ -7,7 +7,7 @@ Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Ch
 Chapter 18 ships the running app: one container image for the store, the warehouse service and the migrations, a Kubernetes file that runs it with Chapter 16's probes, a 15-second graceful shutdown, and, in the Activity, a small Native AOT service, because the store app itself cannot be compiled ahead of time.
 
 - Program.cs: `Configure<HostOptions>` with a 15-second ShutdownTimeout: 93 lines.
-- `Dockerfile` (multi-stage): the SDK image (sdk:11.0-resolute) restores the dotnet-ef tool, publishes AdventureWorks to /app/store and InventoryService to /app/inventory (framework-dependent, UseAppHost=false), and builds an EF Core migrations bundle (/app/efbundle, linux-x64, framework-dependent: the runtime image already has the runtime); the runtime image is aspnet:11.0-resolute-chiseled-extra (no shell, non-root APP_UID, ICU for the fr culture) with /app/data owned by the app's user and the connection string pointing there. One image, three commands: the store (default), the warehouse (`-w /app/inventory`, command `InventoryService.dll`), the migrations (`--entrypoint /app/efbundle`).
+- `Dockerfile` (multi-stage): the SDK image (sdk:11.0-resolute) restores the dotnet-ef tool, publishes AdventureWorks to /app/store and InventoryService to /app/inventory (framework-dependent, UseAppHost=false), and builds an EF Core migrations bundle (/app/efbundle, framework-dependent, for the build container's own platform: no -r, so the same Dockerfile builds on x64 and Arm64 hosts); the runtime image is aspnet:11.0-resolute-chiseled-extra (no shell, non-root APP_UID, ICU for the fr culture) with /app/data owned by the app's user and the connection string pointing there. One image, three commands: the store (default), the warehouse (`-w /app/inventory`, command `InventoryService.dll`), the migrations (`--entrypoint /app/efbundle`).
 - `.dockerignore`: bin, obj, local databases, benchmark output, .vs and publish folders stay out of the build context.
 - `kubernetes.yaml`: Deployments and Services for the warehouse and the store (two replicas), an init container that runs the bundle on the pod's emptyDir database, liveness /health/live and readiness /health/ready on 8080, a 30-second termination grace period.
 - No new package and no new route.
@@ -57,7 +57,7 @@ RUN dotnet tool restore \
         -p:UseAppHost=false \
     && dotnet publish InventoryService -c Release \
         -o /app/inventory -p:UseAppHost=false \
-    && dotnet ef migrations bundle -r linux-x64 \
+    && dotnet ef migrations bundle \
         --project AdventureWorks.Infrastructure \
         --startup-project AdventureWorks -o /app/efbundle \
     && mkdir /data
@@ -351,7 +351,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
     The bundle ended with `INSERT INTO "__EFMigrationsHistory" ... VALUES ('20261103153217_InitialCreate', '11.0.0-rc.3.26522.148');` and `Done.` The store logged "Now listening on: http://[::]:8080", "Hosting environment: Production" and "Content root path: /app/store", plus two warnings readers will see: Data Protection keys in /home/app/.aspnet/DataProtection-Keys "may not be persisted outside of the container", and "Failed to determine the https port for redirect" (the container serves HTTP; TLS ends at the proxy or ingress).
   - `curl -i http://localhost:8080/health/live`: 200 "Healthy"; `/health/ready`: 200 "Healthy" (the store called http://inventory:8080/health and got 200); `/api/catalog`: 200 `{"items":[],"featured":"/api/catalog/3"}`: the tables exist, and nothing seeds a Production database.
-  - `docker stop store`: the store logged "Application is shutting down..." and exited with code 0 in 1.6 s (no request was running, so the 15-second timeout was not needed).
+  - `docker stop -t 30 store`: the store logged "Application is shutting down..." and exited with code 0 in 2.3 s (no request was running, so the 15-second timeout was not needed). `-t 30` matters when one is: docker stop waits 10 seconds by default before it kills the process, less than ShutdownTimeout's 15.
   - kubernetes.yaml: parsed with PyYAML 6.0.1 (two Deployments and two Services), and its image (adventureworks:ch18), container port 8080, probe paths /health/live and /health/ready, `Inventory__BaseUrl=http://inventory:8080/`, init container command /app/efbundle, and the warehouse's working folder and argument match the container that ran. Not applied to a cluster: there is no cluster or kubectl here. Do not say kubectl apply was run.
 
 ## A breakpoint for this chapter
@@ -401,7 +401,7 @@ The template "ASP.NET Core Empty" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj (in 106 ms).
+  Restored AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj (in 153 ms).
 Restore succeeded.
 ```
 
@@ -581,4 +581,5 @@ The build fails with 41 warnings and 50 errors. The warnings are the trim and AO
 - Migrations: a bundle, run as a deployment step (docker run --entrypoint /app/efbundle, or the Kubernetes init container), not MigrateAsync at startup, which Development keeps for its seed. EF Core prints "Don't forget to copy appsettings.json alongside your bundle"; here the connection string comes from the image's environment.
 - The database is SQLite in a volume, enough to run and probe the image; with two store replicas in kubernetes.yaml each pod has its own emptyDir database. A real deployment points ConnectionStrings__AdventureWorks at a database server (Chapter 10's Activity shows SQL Server). Say so beside the YAML.
 - Data Protection keys live inside the container unless the app persists them (the warning above); a sign-in cookie does not survive a new container. A real deployment stores the keys in shared storage.
+- Review items: `docker stop -t 30` everywhere the README and the checks stop the store, because docker stop kills the process after 10 seconds by default, before ShutdownTimeout's 15 can run out. The migrations bundle has no `-r`: `dotnet ef migrations bundle` then builds for the platform of the container that runs it, the SDK image's own, which is also the runtime image's (linux-x64 in this run; linux-arm64 when Docker runs on an Arm64 PC). `-r linux-x64` would have built an x64 bundle that an Arm64 image cannot run. Checked: the image built and the bundle applied the migrations without `-r`, and the container checks passed 15 of 15 again.
 - Program.cs is 93 lines.

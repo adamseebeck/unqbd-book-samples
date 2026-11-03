@@ -494,6 +494,30 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - requests.http 9 of 9, and the README's curl.exe run 9 of 9: avery's three-line feed gave 200 `{"records":3}`; a quoted field and the price "free" gave 400 "Record 1 is not sku,name,price."; casey got 403.
 - The limits, with bodies a .http file cannot type (`tools/scenarios/ch17_import.py`), 8 of 8: a line of exactly 1,024 characters ending in CRLF, then a last line without a newline: 200 `{"records":2}`; 1,025 characters: 400; 1,001 records: 400 "Over 1,000 records."; the bytes E2 82 (a cut-off three-byte character) at the end: 400 "Unable to translate bytes [E2][82] at index -2 from specified code page to Unicode."; 80,000 bytes with Content-Length: 413; 80,000 bytes chunked (80 lines of 1,000 bytes, so the record limit cannot fire first): 413, with Kestrel logging "Request body too large. The max request body size is 65536 bytes."; a valid feed afterward: 200. Checked.
 
+## A breakpoint for this chapter
+
+Set a breakpoint in `AdventureWorks.Core/PriceFeed.cs` on line 21:
+
+```csharp
+if (line.Length == 0) continue;
+```
+
+Press F5 (the https profile), then send POST https://localhost:7001/api/admin/products/import as avery with the three-line feed in requests.http. When Visual Studio stops, the Locals window shows these values (recorded on RC3 by logging each one just above that line in a scratch copy; the runtime type is in brackets; Locals shows the same value in its Value column and the declared type in its Type column):
+
+```text
+line = HLM-1001,Trail Helmet,31.99 [String]
+line.Length = 27 [Int32]
+records = 0 [Int32]
+line = JRS-2001,Cycling Jersey,54.50 [String]
+line.Length = 29 [Int32]
+records = 1 [Int32]
+line = TNT-4001,Two-Person Tent,179.00 [String]
+line.Length = 31 [Int32]
+records = 2 [Int32]
+```
+
+ReadLineAsync has handed over the first line without its newline, decoded strictly as UTF-8; records is still 0 because the count rises only after the empty-line check. Step Into IsRecord to watch first and last, the two comma positions, slice the line without copying it.
+
 ## What the Activity adds
 
 The original Activity ran the chapter's code (benchmarks, checks, limits); those runs are the checkpoint's above. This Activity adds the pooling lesson the app code does not need (Chapter17-Activity, `BufferBenchmarks.cs`): a new 1,000-character array per call against one rented from ArrayPool<char>.Shared and returned. Rent returns an array at least as long as asked for (accuracy 17.3: 1,024 for 1,000), so code must use the length it asked for, not buffer.Length, when it fills the array.

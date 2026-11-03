@@ -1,0 +1,20 @@
+# Chapter 18 Activity. Start InventoryService, then the app:
+#   dotnet run --project InventoryService
+#   dotnet run --project AdventureWorks
+# (two terminals, both from this folder; in Visual Studio, set
+# both as startup projects). Each "Expect" line is the status
+# you should see. The same three requests work against the
+# container on http://localhost:8080 (README).
+@host = https://localhost:7001
+
+###
+# The process answers. Expect 200
+GET {{host}}/health/live
+
+###
+# The database and the warehouse answer. Expect 200
+GET {{host}}/health/ready
+
+###
+# The public catalog. Expect 200 with "sku": "HLM-1001"
+GET {{host}}/api/catalog

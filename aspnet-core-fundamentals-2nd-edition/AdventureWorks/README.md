@@ -2,7 +2,7 @@
 
 One AdventureWorks outdoor-gear store app that grows through the book. The reader creates it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own.
 
-This folder currently holds Chapters 1 to 15. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder holds Chapters 1 to 18. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
 
 ## Folders
 
@@ -51,4 +51,7 @@ Every checkpoint has a `requests.http` file with each request and the status you
 | 12 | Output caching of the anonymous catalog with tag eviction on every product write, a partitioned rate limit on search, compression for the public catalog only, and warehouse stock from the InventoryService tool project through a resilient, cached HttpClient |
 | 13 | The order API as REST resources on the same service: a paged collection with Link headers, OrderDto with an ETag, PATCH with If-Match, DELETE as cancel, the Admin delete under /api/admin, and source-generated JSON |
 | 14 | Three OpenAPI documents: the store routes, and the product API's v1 (controllers, marked deprecated) and v2 (Minimal APIs), chosen by group name. The Activity writes them at build time |
-| 15 | AdventureWorks.Tests on Microsoft.Testing.Platform: unit tests for the order service with fakes, an architecture test, and integration tests through WebApplicationFactory with in-memory SQLite, a Test sign-in scheme and an inventory stub. Chapter15-DebugLab holds the debugging lab: one deliberately failing test |
+| 15 | AdventureWorks.Tests on Microsoft.Testing.Platform: two Moq unit tests for the order service, an architecture test, and three integration tests through one small WebApplicationFactory with in-memory SQLite and a Test sign-in scheme. Chapter15-DebugLab holds the debugging lab: one deliberately failing test |
+| 16 | OpenTelemetry traces and metrics for the order flow (orders.created, orders.processing.duration), the console or OTLP exporter by configuration, the correlation ID from the trace ID, and `/health/live` and `/health/ready` with database and InventoryService checks |
+| 17 | A price-feed import for the Admin (`/api/admin/products/import`), read as a bounded stream, and AdventureWorks.Benchmarks (BenchmarkDotNet) comparing Split with spans. The Activity benchmarks ArrayPool |
+| 18 | One container image for the store, the warehouse and an EF Core migrations bundle, a .dockerignore, kubernetes.yaml with the health probes, and a 15-second graceful shutdown. The Activity adds a small Native AOT price feed and its image |

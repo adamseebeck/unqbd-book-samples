@@ -2,7 +2,7 @@
 
 One AdventureWorks outdoor-gear store app that grows through the book. The reader creates it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own.
 
-This folder currently holds Chapters 1 to 14. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder currently holds Chapters 1 to 15. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
 
 ## Folders
 
@@ -10,6 +10,7 @@ This folder currently holds Chapters 1 to 14. The `Chapter01` to `Chapter18` fol
 | --- | --- |
 | `ChapterNN` | The checkpoint at the end of Chapter NN. The next chapter starts here. |
 | `ChapterNN-Activity` | A copy of that checkpoint plus a worked solution to the chapter's Activity. The next chapter does not start from it. |
+| `Chapter15-DebugLab` | A copy of the Chapter 15 checkpoint with one deliberate bug and the failing test that finds it, for the chapter's Visual Studio debugging lab. |
 | `notes/ChapterNN-delta.md` | For the book's writers: every file and line the chapter adds or changes, in order, with the commands, their output and the real responses. |
 
 Each checkpoint folder is the reader's working folder: it holds `global.json` and, from Chapter 2, `AdventureWorks.slnx` with three projects (from Chapter 12 also `InventoryService`, a companion tool project that stands in for the warehouse's stock service):
@@ -50,3 +51,4 @@ Every checkpoint has a `requests.http` file with each request and the status you
 | 12 | Output caching of the anonymous catalog with tag eviction on every product write, a partitioned rate limit on search, compression for the public catalog only, and warehouse stock from the InventoryService tool project through a resilient, cached HttpClient |
 | 13 | The order API as REST resources on the same service: a paged collection with Link headers, OrderDto with an ETag, PATCH with If-Match, DELETE as cancel, the Admin delete under /api/admin, and source-generated JSON |
 | 14 | Three OpenAPI documents: the store routes, and the product API's v1 (controllers, marked deprecated) and v2 (Minimal APIs), chosen by group name. The Activity writes them at build time |
+| 15 | AdventureWorks.Tests on Microsoft.Testing.Platform: unit tests for the order service with fakes, an architecture test, and integration tests through WebApplicationFactory with in-memory SQLite, a Test sign-in scheme and an inventory stub. Chapter15-DebugLab holds the debugging lab: one deliberately failing test |

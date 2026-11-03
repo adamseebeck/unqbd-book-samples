@@ -1,0 +1,15 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(
+    AuthenticationSchemes = "Identity.Application")]
+@{
+    ViewData["Title"] = "Profile";
+}
+<h1>Profile</h1>
+<p>Signed in as @User.Identity?.Name</p>
+<p>Loyalty number: @User.FindFirst("loyalty_number")?.Value</p>
+<p>Department: @User.FindFirst("Department")?.Value</p>
+<form method="post" asp-page="/Account/Login"
+      asp-page-handler="Logout">
+    <button type="submit">Sign out</button>
+</form>

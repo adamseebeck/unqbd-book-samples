@@ -1,0 +1,6 @@
+@page
+@using AdventureWorks.Authorization
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = StorePolicies.AdminOnly)]
+<h1>Administration</h1>
+<p>Signed in as @User.Identity?.Name, in the Admin role.</p>

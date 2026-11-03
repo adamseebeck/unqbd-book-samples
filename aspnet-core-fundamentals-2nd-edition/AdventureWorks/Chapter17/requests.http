@@ -1,0 +1,64 @@
+# Chapter 17 checkpoint. Start InventoryService, then the app:
+#   dotnet run --project InventoryService
+#   dotnet run --project AdventureWorks
+# (two terminals, both from this folder; in Visual Studio, set
+# both as startup projects). Each "Expect" line is the status
+# you should see. Send them in order.
+@host = https://localhost:7001
+
+###
+# The import is the Admin's. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 200
+# @name token
+GET {{host}}/api/csrf
+
+###
+# Three records, checked and counted, not saved.
+# Expect 200 with {"records":3}
+POST {{host}}/api/admin/products/import
+Content-Type: text/plain
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+HLM-1001,Trail Helmet,31.99
+JRS-2001,Cycling Jersey,54.50
+TNT-4001,Two-Person Tent,179.00
+
+###
+# A quoted field is refused, not parsed. Expect 400
+POST {{host}}/api/admin/products/import
+Content-Type: text/plain
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+HLM-1001,"Trail Helmet",31.99
+
+###
+# A price must be a number. Expect 400
+POST {{host}}/api/admin/products/import
+Content-Type: text/plain
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+HLM-1001,Trail Helmet,free
+
+###
+# casey is no Admin. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# Expect 200
+# @name caseyToken
+GET {{host}}/api/csrf
+
+###
+# Expect 403
+POST {{host}}/api/admin/products/import
+Content-Type: text/plain
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+HLM-1001,Trail Helmet,31.99
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out

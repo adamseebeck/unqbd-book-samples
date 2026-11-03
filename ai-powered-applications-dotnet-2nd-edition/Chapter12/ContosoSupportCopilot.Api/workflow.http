@@ -1,0 +1,14 @@
+@baseUrl = http://localhost:5101
+@engineer = engineer-ana
+
+### Local Development exercise. Use the Offline provider for practice.
+POST {{baseUrl}}/api/Workflow/tickets/3f2b8c1e-0001-4a6b-9a1e-000000000001/process
+Content-Type: application/json
+X-Engineer-Id: {{engineer}}
+
+{
+  "initialInput": "Help me reply to this password reset ticket."
+}
+
+### Liveness. Chapter12 also exposes /health/ready.
+GET {{baseUrl}}/health/live

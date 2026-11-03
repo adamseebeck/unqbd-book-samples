@@ -5,10 +5,29 @@ Companion code for *AI-Powered Applications with .NET Fundamentals, Second Editi
 ## What You Need
 
 - The .NET 11 SDK, version 11.0.100 or later. The `global.json` file in this folder selects it and accepts later .NET 11 feature bands; check with `dotnet --version`.
-- Visual Studio or Visual Studio Code with C# Dev Kit. The .NET CLI commands below work in any terminal.
+- On Windows, Visual Studio 2026 with the ASP.NET and web development workload is the main path. VS Code with C# Dev Kit is the alternative on Windows, macOS or Linux; its terminal uses the same projects.
 - Nothing else for the default offline mode: no AI account, no database server, and no network access after the NuGet restore.
 
 Optional, for real model output: [Ollama](https://ollama.com) for free local models, a Microsoft Foundry resource with one chat deployment and one embedding deployment, or an OpenAI API key. SQL Server, including LocalDB, can replace the default SQLite database.
+
+## Run in Visual Studio
+
+1. Open ChapterNN/ContosoSupportCopilot.slnx with File > Open > Project/Solution and set ContosoSupportCopilot.Api as the startup project.
+2. Build with Ctrl+Shift+B, select **Offline check** beside the green Start button and press Ctrl+F5. Expect the provider line to name Offline and the final line to read `Check passed.`
+3. The Offline check profile overrides saved provider, vector-store and database choices for this run, selects local SQLite and in-memory search, and disables model judges and telemetry export. It remains the practice path after you configure a cloud provider in user secrets. Its counts and answers are deterministic teaching examples.
+4. Select **http** to serve the API with your configured provider. On a fresh download this is Offline. F5 starts a debug session; F9 sets a breakpoint and Shift+F5 stops it.
+5. Select **Provider check** only for an intentional run against the provider you configured. Cloud checks cost tokens; Chapter 9's evaluations and later workflow checks make many calls.
+6. From Chapter 6, use Test > Test Explorer to run tests. Right-click a test and choose Debug to inspect it without launching the API. Chapter 6 explains a deliberate assertion failure and its correction.
+
+Profiles live in the Api project's Properties/launchSettings.json and are local development settings. The explicit terminal offline command is:
+
+```powershell
+dotnet run --project ContosoSupportCopilot.Api --launch-profile "Offline check"
+```
+
+The default http profile remains first, so existing `dotnet run` commands retain their meaning. When entering an argument in Debug Properties, enter only the application's argument, such as `--check`, without `dotnet run --`.
+
+Chapter 11 and Chapter 12 also include `ContosoSupportCopilot.Api/workflow.http` for Visual Studio's HTTP editor. Run the API locally, keep its provider Offline for practice and choose Send request above the request. The engineer header is a Development shortcut; Chapter 12 requires a validated token outside Development.
 
 ## Run a Chapter
 
@@ -125,7 +144,7 @@ Chapter 12 adds these sections:
 | `Telemetry:Exporter` | `None` | `Console` prints spans and metrics; `Otlp` sends them, and the logs, to `OTEL_EXPORTER_OTLP_ENDPOINT` |
 | `Telemetry:EnableSensitiveData` | `false` | Puts prompts, answers, and tool arguments in the spans; keep it off outside a debugging session |
 | `Health:AIProbeIntervalSeconds`, `Health:AIProbeRetrySeconds`, `Health:AIProbeTimeoutSeconds` | `300`, `30`, `10` | How often the background monitor probes the AI provider while it answers and while it fails, and how long one probe may take; readiness only reads the result |
-| `Budget:DailyLimitUsd`, `Budget:AlertThresholdPercent`, `Budget:MaxTokensPerConversation` | `100`, `80`, `50000` | The daily budget, the alert threshold, and the token limit that flags a conversation |
+| `Budget:DailyLimitUsd`, `Budget:AlertThresholdPercent`, `Budget:MaxTokensPerConversation` | `100`, `80`, `50000` | The daily budget, alert threshold and per-conversation token threshold; reports flag excess usage but do not block model calls |
 | `EmbeddingCache:MaxEntries` | `10000` | Size limit of the embedding cache |
 | `Database:InitializeOnStartup` | `true` | `false` leaves the schema to `--initialize-database`, as the Kubernetes manifest does |
 | `Database:SeedSampleData` | `true` in Development, `false` elsewhere | Adds the sample tickets and articles to an empty support database; a production database never needs them |
@@ -148,7 +167,7 @@ The container runs the offline provider in the Production environment: `http://l
 
 ## Database
 
-From Chapter 2 on, the API uses SQLite: `contoso-support.db` appears in the `ContosoSupportCopilot.Api` folder on the first run, with three sample tickets and three knowledge articles. From Chapter 6 on, conversation state and run records go to a second file, `contoso-copilot.db`, next to it. From Chapter 7 on, the knowledge base has five articles, one of them an unpublished draft; Chapter 8 adds an article with a prompt injection attempt and one with addresses, a token, and an email address to mask. Delete the files to start over; each `--check` run in Chapter 6 adds three turns to the password ticket's conversation and one to the API ticket's. To use SQL Server instead, set `Database:Provider` to `SqlServer` and `ConnectionStrings:SupportDb` to your connection string, for example `Server=(localdb)\MSSQLLocalDB;Database=ContosoSupportCopilot;Trusted_Connection=True;TrustServerCertificate=True`. From Chapter 6 on, also set `ConnectionStrings:CopilotDb` to a different database, such as `Database=ContosoCopilotState`; each context creates its tables only in a database that has none.
+From Chapter 2 on, the API uses SQLite: `contoso-support.db` appears in the `ContosoSupportCopilot.Api` folder on the first run, with three sample tickets and three knowledge articles. From Chapter 6 on, conversation state and run records go to a second file, `contoso-copilot.db`, next to it. From Chapter 7 on, the knowledge base has five articles, one of them an unpublished draft; Chapter 8 adds an article with a prompt injection attempt and one with addresses, a token, and an email address to mask. Stop the app and preserve copies of these generated files before starting over; use a new checkpoint folder to keep earlier exercises intact; each `--check` run in Chapter 6 adds three turns to the password ticket's conversation and one to the API ticket's. To use SQL Server instead, set `Database:Provider` to `SqlServer` and `ConnectionStrings:SupportDb` to your connection string, for example `Server=(localdb)\MSSQLLocalDB;Database=ContosoSupportCopilot;Trusted_Connection=True;TrustServerCertificate=True`. From Chapter 6 on, also set `ConnectionStrings:CopilotDb` to a different database, such as `Database=ContosoCopilotState`; each context creates its tables only in a database that has none.
 
 Later chapters add tables to the copilot database: `AgentSessions` in Chapter 10, `WorkflowStates` in Chapter 11, `WorkflowRequests` in the Chapter 11 activity, and `ModelUsage` in Chapter 12. From Chapter 10 on, the app creates the tables that an existing database lacks at startup and logs `Added tables to the copilot database: ...`, so a database from an earlier chapter keeps its data; it never changes an existing table. From Chapter 12 on, `dotnet run --project ContosoSupportCopilot.Api -- --initialize-database` creates the databases and missing tables and exits without starting the server; it adds the sample data only in Development or with `Database__SeedSampleData=true`.
 

@@ -7,8 +7,41 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5101",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development"
       }
+    },
+    "Offline check": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5101",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "AI__Provider": "Offline",
+        "VectorStore__Provider": "InMemory",
+        "VectorStore__Dimensions": "384",
+        "VectorStore__MinScore": "0.2",
+        "VectorStore__TopK": "5",
+        "Database__Provider": "Sqlite",
+        "ConnectionStrings__SupportDb": "Data Source=contoso-support.db",
+        "ConnectionStrings__CopilotDb": "Data Source=contoso-copilot.db",
+        "Evaluation__UseJudges": "false",
+        "Telemetry__Exporter": "None"
+      },
+      "commandLineArgs": "--check"
+    },
+    "Provider check": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5101",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--check"
     }
   }
 }

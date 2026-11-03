@@ -2,7 +2,7 @@
 
 One AdventureWorks outdoor-gear store app that grows through the book. The reader creates it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own.
 
-This folder currently holds Chapters 1 to 9. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder currently holds Chapters 1 to 10. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
 
 ## Folders
 
@@ -18,7 +18,7 @@ Each checkpoint folder is the reader's working folder: it holds `global.json` an
 | --- | --- |
 | `AdventureWorks` | Web: hosting, middleware, endpoints, pages and composition |
 | `AdventureWorks.Core` | Domain types and contracts, with no ASP.NET Core dependency |
-| `AdventureWorks.Infrastructure` | Implementations of the Core contracts (in memory until Chapter 10) |
+| `AdventureWorks.Infrastructure` | Implementations of the Core contracts: in memory until Chapter 10, then EF Core on SQLite |
 
 ## Run a checkpoint
 
@@ -45,3 +45,4 @@ Every checkpoint has a `requests.http` file with each request and the status you
 | 7 | The order form with a private upload, `/api/orders/validate`, built-in Minimal API validation, an async SKU check, static files and en/fr request localization |
 | 8 | ASP.NET Core Identity on SQLite (`adventureworks.db`), sign-in and profile pages, JWT and refresh tokens for `/api/auth`, a Bearer-only loyalty API, a Development seed and test sign-in |
 | 9 | Authorization: a fallback policy with every public endpoint marked, Admin, age, department and resource-based order policies, order delete and archive, the X-CSRF-TOKEN header |
+| 10 | EF Core: the store's tables in the same SQLite database, migrations (dotnet-ef pinned in dotnet-tools.json), EF Core implementations behind the same interfaces, prices in cents, the order report, a version-checked notes update and a transactional stock transfer. The Activity runs it on SQL Server LocalDB |

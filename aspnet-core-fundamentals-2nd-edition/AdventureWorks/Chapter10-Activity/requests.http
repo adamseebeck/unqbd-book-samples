@@ -1,0 +1,176 @@
+# Chapter 10 Activity: the same requests on SQL Server. Start
+# the app with the sqlserver launch profile first:
+#   dotnet run --project AdventureWorks --launch-profile sqlserver
+# (or pick sqlserver in Visual Studio's profile list and press
+# F5). With the https profile the same requests run on SQLite.
+# Each "Expect" line is the status you should see. Send them in
+# order. Every change is undone by a later request, so the file
+# can run again against the same database.
+
+@host = https://localhost:7001
+
+###
+# The catalog now comes from the database.
+# Expect 200 with "sku": "HLM-1001"
+GET {{host}}/api/catalog
+
+###
+# The search runs as SQL. Expect 200 with "name": "Trail Helmet"
+GET {{host}}/api/catalog/search?q=helmet
+
+###
+# Decimal prices again, from whole cents in the table.
+# Expect 200 with "price": 1299.00
+GET {{host}}/api/v2/products/3
+
+###
+# casey: a customer with eleven orders. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# The order with its items and its current version.
+# Expect 200 with "orderNumber": "AW-0001"
+# @name order
+GET {{host}}/api/orders/1
+
+###
+# casey's orders, newest first, ten per page; SQL sums each
+# total. Expect 200 with "orderNumber": "AW-0012"
+GET {{host}}/api/orders/report
+
+###
+# The eleventh order is on page 2.
+# Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/report?page=2
+
+###
+# Pages start at 1. Expect 400
+GET {{host}}/api/orders/report?page=0
+
+###
+# Expect 200
+# @name caseyToken
+GET {{host}}/api/csrf
+
+###
+# Send back the version that was read.
+# Expect 200 with "notes": "Leave it at the side door."
+# @name updated
+PUT {{host}}/api/orders/1
+Content-Type: application/json
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+{ "notes": "Leave it at the side door.",
+  "version": "{{order.response.body.$.version}}" }
+
+###
+# The same version again is stale now: someone saved since.
+# Expect 409
+PUT {{host}}/api/orders/1
+Content-Type: application/json
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+{ "notes": "Ring the bell.",
+  "version": "{{order.response.body.$.version}}" }
+
+###
+# With the current version the update works, and it clears
+# the notes again. Expect 200 with "notes": null
+PUT {{host}}/api/orders/1
+Content-Type: application/json
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+{ "notes": null,
+  "version": "{{updated.response.body.$.version}}" }
+
+###
+# Order 2 is jordan's: the owner rule refuses. Expect 403
+PUT {{host}}/api/orders/2
+Content-Type: application/json
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+{ "notes": "Mine now?",
+  "version": "00000000-0000-0000-0000-000000000000" }
+
+###
+# Stock is for the Admin. Expect 403
+GET {{host}}/api/admin/inventory/1
+
+###
+# avery: the Admin. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 200
+# @name averyToken
+GET {{host}}/api/csrf
+
+###
+# The helmet's two locations. Expect 200 with "quantity": 10
+GET {{host}}/api/admin/inventory/1
+
+###
+# Move 3 helmets; both saves commit together.
+# Expect 200 with {"location":"Overflow","quantity":3}
+POST {{host}}/api/admin/inventory/transfer
+Content-Type: application/json
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+{ "productId": 1, "from": "Main", "to": "Overflow",
+  "quantity": 3 }
+
+###
+# Overflow holds only 3. The first save adds 50 to Main, the
+# second fails the check constraint, and the rollback undoes
+# the first. Expect 409
+POST {{host}}/api/admin/inventory/transfer
+Content-Type: application/json
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+{ "productId": 1, "from": "Overflow", "to": "Main",
+  "quantity": 50 }
+
+###
+# Unchanged. Expect 200 with {"location":"Main","quantity":7}
+GET {{host}}/api/admin/inventory/1
+
+###
+# Move them back.
+# Expect 200 with {"location":"Main","quantity":10}
+POST {{host}}/api/admin/inventory/transfer
+Content-Type: application/json
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+{ "productId": 1, "from": "Overflow", "to": "Main",
+  "quantity": 3 }
+
+###
+# The unique index refuses a second HLM-1001.
+# Expect 400 with "title": "Invalid request"
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Trail Helmet", "sku": "HLM-1001",
+  "price": 29.99, "category": "accessories" }
+
+###
+# A new product. Expect 201
+# @name bottle
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+
+###
+# Expect 204
+DELETE {{host}}/api/v2/products/{{bottle.response.body.$.id}}
+
+###
+# The helmet is on orders, so the foreign key keeps it.
+# Expect 400
+DELETE {{host}}/api/v2/products/1
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out

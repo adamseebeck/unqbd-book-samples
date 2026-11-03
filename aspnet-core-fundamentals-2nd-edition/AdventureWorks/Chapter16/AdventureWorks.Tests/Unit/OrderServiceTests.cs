@@ -56,5 +56,8 @@ public sealed class OrderServiceTests
             TestContext.Current.CancellationToken);
 
         Assert.Equal(OrderOutcome.NotFound, result.Outcome);
+        // Reached the save: not the owner or staging checks.
+        _unitOfWork.Verify(u => u.SaveChangesAsync(
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 }

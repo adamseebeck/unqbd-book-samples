@@ -40,4 +40,28 @@ public sealed class StoreApiTests(StoreFactory factory)
         Assert.Equal(189.00m,
             order.GetProperty("total").GetDecimal());
     }
+
+    // Chapter 11's version check, on SQLite: an ETag that no
+    // order has fails the UPDATE's version test. A mock cannot.
+    [Fact]
+    public async Task AStaleETagIs412()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = await factory.CreateCustomerAsync(ct);
+        var placed = await client.PostAsJsonAsync("/api/orders",
+            new { Items = new[] { new { ProductId = 4,
+                Quantity = 1 } } }, ct);
+        var patch = new HttpRequestMessage(HttpMethod.Patch,
+            placed.Headers.Location)
+        {
+            Content = JsonContent.Create(new { Notes = "Gift" })
+        };
+        patch.Headers.TryAddWithoutValidation("If-Match",
+            $"\"{Guid.NewGuid()}\"");
+
+        var response = await client.SendAsync(patch, ct);
+
+        Assert.Equal(HttpStatusCode.PreconditionFailed,
+            response.StatusCode);
+    }
 }

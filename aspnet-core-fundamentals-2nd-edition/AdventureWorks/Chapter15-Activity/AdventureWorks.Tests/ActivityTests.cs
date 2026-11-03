@@ -33,8 +33,7 @@ public sealed class OrderServiceMockTests
         await Service().CreateAsync("casey", OneHelmet(),
             request.Token);
 
-        _catalog.Verify(c => c.GetByIdsAsync(
-            It.Is<int[]>(ids => ids.SequenceEqual(new[] { 1 })),
+        _catalog.Verify(c => c.GetByIdsAsync(new[] { 1 },
             request.Token), Times.Once);
     }
 

@@ -578,13 +578,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+6/x0/?0] (8s 100ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+7/x0/?0] (5s 685ms)
 Test run summary: Passed!
-  total: 6
+  total: 7
   failed: 0
-  succeeded: 6
+  succeeded: 7
   skipped: 0
-  duration: 9s 720ms
+  duration: 6s 846ms
 ```
 
 ## Program.cs at the checkpoint (89 lines)
@@ -733,7 +733,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   Healthy
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: e8b71cffb2eb1dff7a12ae9af10bafbd)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 800e3256c043f8e1899b838b35d2eb18)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -745,7 +745,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 7643067327491606d8b997321be28070)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 36f3e2f1b01838423f97eaec38ba350d)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -782,7 +782,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZowAqXvMS8CjsGTCfgbAJglNWbjI4IMnyoO0R7XX1TYElN2KTDIDrDbXodz1qTg610dKgfJZBUqzICXkLmU1XLrZe6PTlBmc48QbsUFM2N9cUQcOA_uH3RegjbBQ5Wtp_UXMgFGyk1OF05Kpy9_pSQWJgaeYQd9bc6Gs3hYkm8og"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYATFtcEYUDucpOX7a19p5RnfFYUBMGXr8wcxhmq5SoFPxjsrmEyJU9umRwI5FxEEdgGoy6YtTJxQ--nX5Y2RNFwoQMk2ch5zSYRZGKGQazdiC_0k390nNRRAIV4A_XIk1wRQovjzIIElBJw_bpEefQMrDUTd99V306CJCwBETC6w"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
@@ -802,7 +802,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYgcvMn5UPRjWE9IBsfzZyImvgEBYVArQ3k6BZmWZrW3A9qBN385sOkgW9EEGQivesxPSyVwkebyy-eVCVNOx1A_ucB3ILDHnC4q2fXzsOzFlQBD5v4HUwEJkliHaIuZ-flzV5ebr90XNqLMExQhGmmL3w3GFxR-jWb3m3fjjJZFg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbT2mNb86WlpC-dX7wV0NeHM4Y_Ir9rIBl6FESvGHfb6vIPcfT4-2kQuBhSLnnXjY8PVpfvNcyK8aLhTRCea0mqGGOXk3aAkdli3Zt0DpCYTq_pY2BsaXbshZ-8hfFsSyb31CeH99IFYDRZvRjnvMQuU6-V5v_A3Q3H3fkFvn7qOQ"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -811,7 +811,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ### Other runs
 
-- `dotnet test --project AdventureWorks.Tests`: total 6, succeeded 6 (OrderTelemetryTests adds one); the unit filter 3. The Visual Studio 2026 rebuild built all five projects without warnings.
+- `dotnet test --project AdventureWorks.Tests`: total 7, succeeded 7 (OrderTelemetryTests adds one); the unit filter 3. The Visual Studio 2026 rebuild built all five projects without warnings.
 - requests.http 18 of 18, and the README's curl.exe run 18 of 18: live and ready 200 ("Healthy"); no X-Correlation-ID, or "bad value", came back as a 32-character trace ID (for example 7643067327491606d8b997321be28070), and "order-lab-1" came back unchanged; with InventoryService slowed to 1.5 s through /control/delay, ready answered 503 "Degraded" after the one-second timeout while live answered 200; after /control/reset, ready answered 200 again.
 - InventoryService stopped (nothing on 127.0.0.1:42132): live 200 "Healthy", ready 503 "Degraded". Accuracy 16.1 holds here: on Windows a refused loopback connection takes about two seconds, so the one-second timeout fires first and the check reports Degraded, not Unhealthy; Linux normally refuses at once (Unhealthy). Both are 503.
 - With `--Telemetry:Exporter=console`, one order and a three-second wait printed the spans and metrics (excerpt; the orders.create span is a child of the framework's POST /api/orders/ server span, same trace ID, ParentSpanId 6a2a7943e6b37a92 = its SpanId):
@@ -865,7 +865,7 @@ The decorator has the result of the whole chain below it (logging, then the serv
 
 The original Activity added an order-attempts counter; on this app it is the next counter on the same meter (Chapter16-Activity). OrderTelemetry gains `Cancelled`, `orders.cancelled` ({order}), and MeteredOrderService adds 1 for each Cancelled outcome. No registration changes: OpenTelemetry already listens to the AdventureWorks.Orders meter. `CancelledCounterTests` places an order, cancels it through its Location, and reads 1 from MetricCollector.
 
-Checked: total 7, succeeded 7; the unit filter 3; with `--Telemetry:Exporter=console` the log shows orders.cancelled next to orders.created.
+Checked: total 8, succeeded 8; the unit filter 3; with `--Telemetry:Exporter=console` the log shows orders.cancelled next to orders.created.
 
 The reader-path check rebuilt `AdventureWorks/Chapter16-Activity` from the Chapter 16 checkpoint: no differences.
 The Activity adds 40 lines of code: 35 in 1 new file and 5 new or changed in existing files, plus 1 command line. Blank lines in listings are counted; deleted lines and files that a command writes are not.
@@ -946,13 +946,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+7/x0/?0] (6s 397ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+8/x0/?0] (6s 119ms)
 Test run summary: Passed!
-  total: 7
+  total: 8
   failed: 0
-  succeeded: 7
+  succeeded: 8
   skipped: 0
-  duration: 7s 610ms
+  duration: 7s 262ms
 ```
 
 ### Activity requests and responses
@@ -971,7 +971,7 @@ Test run summary: Passed!
   Healthy
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 7d61345581faaa8fb6329fc0c9801db6)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 055e58ca0cb535578586a782cf3152c1)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -983,7 +983,7 @@ Test run summary: Passed!
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: d4f8cc4e654d1a66da662f8099e6ddec)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 77b7ad6d87abdd23724814354632eb1d)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -1020,7 +1020,7 @@ Test run summary: Passed!
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb-HFs22ePpCEpYl0znklIGrPUx7fLUS_2Tl_Kxsa7IFxlKEyjH_wGdagG0itTpYDIY6JW082InzzXdwwvnt7-E-0YSdGqMr3vgBifQtEbf3tv9BKqS7TpQB4x4V2oxDyv89ncFK5LlrrxnzTZg8GRo5MuxuMbxKfC33zCVoIy9Iw"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb4MePKu_4dxuwZpq1pRKCbwMUVXvhTy3LPv3g5Hokwuv3eOD9D25chzcnMBILKnIu6nqsrubjGmeVrSo4WLvT4TKWz2Vzs8V_LlZeBOuQ47jS_rJGX1T9xxsIYmtyFRHCZ2pIGfeB1u5ehN19NUoKemt98NyiXYPdIeXEjEq9ATg"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
@@ -1040,7 +1040,7 @@ Test run summary: Passed!
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYxpqihZX7qAb6JXQKraCdKliCl9dwTRKP21LmUehNU_xkXIQ8m5uakeguTWUX9TBDCN8QpAxomw475l9b6HzGHtcJxJLoJfiZ6Ockfw2QGCgWoAVj-zIXcSz8VBOonctIrBzyQMMs_FmUfOITp3HMeXRUdR6mTgaDsBdweGahjYw"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZGOT8A6Royxd-XHjHbTcr-JIQEqlrRpcSF7Y6nbsADGTquIPYcWDtEa3lS7NboPoZ0zTd8NIvLaouL2SLAMs3ZTT1ap1p0elAfAKzfipIoUYOUV22R4CmxV24ZFdCOhLQrJl_ghI2EI-qyvW5FZ6ViwhtYG7hLP7rO5WAfbTh01A"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**

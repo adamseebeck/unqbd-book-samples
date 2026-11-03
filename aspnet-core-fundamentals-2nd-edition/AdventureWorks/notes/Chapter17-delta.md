@@ -169,7 +169,7 @@ The template "Console App" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 109 ms).
+  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 111 ms).
 Restore succeeded.
 ```
 
@@ -429,7 +429,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZzga0uW9jPG0u1p9v26IQdFkzO74LsD69glY5ss8Fl3wWU789kfmWs-0zqQucQh2OJJVY-K4s_FxbFiINMaw3AddODdh1IUCfhz_oxDjsYMUT4zbVB3RZmR8Vai2u8VKtVKTZ_2YyjBQgxFTT1of6rKFgJ3s2ghbK45iAyDZj1ug"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZkziXqR574Wg9JnZEjQrvhF5eoOzi5dfMBa9eND0vVUvXBBpZ_c5qatv96gO0jVzsTs-E_JQNK-JFukCyPFBoLQz92XPdmdcOk_Mf9k7G7PURhMIcM4Pp18fFmEB3XGpYCRcde5KzzxWzN66rK-RGbIBtYl7Jpeu2escbdha0lKg"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -441,13 +441,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-5e7c01e1423fd0f4da6fc8b333402e03-462f0a06d713f912-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-b764af0d6df1c8920083480785fdd967-afae5d0d62bb6312-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-24924fc1a6bda06e60679516298e4b76-0562804386af70eb-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-172f64ba0abfd7c6f041667689de5790-e9b3f3acac1116ba-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -459,13 +459,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZNLHfwY2RNXPq1pQb9GY9niianIe59e0Mhx5g4kBVE2y9WiArG3qdUxIUg8EyPlvibSs6hoHxqPOGezTDv37cfRYO5wDbX7BXzzzbG6N9-FEh51RYMkYvbJGlzDZKsWjnVyVEbj3j3f5d_M8pbhT1WtlL3lDdQMNAMGdCgmNYlzQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbKy3uNYMPij_BUzYXRGrXoyFEFKFL1OKsajVOhxwPRUiMlQ--jdqCRAXhBLFuqbwmb25Sz7mEnu_X3D3vOb2uJ-DTA7ixboUTbKAqC-8JmZA_pwf-rOoJl2rYsaIxt7iBW5-3kOrlQa2pKsvptjzugKfH1O6iI0tL8A5JNph8q-w"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-1c865454853f842dd5196d7a6dd87281-2c32aecd74ef40ba-03","correlationId":"1c865454853f842dd5196d7a6dd87281"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-d608bc971c095ee6e303e7d64e362c6b-922b601738b35c6d-03","correlationId":"d608bc971c095ee6e303e7d64e362c6b"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -490,7 +490,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   ```
 
   Split allocates 168 bytes a line (an array and three strings), Span nothing. The short job's three iterations give a wide Error column; two earlier runs on the same machine measured 123.83 and 67.22 us, and 131.52 and 58.42 us. Say "about twice as fast, and no allocation", not a precise ratio. BenchmarkDotNet ran the benchmarks out of process on the host runtime with no runtime moniker given.
-- `dotnet test --project AdventureWorks.Tests`: total 6, succeeded 6 (Chapter 16's suite; this chapter adds no tests); the unit filter 3. The Visual Studio 2026 rebuild built all six projects without warnings.
+- `dotnet test --project AdventureWorks.Tests`: total 7, succeeded 7 (Chapter 16's suite; this chapter adds no tests); the unit filter 3. The Visual Studio 2026 rebuild built all six projects without warnings.
 - requests.http 9 of 9, and the README's curl.exe run 9 of 9: avery's three-line feed gave 200 `{"records":3}`; a quoted field and the price "free" gave 400 "Record 1 is not sku,name,price."; casey got 403.
 - The limits, with bodies a .http file cannot type (`tools/scenarios/ch17_import.py`), 8 of 8: a line of exactly 1,024 characters ending in CRLF, then a last line without a newline: 200 `{"records":2}`; 1,025 characters: 400; 1,001 records: 400 "Over 1,000 records."; the bytes E2 82 (a cut-off three-byte character) at the end: 400 "Unable to translate bytes [E2][82] at index -2 from specified code page to Unicode."; 80,000 bytes with Content-Length: 413; 80,000 bytes chunked (80 lines of 1,000 bytes, so the record limit cannot fire first): 413, with Kestrel logging "Request body too large. The max request body size is 65536 bytes."; a valid feed afterward: 200. Checked.
 
@@ -507,7 +507,7 @@ The original Activity ran the chapter's code (benchmarks, checks, limits); those
 | Rented   |  19.63 ns |   5.884 ns |  0.323 ns |  0.17 |    0.02 |      - |         - |        0.00 |
 ```
 
-2,024 bytes is the array of 1,000 chars plus its object header and length. The new array's wide Error column (three iterations on a shared machine; an earlier run gave 88.72 ns) is why the delta says "several times faster and no allocation", not a ratio. Checked: the build, the six-project Visual Studio rebuild, the tests (6 of 6) and requests.http (9 of 9) as for the checkpoint.
+2,024 bytes is the array of 1,000 chars plus its object header and length. The new array's wide Error column (three iterations on a shared machine; an earlier run gave 88.72 ns) is why the delta says "several times faster and no allocation", not a ratio. Checked: the build, the six-project Visual Studio rebuild, the tests (7 of 7) and requests.http (9 of 9) as for the checkpoint.
 
 The reader-path check rebuilt `AdventureWorks/Chapter17-Activity` from the Chapter 17 checkpoint: no differences.
 The Activity adds 33 lines of code: 33 in 1 new file and 0 new or changed in existing files, plus 2 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
@@ -574,7 +574,7 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbArQE6rGZCQlSVwYblJnswWyQSnLJm2ciERN2Q7nBbQE_0zKeUBjWuvcHLyIhMiUPWQF_5wtDjn_OA9DablBweSWL72gqi6ZX8DQyLzSTxOYoVCzZNBDHXjs9PrBO3X5HAsbWNK5FDQ1XkJGn4PEFJugvcXQyyKB5wTr0If_bDHA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbY1Oi2_VB3GG_1HxFPUVdub7fDObQZt_xZpxlRTzzViespRux80WHzzAPjzDYI-Pvng-ordTok3BJCCpIytuPChIRvisuMxCSuL6wVtwdlQcbL8Ecj7hZQo9Fpvwrb962ar2IwyXPAYnz_A0lAyU8LMcOh1cvVAxVDw0XRgUc-kg"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -586,13 +586,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-553185ce16cc36617222ae8b2631566b-13906240b35fd295-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-9cc9b656124860b53a2431f54b585ba6-c2b828961a10b654-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-00545fa3892bc9d4472be12ea779bd1d-e7fa7ea2ffb63e3d-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-c1f1b4bb61fe182f39e8a10fe7ef81b1-b47cc7438d1eaacc-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -604,13 +604,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZKqGBUBfW6iCPSQnbkPDGmUACrw3RVtLDt41VHG6EEvC1JrFo8V5bbOTsPv2brebqmi1rgHI0Yjome6cFKCL3TGGamQayTJOKtPa3gxMNdyKSMiSIm_to6NA-V0NEwWi79vUQfQGeAE_R191xucFuzTWJzFVDY2kGpLEOrn_CEaA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZRRP8OpTzyQ_8I2Y2xkwqxCmYfqc_ACjF_RXg-UxC8so1oRhvddg3Mh_zQrTMZjINkfkdFRni0lXArHAePKAQ0RA93MTXGdvzjyy5n5i4P9xOC_sVGqZ0mmKc5gn8f-1tm_wbdpfV9VQ-3ysv09NDyWt81B7UV5qxIUKLBi5zk4Q"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-3a856987c8c9cf10bd18b6c281ce0c7e-b8c02aa2e1b88f65-03","correlationId":"3a856987c8c9cf10bd18b6c281ce0c7e"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-2da121ea3eccd4d6711c55fecd1c9d16-58afa673f9809350-03","correlationId":"2da121ea3eccd4d6711c55fecd1c9d16"}
   ```
 
 - `POST /dev/sign-out` returned **204**

@@ -383,23 +383,16 @@ info : Adding PackageReference for package 'Microsoft.Extensions.ApiDescription.
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
 info : Package 'Microsoft.Extensions.ApiDescription.Server' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.Extensions.ApiDescription.Server' version '11.0.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
 (3 more lines)
 ```
 
-In `AdventureWorks/AdventureWorks.csproj`, replace these lines. In the PropertyGroup.
+In `AdventureWorks/AdventureWorks.csproj`, add these lines after the line `<UserSecretsId>`. In the PropertyGroup.
 
 ```xml
-    <UserSecretsId>494dd3b3-31fc-416b-a999-c0ad92a798c5</UserSecretsId>
-```
-
-With these:
-
-```xml
-    <UserSecretsId>494dd3b3-31fc-416b-a999-c0ad92a798c5</UserSecretsId>
     <OpenApiDocumentsDirectory>docs</OpenApiDocumentsDirectory>
 ```
 

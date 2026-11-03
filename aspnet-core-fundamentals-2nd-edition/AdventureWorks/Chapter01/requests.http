@@ -1,0 +1,26 @@
+# Chapter 1 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Each "Expect" line is the status you should see.
+
+@host = https://localhost:7001
+
+###
+# The root redirects to the status endpoint. Expect 302
+GET {{host}}/
+
+###
+# The status endpoint. Expect 200 with "status": "Operational"
+GET {{host}}/api/status
+
+###
+# The health endpoint answers Healthy. Expect 200
+GET {{host}}/health
+
+###
+# Plain HTTP is redirected to HTTPS. Expect 307
+GET http://localhost:5001/api/status
+
+###
+# Nothing is mapped here. Expect 404
+GET {{host}}/missing

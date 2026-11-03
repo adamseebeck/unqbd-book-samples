@@ -499,6 +499,51 @@ ENTRYPOINT ["./AdventureWorks.CatalogFeed"]
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
+## Step 3's startup failure, verified
+
+For the writer's Step 3, run on RC3 in an RC3 copy of this checkpoint (`tools/startup18.py`), as a host would start it: no ASPNETCORE_ENVIRONMENT (so Production), no ASPNETCORE_URLS, InventoryService not running. Port 5000, the default without URLs, was taken by another program on this machine, so both runs add `--urls http://localhost:5085`; without it the app listens on http://localhost:5000.
+
+1. `dotnet publish AdventureWorks -c Release -o publish` from the working folder: exit 0. The folder holds AdventureWorks.dll and .exe, their .pdb, deps.json and runtimeconfig.json, AdventureWorks.Core.dll and AdventureWorks.Infrastructure.dll, appsettings.json and appsettings.Development.json, web.config, AdventureWorks.staticwebassets.endpoints.json and wwwroot.
+2. `dotnet publish/AdventureWorks.dll --urls http://localhost:5085` from the working folder stops at once with exit code 3762504530 (0xE0434352, the code Windows gives an unhandled .NET exception; -532462766 as a signed number). The log, with the stack trace cut after its first three frames and the user folder name replaced by <user>:
+
+```text
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[63]
+      User profile is available. Using 'C:\Users\<user>\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+fail: Microsoft.Extensions.Hosting.Internal.Host[11]
+      Hosting failed to start
+      Microsoft.Extensions.Options.OptionsValidationException: DataAnnotation validation failed for 'FeatureFlags' members: 'MaxCartItems' with the error: 'The field MaxCartItems must be between 1 and 100.'.; DataAnnotation validation failed for 'FeatureFlags' members: 'AllowedRegions' with the error: 'The field AllowedRegions must be a string or array type with a minimum length of '1'.'.
+         at Microsoft.Extensions.Options.OptionsFactory`1.ThrowIfValidationFailed(String name, List`1 failures)
+         at Microsoft.Extensions.Options.OptionsFactory`1.CreateAsync(String name, CancellationToken cancellationToken)
+         at Microsoft.Extensions.DependencyInjection.OptionsBuilderExtensions.<>c__DisplayClass0_1`1.<<ValidateOnStart>b__4>d.MoveNext()
+```
+
+   The first line is an info line from Data Protection, not the failure; the first `fail:` line is. The message names two members, not one: MaxCartItems (0, outside 1 to 100) and AllowedRegions (empty; Chapter 2's [MinLength(1)]). Both come from appsettings.json, which was not read: the content root was the working folder.
+3. `dotnet publish/AdventureWorks.dll --contentRoot . --urls http://localhost:5085` starts. A relative content root is resolved against the DLL's folder, and the log prints the path with the dot kept:
+
+```text
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5085
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\unQbd-Repos\Book-Production\Full-Fixes-aspnet2\work\startup18\publish\.
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+```
+
+   `/health/live` answered 200 "Healthy"; `/health/ready` answered 503 "Unhealthy", and the log names both checks:
+
+```text
+fail: Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService[103]
+      Health check database with status Unhealthy completed after 762.7072ms with message '(null)'
+warn: Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService[103]
+      Health check inventory with status Degraded completed after 1022.729ms with message 'Inventory did not answer within a second.'
+```
+
+   The database check is Unhealthy because publish has no adventureworks.db (Production migrates nothing; the check does not create the file: none existed afterward). The inventory check is Degraded because InventoryService was not running (on Windows the refused connection outlasts the one-second timeout, Chapter 16). The overall status is the worst one, Unhealthy. If the chapter quotes only the database line, say that the inventory line appears too unless InventoryService runs.
+
 ## The store app and Native AOT
 
 The store cannot be compiled ahead of time, and the build says why. From the working folder, on RC3:

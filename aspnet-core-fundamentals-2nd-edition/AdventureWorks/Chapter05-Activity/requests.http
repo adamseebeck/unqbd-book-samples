@@ -1,0 +1,203 @@
+# Chapter 5 Activity. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Send the requests in order: the in-memory store starts with
+# the four catalog products, ids 1 to 4. Restart the app to start
+# over.
+# Each "Expect" line is the status you should see.
+
+@host = https://localhost:7001
+
+###
+# The v1 controller lists the catalog.
+# Expect 200 with "sku": "HLM-1001"
+GET {{host}}/api/v1/products
+
+###
+# Create a product through v1, the controller version.
+# Expect 201 with "id": 5 and a Location header
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+
+###
+# The same singleton store serves v2.
+# Expect 200 with "sku": "BTL-5001"
+GET {{host}}/api/v2/products/5
+
+###
+# And Chapter 4's catalog, too. Expect 200 with "sku": "BTL-5001"
+GET {{host}}/api/catalog/5
+
+###
+# Create a product through v2, the Minimal API version.
+# Expect 201 with "id": 6
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Camp Mug", "sku": "MUG-6001",
+  "price": 12.50, "category": "camping" }
+
+###
+# Search by name through v1. Expect 200 with "sku": "MUG-6001"
+GET {{host}}/api/v1/products?q=mug
+
+###
+# Update through v1. Expect 204
+PUT {{host}}/api/v1/products/5
+Content-Type: application/json
+
+{ "name": "Trail Bottle XL", "price": 27.99 }
+
+###
+# Update through v2. Expect 204
+PUT {{host}}/api/v2/products/6
+Content-Type: application/json
+
+{ "name": "Camp Mug Large", "price": 14.00 }
+
+###
+# Each update raises the version. Expect 200 with "version": 2
+GET {{host}}/api/v2/products/5
+
+###
+# A name shorter than 3 characters fails in v1. Expect 400
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "AB", "sku": "ABC-0003",
+  "price": 5, "category": "camping" }
+
+###
+# A zero price fails in v2. Expect 400
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Free Sample", "sku": "FRE-0004",
+  "price": 0, "category": "camping" }
+
+###
+# A lowercase SKU fails the pattern in v1. Expect 400
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "Lantern", "sku": "lan-0005",
+  "price": 30, "category": "camping" }
+
+###
+# The same lowercase SKU fails in v2. Expect 400
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Lantern", "sku": "lan-0005",
+  "price": 30, "category": "camping" }
+
+###
+# The object-level rule rejects an unknown category in v1.
+# Expect 400 with "Unknown category."
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "Kayak", "sku": "KYK-0006",
+  "price": 450, "category": "boats" }
+
+###
+# The same rule in v2. Expect 400
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Kayak", "sku": "KYK-0006",
+  "price": 450, "category": "boats" }
+
+###
+# Nothing invalid was stored: ids 1 to 6 only. Expect 200
+GET {{host}}/api/v2/products
+
+###
+# Paging outside the allowed range in v2. Expect 400
+GET {{host}}/api/v2/products?page=0
+
+###
+# The same bound in v1, from the Range attribute. Expect 400
+GET {{host}}/api/v1/products?pageSize=500
+
+###
+# Updating a product that does not exist. Expect 404
+PUT {{host}}/api/v1/products/99
+Content-Type: application/json
+
+{ "name": "Ghost", "price": 1 }
+
+###
+# Delete through v1. Expect 204
+DELETE {{host}}/api/v1/products/5
+
+###
+# Gone from v2 as well. Expect 404
+GET {{host}}/api/v2/products/5
+
+###
+# Delete through v2. Expect 204
+DELETE {{host}}/api/v2/products/6
+
+###
+# Deleting again finds nothing. Expect 404
+DELETE {{host}}/api/v2/products/6
+
+###
+# Route, query and header binding (Development only).
+# Expect 200 with {"id":7,"q":"tent","version":"2"}
+GET {{host}}/examples/binding/7?q=tent
+X-Api-Version: 2
+
+###
+# The header value is required. Expect 400
+GET {{host}}/examples/binding/7?q=tent
+
+###
+# The OpenAPI document lists both versions. Expect 200
+GET {{host}}/openapi/v1.json
+
+###
+# Earlier chapters' routes still answer. Expect 200
+GET {{host}}/api/catalog/category/camping
+
+###
+# Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/1
+
+###
+# Expect 200
+GET {{host}}/ping
+
+###
+# The Activity's quote group: the server prices 2 helmets.
+# Expect 201 with "total": 59.98 and a Location header
+POST {{host}}/api/quotes
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 2 }
+
+###
+# Following the Location. Expect 200 with "quantity": 2
+GET {{host}}/api/quotes/1
+
+###
+# A quantity over 20 fails the validation filter. Expect 400
+POST {{host}}/api/quotes
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 50 }
+
+###
+# An unknown product is a validation problem too. Expect 400
+POST {{host}}/api/quotes
+Content-Type: application/json
+
+{ "productId": 99, "quantity": 1 }
+
+###
+# No quote 2 was stored. Expect 404
+GET {{host}}/api/quotes/2

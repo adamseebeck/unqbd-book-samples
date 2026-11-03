@@ -1,0 +1,6 @@
+/* A public static file. Uploads never go under wwwroot. */
+body { font-family: system-ui, sans-serif; margin: 2rem; }
+header { margin-bottom: 1rem; }
+label { display: block; margin-top: 0.5rem; }
+.field-validation-error,
+.validation-summary-errors { color: #b00020; }

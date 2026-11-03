@@ -2,7 +2,7 @@
 
 One AdventureWorks outdoor-gear store app that grows through the book. The reader creates it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own.
 
-This folder currently holds Chapters 1 to 11. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder currently holds Chapters 1 to 12. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
 
 ## Folders
 
@@ -12,7 +12,7 @@ This folder currently holds Chapters 1 to 11. The `Chapter01` to `Chapter18` fol
 | `ChapterNN-Activity` | A copy of that checkpoint plus a worked solution to the chapter's Activity. The next chapter does not start from it. |
 | `notes/ChapterNN-delta.md` | For the book's writers: every file and line the chapter adds or changes, in order, with the commands, their output and the real responses. |
 
-Each checkpoint folder is the reader's working folder: it holds `global.json` and, from Chapter 2, `AdventureWorks.slnx` with three projects:
+Each checkpoint folder is the reader's working folder: it holds `global.json` and, from Chapter 2, `AdventureWorks.slnx` with three projects (from Chapter 12 also `InventoryService`, a companion tool project that stands in for the warehouse's stock service):
 
 | Project | Holds |
 | --- | --- |
@@ -47,3 +47,4 @@ Every checkpoint has a `requests.http` file with each request and the status you
 | 9 | Authorization: a fallback policy with every public endpoint marked, Admin, age, department and resource-based order policies, order delete and archive, the X-CSRF-TOKEN header |
 | 10 | EF Core: the store's tables in the same SQLite database, migrations (dotnet-ef pinned in dotnet-tools.json), EF Core implementations behind the same interfaces, prices in cents, the order report, a version-checked notes update and a transactional stock transfer. The Activity runs it on SQL Server LocalDB |
 | 11 | An application service for placing and cancelling orders (server-side prices, owner from the sign-in), narrow repositories, one unit of work, a logging decorator, and scope validation in every environment |
+| 12 | Output caching of the anonymous catalog with tag eviction on every product write, a partitioned rate limit on search, compression for the public catalog only, and warehouse stock from the InventoryService tool project through a resilient, cached HttpClient |

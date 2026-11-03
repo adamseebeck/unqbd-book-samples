@@ -39,7 +39,7 @@ Chapter 10 moves the store from memory into the SQLite database Chapter 8 create
 | (command) `dotnet add package Microsoft.EntityFrameworkCore.Design@11.0.0` | creates or edits project files |
 | (command) `dotnet ef migrations add InitialCreate -s ..\AdventureWorks` | generates the migration files in `AdventureWorks.Infrastructure/Migrations` |
 
-The reader types 817 lines of code: 564 in 9 new files and 253 new or changed in existing files, plus 7 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 821 lines of code: 566 in 9 new files and 255 new or changed in existing files, plus 7 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -89,7 +89,7 @@ info : Adding PackageReference for package 'Microsoft.EntityFrameworkCore.Design
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'Microsoft.EntityFrameworkCore.Design' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.EntityFrameworkCore.Design' version '11.0.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
@@ -382,13 +382,13 @@ It prints:
 Build started...
 Build succeeded.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (30ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (36ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       PRAGMA journal_mode = 'wal';
 info: Microsoft.EntityFrameworkCore.Migrations[20411]
       Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
 Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
 (208 more lines)
 ```
 
@@ -666,9 +666,9 @@ public interface IOrderRepository
 
 UpdateNotesAsync loads the order, then sets the Version's original value to the one the client sent. EF Core puts the original value in the UPDATE's WHERE clause, so if anyone saved the order after the client read it, no row matches and SaveChangesAsync throws DbUpdateConcurrencyException. Archive and delete are single statements. Order 500 still throws Chapter 3's simulated failure.
 
-Create `AdventureWorks.Infrastructure/Data/EfOrderRepository.cs` (88 lines).
+Create `AdventureWorks.Infrastructure/Data/EfOrderRepository.cs` (90 lines).
 
-EfOrderRepository.cs, part 1 of 3 (20 lines):
+EfOrderRepository.cs, part 1 of 4 (20 lines):
 
 ```csharp
 using AdventureWorks.Core;
@@ -693,7 +693,7 @@ public sealed class EfOrderRepository(AdventureWorksDbContext db)
     }
 ```
 
-EfOrderRepository.cs, part 2 of 3 (40 lines):
+EfOrderRepository.cs, part 2 of 4 (19 lines):
 
 ```csharp
     // One bounded page, newest first. SQL sums the cents.
@@ -715,7 +715,11 @@ EfOrderRepository.cs, part 2 of 3 (40 lines):
             r.OrderNumber, Money.FromCents(r.Cents), r.Status,
             r.Archived))];
     }
+```
 
+EfOrderRepository.cs, part 3 of 4 (22 lines):
+
+```csharp
     public async Task<UpdateOutcome> UpdateNotesAsync(
         int id, string? notes, Guid version)
     {
@@ -733,12 +737,14 @@ EfOrderRepository.cs, part 2 of 3 (40 lines):
         }
         catch (DbUpdateConcurrencyException)
         {
-            return UpdateOutcome.Conflict;
+            // No row matched: the order changed, or was deleted.
+            return await db.Orders.AnyAsync(o => o.Id == id)
+                ? UpdateOutcome.Conflict : UpdateOutcome.NotFound;
         }
     }
 ```
 
-EfOrderRepository.cs, part 3 of 3 (26 lines):
+EfOrderRepository.cs, part 4 of 4 (26 lines):
 
 ```csharp
     // ExecuteUpdate bypasses SaveChanges, so it sets the new
@@ -877,8 +883,10 @@ In `AdventureWorks/OrderEndpoints.cs`, add the following below `static async Tas
             id, input.Notes, input.Version);
         return outcome switch
         {
+            // Null: deleted after the update, before this read.
             UpdateOutcome.Updated =>
-                Results.Ok(await orders.GetByIdAsync(id)),
+                await orders.GetByIdAsync(id) is { } saved
+                    ? Results.Ok(saved) : Results.NotFound(),
             UpdateOutcome.Conflict => Results.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "The order has changed",
@@ -1418,7 +1426,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"bd62f6ad-0df6-4748-bca6-b568bf1aaabb","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"d2027c1a-20d2-46c3-843d-01ac88b5b3da","items":[{"productId":2,"qu...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"61811963-4d1b-4e0f-808e-9db3fa96d34a","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"ed3fcc5e-0130-4399-bb5b-5e1e3d093aff","items":[{"productId":2,"qu...
   ```
 
 - `GET /api/orders/report` returned **200**
@@ -1436,43 +1444,43 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/report?page=0` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"page":["The field page must be between 1 and 1000."]},"traceId":"00-c7d716c6fc16b73ba...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"page":["The field page must be between 1 and 1000."]},"traceId":"00-e587a7f6bec79ca37...
   ```
 
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYvxRU5Pc7H9CQsqyWmM8iPOIsSGhFrAJCPt6LhaJn9_DgOi3RYyq-IdKeM1tryDuu6SqyZ-Ty6Ml-CIp8q61SQ4AGe7tjQ6XaFkla-yNEbPiGqcNZg9ygDDpvlNVe3pCWQxhNOrADtHaDG_8v66_GYhMCZ60fBr2UhpFFOKc3TJg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZzH9TAzUA_LdoABhtjbv4a5JBlA5yJCu-zBK7z020g9FW7SypU6XNEN4PcwQFA0ONdovWTEFQaRwGG08oYnk3eFNQuTDc9YToc5ZXdUsfog6-wSB0KjvCgmFKTU9U-jmbFhKph_0JKtH_BYJ-p_3bE4kBFCFWN9FxBvEQfZUF9XA"}
   ```
 
 - `PUT /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"bd62f6ad-0df6-4748-bca6-b568bf1aaabb","total":49.99,"status":"Pending","archived":false,"notes":"Leave it at the side door.","version":"c0129c2c-a911-42c3-875f-fc96e1889d32","it...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"61811963-4d1b-4e0f-808e-9db3fa96d34a","total":49.99,"status":"Pending","archived":false,"notes":"Leave it at the side door.","version":"352c5f0e-4e18-4110-8c8e-ef17bc919415","it...
   ```
 
 - `PUT /api/orders/1` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"The order has changed","status":409,"detail":"Read the order again and send its current version.","traceId":"00-c21b1f4e2f67c67e06d7914f67a5f140-f62a...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"The order has changed","status":409,"detail":"Read the order again and send its current version.","traceId":"00-15d410e6426aa68ab3805524c5e2f046-457b...
   ```
 
 - `PUT /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"bd62f6ad-0df6-4748-bca6-b568bf1aaabb","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"3bbce45f-c17b-4dbc-95ac-4b7e2e2d6c7d","items":[{"productId":2,"qu...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"61811963-4d1b-4e0f-808e-9db3fa96d34a","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"3e60ace9-41dd-4680-bcca-0632c5f21599","items":[{"productId":2,"qu...
   ```
 
 - `PUT /api/orders/2` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-2302e241afd1692d858d98119cc99e38-594961694a21d519-02","correlationId":"f971d5df273e4993a97240d66a52db92"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-50f3109c8a1fd495269fc4d591273733-b0a4dbe25c2ba83c-02","correlationId":"62bd443e66f44b50816a34674751efb7"}
   ```
 
 - `GET /api/admin/inventory/1` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-e139f9f13c000ef96e62a5aae32c1d7b-92ee7caa9c6f6439-02","correlationId":"63cbd6ed150d486bb2452f695b57d1b4"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-1e8b35709334ad54f00b085d45c5fd64-0f585000cc0e338c-02","correlationId":"aae26b69b7cf4f89ba8b8ae476c88b4c"}
   ```
 
 - `POST /dev/sign-in/avery` returned **200**
@@ -1484,7 +1492,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZ58IEVjy_FR_dtuNLqBByeHDUQk35yFSXY_YWtzLitLWvT-eXbnY1Aw_y6N55aP4lC477SxHnPw5a7kVfQjxI6M9Ap_wjQOl3SHvdA0hwjHrOH_vpD3R2_paGbke-RO2K4D455RrB6TrVYs4zcBiQTmG2ZUXd9BrB5NOb0bhGeiQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYqsAwVWhLp_bn9g-cP27voEz2z7jOAQ4rEeW7Hg1yDoy9rX0eRF7L_nZP3cvR9bkJ9Vf52LyRz2qMS9rpiQWvEhzZIONV4v9_lqhRV5kPJtBSPs5DDMUYexBUaoRCwbJMom5b3DcEUSob3q3Mwt_Vt3ZUIV7B1wnkOXkeSs0onzg"}
   ```
 
 - `GET /api/admin/inventory/1` returned **200**
@@ -1502,7 +1510,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/inventory/transfer` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Not enough stock","status":409,"detail":"Overflow has fewer than 50.","traceId":"00-a5531bc4176f10dca23e8431fa4a1f82-b0a1b96bd272331f-02","correlatio...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Not enough stock","status":409,"detail":"Overflow has fewer than 50.","traceId":"00-930eb9ec9691123d35072e536ef41930-f41b319d299f2ec4-02","correlatio...
   ```
 
 - `GET /api/admin/inventory/1` returned **200**
@@ -1520,13 +1528,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/inventory/transfer` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"To":["Use two different locations."]},"traceId":"00-532cca48fa9250ba7cadedc1cb5c5562-...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"To":["Use two different locations."]},"traceId":"00-d0e37f0927c6ed36c32112f8937f0c7f-...
   ```
 
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-b1c8f78b48d416a1effce56b3e243372-7add703610c602f5-02","...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-ea24f2938428b105472811adb62b58e6-d0f9554bfecef215-02","...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/5)
@@ -1540,7 +1548,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `DELETE /api/v2/products/1` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-bbf853e2b8a2d36d78219269f0c473db-564b9e9efdedfea4-02","cor...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-f28bcb93a3d63f997bbc8f1dd74d41a6-e7b17d913514736a-02","cor...
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -1610,7 +1618,7 @@ The template "Class Library" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.SqlServerMigrations\AdventureWorks.SqlServerMigrations.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.SqlServerMigrations\AdventureWorks.SqlServerMigrations.csproj (in 106 ms).
+  Restored AdventureWorks.SqlServerMigrations\AdventureWorks.SqlServerMigrations.csproj (in 87 ms).
 Restore succeeded.
 ```
 
@@ -1667,7 +1675,7 @@ info : Adding PackageReference for package 'Microsoft.EntityFrameworkCore.SqlSer
 info : Restoring packages for AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 warn : NU1902: Package 'System.Security.Cryptography.Pkcs' 9.0.18 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2fmv-rv2c-59x7
 warn : NU1903: Package 'System.Security.Cryptography.Pkcs' 9.0.18 has a known high severity vulnerability, https://github.com/advisories/GHSA-846f-f764-76mx
 info : Package 'Microsoft.EntityFrameworkCore.SqlServer' is compatible with all the specified frameworks in project 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
@@ -1691,7 +1699,7 @@ info : Adding PackageReference for package 'System.Security.Cryptography.Pkcs' i
 info : Restoring packages for AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'System.Security.Cryptography.Pkcs' is compatible with all the specified frameworks in project 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : PackageReference for package 'System.Security.Cryptography.Pkcs' version '11.0.0' added to file 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : Writing assets file to disk. Path: AdventureWorks.Infrastructure\obj\project.assets.json
@@ -1939,7 +1947,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-d7ec693dcf9edc242f85ae780bf1373f-f6ea9d49ed8581a9-02","...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-2f2d378ca1f18843afad8dc05b2efe94-9a1563a8b46faf67-02","...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/6)
@@ -1953,7 +1961,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - `DELETE /api/v2/products/1` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-432670eacb7f11141e0c6207bcc0c2d3-057476a28465f101-02","cor...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-78cf1271e6f2e855439a44cdccd40e60-c3b77826edd0c88d-02","cor...
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -1984,6 +1992,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - Accuracy 10.2: nothing here uses lazy loading. GetByIdAsync loads the items with Include; the report is a projection, so SQL computes only the columns it returns.
 - SQLite reports a delete refused by ON DELETE RESTRICT as SQLITE_CONSTRAINT_TRIGGER (1811), not SQLITE_CONSTRAINT_FOREIGNKEY (787, which NO ACTION gives). Checked with the app (the 400) and with SQLite directly.
 - SQLite ignores HasMaxLength (TEXT has no length); the API's validation enforces the lengths, and SQL Server enforces them in the Activity (nvarchar(8) for Sku).
+- Review 11-P10, from Chapter 10 on: the PUT notes update answers 404 when the order is deleted part-way through. Deleted after the endpoint's load, before UpdateNotesAsync's FindAsync: NotFound (as before). Deleted between FindAsync and the save: the UPDATE matches no row, so the catch asks the database whether the order still exists (AnyAsync): gone is NotFound, 404; present with another version stays Conflict, 409. Deleted after the save, before the endpoint reads the order back: 404 instead of 200 with an empty body. The same two blocks carry on unchanged into Chapters 11 and 12. Checked with the scratch delete-race probe (tools/scenarios/DeleteRaceProbe.cs and ch10-delete-race.http; X-Delete-At stage, save or reread on casey's orders 10, 11 and 12): all three PUTs answered 404 with the probe's X-Probe-Deleted header, each order then read 404, and a PUT without the header answered 200: 13 of 13 on SQLite, and 13 of 13 in the Activity on SQL Server LocalDB. The same code before the fix (it was unchanged in Chapter 11 until then) answered 404, 409, and 200 with an empty body.
 - Review P13: StockTransfer's Validate rule now has a request. A transfer from Main to Main answers 400 before the endpoint runs, with `"errors":{"To":["Use two different locations."]}` (Chapter 7's AddValidation runs the type's Validate method), on SQLite and on SQL Server.
 - EF Core logs each SQL command at Information, so the Development console shows them, and it logs a failed SaveChanges at Error ("An exception occurred in the database while saving changes") even when the code catches the exception and answers 400 or 409. Expect those entries after the constraint requests.
 - Program.cs is 77 lines.

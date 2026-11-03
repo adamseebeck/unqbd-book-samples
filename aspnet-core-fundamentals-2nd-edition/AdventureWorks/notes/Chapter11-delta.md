@@ -8,7 +8,7 @@ Chapter 11 puts order placement and cancellation behind an application service i
 
 - Core `OrderContracts.cs`: OrderStatus, `CreateOrderRequest` (1 to 20 `OrderLineRequest` lines of ProductId and Quantity 1 to 20; no owner, no price), NewOrder, OrderOutcome, OrderResult, `IOrderService` (CreateAsync, CancelAsync), the narrow `IOrderWriter` (stages only) and `IUnitOfWork` (one save), and three Core exceptions for the expected database failures (a duplicate number, a changed order, an order deleted since it was read). IProductService gains GetByIdsAsync; IOrderRepository gains GetByNumberAsync.
 - Core `OrderService.cs`: the rules: one line per product, every product sold, prices from the catalog, the next order number, ownership and the version check on cancel. It depends only on Core interfaces, so Chapter 15 can unit-test it.
-- Infrastructure: `EfOrderWriter` (stages a new order or a status change in the request's DbContext), `EfUnitOfWork` (one SaveChangesAsync; translates DbUpdateConcurrencyException into OrderDeletedException when the row is gone and OrderChangedException when it exists with another version, and the unique-index violation on Orders.OrderNumber into OrderNumberConflictException, and lets anything else through), and the two new query methods. Chapter 10's self-saving notes update (PUT) tells a deleted order from a changed one the same way.
+- Infrastructure: `EfOrderWriter` (stages a new order or a status change in the request's DbContext), `EfUnitOfWork` (one SaveChangesAsync; translates DbUpdateConcurrencyException into OrderDeletedException when the row is gone and OrderChangedException when it exists with another version, and the unique-index violation on Orders.OrderNumber into OrderNumberConflictException, and lets anything else through), and the two new query methods. Chapter 10's self-saving notes update (PUT) already tells a deleted order from a changed one (Chapter 10, review 11-P10), so this chapter does not change it.
 - Web: `LoggingOrderService`, a decorator registered by hand with a factory; AddOrderServices registers the writer, the unit of work, the service and the decorator, all scoped; `POST /api/orders` (201 with a Location) and `POST /api/orders/{id}/cancel` (Chapter 9's owner rule, then the service); Program.cs turns on ValidateScopes and ValidateOnBuild in every environment: 80 lines.
 
 ## Files added or changed
@@ -27,7 +27,7 @@ Chapter 11 puts order placement and cancellation behind an application service i
 | `AdventureWorks/OrderEndpoints.cs` | changed |
 | `AdventureWorks/Program.cs` | changed |
 
-The reader types 424 lines of code: 259 in 5 new files and 165 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 371 lines of code: 259 in 5 new files and 112 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -356,33 +356,6 @@ In `AdventureWorks.Infrastructure/Data/EfOrderRepository.cs`, add the following 
     }
 ```
 
-In `AdventureWorks.Infrastructure/Data/EfOrderRepository.cs`, replace the UpdateNotesAsync method with the following. Chapter 10's notes update gets the same rule: when the UPDATE matches no row, the order was either changed (409) or deleted since FindAsync (404).
-
-```csharp
-    public async Task<UpdateOutcome> UpdateNotesAsync(
-        int id, string? notes, Guid version)
-    {
-        var row = await db.Orders.FindAsync(id);
-        if (row is null) return UpdateOutcome.NotFound;
-        // Compare with the version the client read, not the one
-        // just loaded: the UPDATE runs WHERE Version = version.
-        db.Entry(row).Property(o => o.Version).OriginalValue =
-            version;
-        row.Notes = notes;
-        try
-        {
-            await db.SaveChangesAsync();
-            return UpdateOutcome.Updated;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            // No row matched: the order changed, or was deleted.
-            return await db.Orders.AnyAsync(o => o.Id == id)
-                ? UpdateOutcome.Conflict : UpdateOutcome.NotFound;
-        }
-    }
-```
-
 ### Step 4: A logging decorator, registered by hand
 
 A decorator implements the same interface and wraps the real service, so logging (or metrics, or caching) is added without touching the rules. The built-in container has no decorator method, and none is needed: register the concrete OrderService, then register IOrderService with a factory that wraps it. Everything is scoped, because everything below it uses the scoped DbContext.
@@ -542,42 +515,6 @@ In `AdventureWorks/OrderEndpoints.cs`, add the following below `static async Tas
             _ => Results.Problem(result.Error,
                 statusCode: StatusCodes.Status400BadRequest)
         };
-```
-
-In `AdventureWorks/OrderEndpoints.cs`, replace the UpdateNotes method with the following. The read-back after the update can find nothing, when the order was deleted in between: 404, not 200 with an empty body.
-
-```csharp
-    // The client sends back the Version it read. If the order has
-    // changed since, the update changes nothing: 409.
-    static async Task<IResult> UpdateNotes(int id,
-        OrderNotesInput input, IOrderRepository orders,
-        IAuthorizationService authorization,
-        ClaimsPrincipal user, HttpContext context,
-        IAntiforgery antiforgery)
-    {
-        if (!await HasValidTokenAsync(context, antiforgery))
-            return Results.BadRequest();
-        var order = await orders.GetByIdAsync(id);
-        if (order is null) return Results.NotFound();
-        var owner = await authorization.AuthorizeAsync(
-            user, order, StorePolicies.OrderOwner);
-        if (!owner.Succeeded) return Results.Forbid();
-        var outcome = await orders.UpdateNotesAsync(
-            id, input.Notes, input.Version);
-        return outcome switch
-        {
-            // Null: deleted after the update, before this read.
-            UpdateOutcome.Updated =>
-                await orders.GetByIdAsync(id) is { } saved
-                    ? Results.Ok(saved) : Results.NotFound(),
-            UpdateOutcome.Conflict => Results.Problem(
-                statusCode: StatusCodes.Status409Conflict,
-                title: "The order has changed",
-                detail: "Read the order again and send its "
-                    + "current version."),
-            _ => Results.NotFound()
-        };
-    }
 ```
 
 ### Step 6: Validate lifetimes in every environment
@@ -1015,7 +952,7 @@ app.MapOrderAudit();
 - After a save, the service reads the new order back by its number to return it with its ID and Location: one extra query, and no EF Core type leaks into Core.
 - Departure: the design lists GET for the service; this chapter's service has CreateAsync and CancelAsync, and GET /api/orders/{id} keeps Chapter 9's resource-based rule. Chapter 13 adds the owner's list.
 - Cancel loads the order, applies Chapter 9's OrderOwner policy (403 for jordan), then calls the service, which checks the owner again and stages the status with the version it read.
-- Review 11-P10, an order deleted part-way through a write: every write now answers 404 at each point. Deleted after the load, before staging: SetStatusAsync (and Chapter 10's notes update) finds no row, NotFound. Deleted after staging, before the save: the UPDATE matches no row, and EfUnitOfWork asks the database for the row's current values (GetDatabaseValuesAsync); none means OrderDeletedException, NotFound, while a row with another version stays OrderChangedException, 409. Deleted after the save, before the read-back: OrderService.Saved turns the missing order into NotFound instead of an outcome with no order; the PUT endpoint does the same for its read-back. Before the fix the same runs gave a 409 instead of 404, 200 with an empty body (PUT and cancel), and a 500 (NullReferenceException) for a create whose order was deleted before the read-back.
+- Review 11-P10, an order deleted part-way through a write: every write now answers 404 at each point. Deleted after the load, before staging: SetStatusAsync (and Chapter 10's notes update) finds no row, NotFound. Deleted after staging, before the save: the UPDATE matches no row, and EfUnitOfWork asks the database for the row's current values (GetDatabaseValuesAsync); none means OrderDeletedException, NotFound, while a row with another version stays OrderChangedException, 409. Deleted after the save, before the read-back: OrderService.Saved turns the missing order into NotFound instead of an outcome with no order. Chapter 10's PUT notes path has had the same rule since Chapter 10. Before the fix the same runs gave a 409 instead of 404, 200 with an empty body (PUT and cancel), and a 500 (NullReferenceException) for a create whose order was deleted before the read-back.
 - AddValidation validates the nested lines: a zero quantity returns 400 with the key `Items[0].Quantity`; an empty list returns 400 for `Items`.
 - The decorator needs no package: register OrderService, then IOrderService with a factory that wraps it.
 - Program.cs is 80 lines.

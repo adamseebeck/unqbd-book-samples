@@ -1,0 +1,142 @@
+# Chapter 7 Activity. Start both apps first, each in its own
+# terminal:
+#   dotnet run --project AdventureWorks
+#   dotnet run --project HeaderOnlyForms
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Each "Expect" line is the status you should see. The order form
+# needs its antiforgery token, so submit it in the browser at
+# https://localhost:7001/Orders/Create or with the README's
+# PowerShell section.
+
+@host = https://localhost:7001
+@forms = http://localhost:5107
+
+###
+# An available SKU and a quantity in range.
+# Expect 200 with {"sku":"HLM-1001","quantity":2}
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "HLM-1001", "quantity": 2 }
+
+###
+# A well-formed SKU the catalog does not have: the asynchronous
+# check rejects it. Expect 400 with "Sku is unavailable"
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "PEN-2020", "quantity": 1 }
+
+###
+# Not the AAA-9999 pattern. Expect 400
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "NOTEBOOK-101", "quantity": 1 }
+
+###
+# Quantity above 20. Expect 400
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "sku": "HLM-1001", "quantity": 25 }
+
+###
+# A missing SKU fails Required. Expect 400
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+
+{ "quantity": 1 }
+
+###
+# AddValidation now validates Chapter 5's v2 products as well.
+# Expect 400 with "errors":
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Kayak", "sku": "KYK-0006",
+  "price": 450, "category": "boats" }
+
+###
+# A French request formats the range numbers the French way.
+# Expect 400 with "0,01"
+POST {{host}}/api/v2/products
+Content-Type: application/json
+Accept-Language: fr
+
+{ "name": "Free Sample", "sku": "FRE-0004",
+  "price": 0, "category": "camping" }
+
+###
+# A valid v2 product still saves. Expect 201
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+
+###
+# The order form page. Expect 200
+GET {{host}}/Orders/Create
+
+###
+# A form POST without the antiforgery token. Expect 400
+POST {{host}}/Orders/Create
+Content-Type: application/x-www-form-urlencoded
+
+Input.ProductId=1&Input.Quantity=2&Input.Email=ada@example.com
+
+###
+# The public stylesheet is a static file. Expect 200
+GET {{host}}/css/site.css
+
+###
+# Uploads are stored outside wwwroot, so no URL serves them.
+# Expect 404
+GET {{host}}/PrivateUploads/example.bin
+
+###
+# Earlier chapters' routes still answer. Expect 200
+GET {{host}}/api/catalog/1
+
+###
+# Expect 200
+GET {{host}}/Products
+
+###
+# The header-only host: a same-origin form post. Expect 200
+POST {{forms}}/newsletter
+Content-Type: application/x-www-form-urlencoded
+Sec-Fetch-Site: same-origin
+
+email=ada@example.com
+
+###
+# An untrusted cross-site form post is rejected by the header
+# check alone. Expect 400
+POST {{forms}}/newsletter
+Content-Type: application/x-www-form-urlencoded
+Sec-Fetch-Site: cross-site
+Origin: https://evil.example
+
+email=ada@example.com
+
+###
+# The store's origin is a trusted credentialed CORS origin, so the
+# same cross-site post is accepted. Expect 200
+POST {{forms}}/newsletter
+Content-Type: application/x-www-form-urlencoded
+Sec-Fetch-Site: cross-site
+Origin: https://localhost:7001
+
+email=ada@example.com
+
+###
+# The form defense does not reject JSON by itself: cross-site
+# metadata on the store's JSON route. Expect 200
+POST {{host}}/api/orders/validate
+Content-Type: application/json
+Sec-Fetch-Site: cross-site
+Origin: https://evil.example
+
+{ "sku": "HLM-1001", "quantity": 1 }

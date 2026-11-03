@@ -7,11 +7,15 @@ You can read and copy any file here in your browser. To run the projects, clone 
 ## What you need
 
 - The .NET 11 SDK, version 11.0.100 or later, from the [.NET 11 download page](https://dotnet.microsoft.com/download/dotnet/11.0). The `global.json` file in this folder selects it for every project below it and accepts later .NET 11 SDKs.
-- Visual Studio 2026 with the ASP.NET and web development workload, or Visual Studio Code with C# Dev Kit. Every step also works from the command line.
+- On Windows, Visual Studio 2026 with the ASP.NET and web development workload, which the book's steps use. On Windows, macOS or Linux, Visual Studio Code with C# Dev Kit and the .NET CLI work as well; the book gives that way next to each Visual Studio step.
 - Projects target `net11.0` and list exact package versions. Packages that ship with each .NET release, such as ASP.NET Core and Entity Framework Core, use 11.0.0; other libraries follow their own version numbers, including Microsoft ones such as Microsoft.Extensions.Http.Resilience, the test SDK and the Azure libraries.
 - Some later chapters need more: SQL Server Express LocalDB 2022 on Windows (or a SQL Server 2022 container) for the data chapters, Docker with Linux containers for the deployment chapter, and the `dotnet user-jwts` tool, which ships with the SDK, for the security chapters. The chapter tells you when.
 
 ## Run a chapter
+
+In Visual Studio, choose File > Open > Project/Solution and open the chapter's project file, such as `Chapter01/WarehouseApi/WarehouseApi.csproj`. Select the `http` profile in the toolbar's start button and press Ctrl+F5 (Debug > Start Without Debugging); the console window shows the address, `http://localhost:5080`. Press F5 instead to run it with the debugger.
+
+With Visual Studio Code or the command line:
 
 ```shell
 cd Chapter01/WarehouseApi
@@ -21,7 +25,7 @@ dotnet run
 
 `dotnet --version` should print 11.0.100 or a later 11.0 version. `dotnet run` uses the project's `http` launch profile, which sets the Development environment and listens on `http://localhost:5080`. Stop the app with Ctrl+C. To use another port, run `dotnet run --urls http://localhost:5199`.
 
-Each project folder has an `.http` file with the chapter's requests. Visual Studio 2026 runs it directly; in Visual Studio Code, use an extension that runs `.http` files, such as REST Client. You can also use curl:
+Each project folder has an `.http` file with the chapter's requests. In Visual Studio, open it and select Send request above a request; the response opens in a pane beside the file. In Visual Studio Code, use an extension that runs `.http` files, such as REST Client. You can also use curl:
 
 ```shell
 curl -i http://localhost:5080/api/warehouses/MAIN
@@ -29,7 +33,7 @@ curl -i http://localhost:5080/api/warehouses/MAIN
 
 In Windows PowerShell, type `curl.exe` so the command runs curl rather than the `Invoke-WebRequest` alias.
 
-The Chapter 2 activity reads its notification email from user secrets, which live in your user profile rather than in the project folder:
+The Chapter 2 activity reads its notification email from user secrets, which live in your user profile rather than in the project folder. In Visual Studio, right-click the project > Manage User Secrets and add `"InventoryThresholds:NotificationEmail": "stock-alerts@example.com"` to secrets.json. From the command line:
 
 ```shell
 cd Chapter02/Activity
@@ -86,7 +90,7 @@ Chapter 3's `Program.cs` contains one commented registration, the captive depend
 
 ## The data chapters
 
-From Chapter 10 on, the Warehouse API stores its data in SQL Server through Entity Framework Core. The `appsettings.Development.json` file of each project connects to SQL Server Express LocalDB with your Windows account and uses a database named `WarehouseDb`. Restore the tools once, from this folder, then create the database from the project folder:
+From Chapter 10 on, the Warehouse API stores its data in SQL Server through Entity Framework Core. The `appsettings.Development.json` file of each project connects to SQL Server Express LocalDB with your Windows account and uses a database named `WarehouseDb`. Restore the tools once, from this folder, then create the database from the project folder. In Visual Studio, run these commands in View > Terminal, starting from this folder:
 
 ```shell
 dotnet tool restore
@@ -101,11 +105,11 @@ Each checkpoint keeps the previous chapter's migrations, and Chapter 11 adds one
 
 From Chapter 11 on, the console exporter of OpenTelemetry writes every finished trace span to the console, so a block of `Activity.` lines follows each request in the output of `dotnet run`.
 
-The Chapter 12 activity comes with a test project. Run `dotnet test` in `Chapter12/Activity.Tests`. The tests run the API in the Production environment with a test double in place of the order service, so they need no database.
+The Chapter 12 activity comes with a test project. In Visual Studio, add `Chapter12/Activity.Tests` to the solution and select Run All Tests in Test > Test Explorer, or run `dotnet test` in `Chapter12/Activity.Tests`. The tests run the API in the Production environment with a test double in place of the order service, so they need no database.
 
 ## The security and versioning chapters
 
-From Chapter 13 on, every endpoint under `/api` needs a bearer token; only `/health` stays open. Create development tokens with `dotnet user-jwts` in the project folder:
+From Chapter 13 on, every endpoint under `/api` needs a bearer token; only `/health` stays open. Create development tokens with `dotnet user-jwts` in the project folder, in Visual Studio's View > Terminal or any terminal:
 
 ```shell
 cd Chapter13/WarehouseApi
@@ -129,7 +133,7 @@ cd Chapter15/WarehouseApi
 dotnet user-secrets set "ExternalShipmentService:ApiKey" "local-development-key"
 ```
 
-Then, from the `Chapter15` folder, start the fake ERP with `dotnet run --project FakeErp` in one terminal and the API with `dotnet run --project WarehouseApi` in another. The fake ERP listens on `http://localhost:5090`, the address in the API's `appsettings.Development.json`, and accepts any key. Without the key, the API stops at startup and names the missing setting; the shared `UserSecretsId` makes the same key work for Chapter 16 and the activities.
+In Visual Studio, with `Chapter15/WarehouseApi/WarehouseApi.csproj` open, add `Chapter15/FakeErp/FakeErp.csproj` with right-click the solution > Add > Existing Project, then right-click the solution > Configure Startup Projects, choose Multiple startup projects and set both to Start; Ctrl+F5 starts both. From the command line, start the fake ERP with `dotnet run --project FakeErp` in one terminal and the API with `dotnet run --project WarehouseApi` in another, both from the `Chapter15` folder. The fake ERP listens on `http://localhost:5090`, the address in the API's `appsettings.Development.json`, and accepts any key. Without the key, the API stops at startup and names the missing setting; the shared `UserSecretsId` makes the same key work for Chapter 16 and the activities.
 
 `POST /api/v2/orders/{id}/shipment` answers 202 Accepted with a `Location` header that points to the shipment status at the same address; the allocate endpoint still answers 200 with the order in both versions, and it queues the shipment as well. To watch the retries, start the fake ERP with `--FakeErp:FailFirstRequests=1 --FakeErp:LoseFirstResponses=1`, or send `POST http://localhost:5090/fake/outage?requests=3` while it runs. The ERP client's retry, timeout and circuit breaker settings are in the `ExternalShipmentService:Resilience` section of the API's `appsettings.json`.
 
@@ -137,7 +141,7 @@ The Chapter 15 checkpoint adds a migration for shipments. Orders that are alread
 
 From Chapter 16 on, `/health/live` answers as long as the application runs, and `/health` reports the database and the fulfillment queue as JSON; neither needs a token. Order creation accepts 10 requests per client per minute and answers the next one with 429 and a `Retry-After` header, and the product catalog responses are cached for five minutes.
 
-The Chapter 16 test projects use SQL Server Express LocalDB. Each test class creates a database with a random name and drops it when it finishes, so the tests never touch `WarehouseDb`. To run them against another SQL Server, set the `WAREHOUSE_TEST_SQLSERVER` environment variable to its connection string without a database name.
+The Chapter 16 test projects use SQL Server Express LocalDB. Each test class creates a database with a random name and drops it when it finishes, so the tests never touch `WarehouseDb`. To run them against another SQL Server, set the `WAREHOUSE_TEST_SQLSERVER` environment variable to its connection string without a database name. In Visual Studio, add `Chapter16/WarehouseApi.Tests` to the solution and select Run All Tests in Test > Test Explorer. From the command line:
 
 ```shell
 cd Chapter16/WarehouseApi.Tests

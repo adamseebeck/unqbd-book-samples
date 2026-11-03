@@ -63,3 +63,6 @@ public sealed class OrderNumberConflictException(Exception inner)
 
 public sealed class OrderChangedException(Exception inner)
     : Exception("The order changed after it was read.", inner);
+
+public sealed class OrderDeletedException(Exception inner)
+    : Exception("The order was deleted after the read.", inner);

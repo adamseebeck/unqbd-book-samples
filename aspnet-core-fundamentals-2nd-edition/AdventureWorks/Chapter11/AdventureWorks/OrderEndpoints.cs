@@ -161,8 +161,10 @@ public static class OrderEndpoints
             id, input.Notes, input.Version);
         return outcome switch
         {
+            // Null: deleted after the update, before this read.
             UpdateOutcome.Updated =>
-                Results.Ok(await orders.GetByIdAsync(id)),
+                await orders.GetByIdAsync(id) is { } saved
+                    ? Results.Ok(saved) : Results.NotFound(),
             UpdateOutcome.Conflict => Results.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "The order has changed",

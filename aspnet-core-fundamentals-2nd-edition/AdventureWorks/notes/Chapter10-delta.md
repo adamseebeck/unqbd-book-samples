@@ -39,6 +39,8 @@ Chapter 10 moves the store from memory into the SQLite database Chapter 8 create
 | (command) `dotnet add package Microsoft.EntityFrameworkCore.Design@11.0.0` | creates or edits project files |
 | (command) `dotnet ef migrations add InitialCreate -s ..\AdventureWorks` | generates the migration files in `AdventureWorks.Infrastructure/Migrations` |
 
+The reader types 817 lines of code: 564 in 9 new files and 253 new or changed in existing files, plus 7 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+
 ## Steps, in order
 
 Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 73 of 73 files identical and no differences.
@@ -85,13 +87,13 @@ info : X.509 certificate chain validation will use the default trust store selec
 info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
 info : Adding PackageReference for package 'Microsoft.EntityFrameworkCore.Design' into project 'AdventureWorks\AdventureWorks.csproj'.
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
-info :   GET https://api.nuget.org/v3/vulnerabilities/index.json
-info :   OK https://api.nuget.org/v3/vulnerabilities/index.json 332ms
-info :   GET https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   GET https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
-info :   OK https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json 8ms
-info :   OK https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json 25ms
-(6 more lines)
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info : Package 'Microsoft.EntityFrameworkCore.Design' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
+info : PackageReference for package 'Microsoft.EntityFrameworkCore.Design' version '11.0.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
+info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
+(3 more lines)
 ```
 
 Stop the app if it is running. EnsureCreated built Chapter 8's database without a migrations history, so migrations cannot take it over: the first migration would try to create AspNetUsers again and fail with "table already exists". Drop it. Chapter 10's Development seed recreates the test accounts. The tool runs from the Infrastructure folder, where the DbContext and the migrations live; `-s` (`--startup-project`) names the web project, whose configuration holds the connection string.
@@ -119,9 +121,9 @@ Successfully dropped database 'main'.
 
 ### Step 2: Map the store's tables
 
-The database rows are separate classes in Infrastructure, so Core's records stay the app's model and the EF Core code converts at the boundary. Money stays decimal in Core and in every API contract; the tables store whole cents (PriceCents, UnitPriceCents), because SQLite cannot sum decimal columns, and the order report sums in SQL. Money.ToCents rounds to the nearest cent, and FromCents returns two decimal places, so 129900 reads back as 1299.00.
+The database rows are separate classes in Infrastructure, so Core's records stay the app's model and the EF Core code converts at the boundary. Money stays decimal in Core and in every API contract; the tables store whole cents (PriceCents, UnitPriceCents), because SQLite has no exact decimal type and whole cents keep money exact and simple to compare; the order report sums the cents in SQL. Money.ToCents rounds to the nearest cent, and FromCents returns two decimal places, so 129900 reads back as 1299.00.
 
-Create `AdventureWorks.Infrastructure/Data/StoreEntities.cs` (53 lines).
+Create `AdventureWorks.Infrastructure/Data/StoreEntities.cs` (54 lines).
 
 StoreEntities.cs, part 1 of 2 (25 lines):
 
@@ -153,7 +155,7 @@ public sealed class OrderEntity
 }
 ```
 
-StoreEntities.cs, part 2 of 2 (27 lines):
+StoreEntities.cs, part 2 of 2 (28 lines):
 
 ```csharp
 public sealed class OrderItemEntity
@@ -173,8 +175,9 @@ public sealed class InventoryItemEntity
     public int Quantity { get; set; }
 }
 
-// Core and the API use decimal; the database stores whole cents,
-// because SQLite cannot sum decimal columns.
+// Core and the API use decimal; the database stores whole cents.
+// SQLite has no exact decimal type, and whole cents keep money
+// exact and simple to compare.
 public static class Money
 {
     public static long ToCents(decimal amount) =>
@@ -379,7 +382,7 @@ It prints:
 Build started...
 Build succeeded.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (37ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (30ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       PRAGMA journal_mode = 'wal';
 info: Microsoft.EntityFrameworkCore.Migrations[20411]
       Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
@@ -1415,7 +1418,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"b8286f07-fa24-4aab-9755-9e06a55e6f48","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"83aaac27-8e99-45b1-8d73-f191f8b8a79e","items":[{"productId":2,"qu...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"87298432-29f4-42bc-9784-d9abd78f8c66","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"510661d0-df2e-4dd9-8396-daaf95851f0b","items":[{"productId":2,"qu...
   ```
 
 - `GET /api/orders/report` returned **200**
@@ -1433,43 +1436,43 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/report?page=0` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"page":["The field page must be between 1 and 1000."]},"traceId":"00-524e32d2b5462d8a6...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"page":["The field page must be between 1 and 1000."]},"traceId":"00-530a3691760e4144c...
   ```
 
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYxuDcl1ne23uAmKxpzSmw0Ve-oX57HH99e_Ev_u6Dpt4ZrGy4Amaf15kYaK3zlUQMYO1zk2dfV_3KQ6OP07YFnMK8IzbPJXCtIOAshdIalWFOBEjQFCZIgLKep-WEfsP6_LMf-AT1xvr6SxOsFE7B_k4gZsHViqg3MvJ1l55saZw"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZioc83_XkYvpzeqLH78WHw5eRrWHiUS_r2mbfik2JeKyDHjxbnG2eMtzz8dTnEPTTr83P71Y4IgLxzKC63QXNBCeOgCRGyiWOL3H6GQsvKPDU6wK7CqjG7LnQ3yRtugOr536x_Cn3xdwhQTy76V26tkAahmdYppxxvf8-pQXy5NQ"}
   ```
 
 - `PUT /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"b8286f07-fa24-4aab-9755-9e06a55e6f48","total":49.99,"status":"Pending","archived":false,"notes":"Leave it at the side door.","version":"ae8ae382-46fb-4f65-9a6d-1b0372cf5b1b","it...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"87298432-29f4-42bc-9784-d9abd78f8c66","total":49.99,"status":"Pending","archived":false,"notes":"Leave it at the side door.","version":"c1582688-fc62-4b22-b3ad-90b1717bb7d5","it...
   ```
 
 - `PUT /api/orders/1` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"The order has changed","status":409,"detail":"Read the order again and send its current version.","traceId":"00-485646374ab9b14c0b2487079e4c8409-db3e...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"The order has changed","status":409,"detail":"Read the order again and send its current version.","traceId":"00-4c6b9f744b7024ccab4c7f93d3b63250-21d8...
   ```
 
 - `PUT /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"b8286f07-fa24-4aab-9755-9e06a55e6f48","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"4bfd76dc-df45-43e6-90ee-4f0f020d0644","items":[{"productId":2,"qu...
+  {"id":1,"orderNumber":"AW-0001","ownerId":"87298432-29f4-42bc-9784-d9abd78f8c66","total":49.99,"status":"Pending","archived":false,"notes":null,"version":"e4e41ccf-fc0e-4cf9-80c1-42b76ea1b4c5","items":[{"productId":2,"qu...
   ```
 
 - `PUT /api/orders/2` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-2a94be7f5e95a2a644c0b7b0fae5e2dd-fe3fdd554e1e88b6-02","correlationId":"177da6a255ee403c81d60ff8b3c68718"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-4cbf85c7397468d422edaedc7e50eef2-8ad726577b20a461-02","correlationId":"badf9947986745f58604f1c8a1a7f3e6"}
   ```
 
 - `GET /api/admin/inventory/1` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-0f34d0f256118863ceec5d14a2149e1c-de6bb98b4d4321fb-02","correlationId":"e7f53dd1dc7b4565b4e354585cf0c53f"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-ae1530aaefadddb3a1affa585f632228-bd16146c82a06977-02","correlationId":"fddfab5afd2145a6b11e79e9f1044669"}
   ```
 
 - `POST /dev/sign-in/avery` returned **200**
@@ -1481,7 +1484,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZLQuP6x3S81Ws6xPwUisbf_UJXRavb0XtpHNhnc5BtHDp7yB0RXwsjHprSIpCZ4J5LwZATLP-zyf2cQrAj02uTUTvF5_Omk3ElqNzLjQAqYNp_AfovBgCnPIAkC_l68NetdwqVPDiRdaigQP6vUZC6ZlA1eDkCTYB3dnBMm2d4qA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaY11FkYGq6GTS129efLSvhizDsmZeZiQtdrRGNaXsT26ep3fDEBex6uDi9WC1zLARGNPQ-nbJ3sngXQhw9-gixofBzAyoIVaCbafI2hxm3jVMiZqr45IwJN8Mqa1hJxNAW6xyI5pmq2WlRxtAwaBxSmgs_LQIiubS9d0mpPprRSA"}
   ```
 
 - `GET /api/admin/inventory/1` returned **200**
@@ -1499,7 +1502,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/inventory/transfer` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Not enough stock","status":409,"detail":"Overflow has fewer than 50.","traceId":"00-7404054ca593becbd3e2ae0335a1191d-32c2b5e49ca2d2b7-02","correlatio...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Not enough stock","status":409,"detail":"Overflow has fewer than 50.","traceId":"00-351040b27fa540131a15afce25f9204a-750076126df95607-02","correlatio...
   ```
 
 - `GET /api/admin/inventory/1` returned **200**
@@ -1517,7 +1520,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-3d52178c0287f8286851f947984fe2d1-ad1870a2c7c5b5be-02","...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-85100db6e014ba7deedd54bb33bef903-83eab88b8cb3c96a-02","...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/5)
@@ -1531,7 +1534,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `DELETE /api/v2/products/1` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-dd663d749fe52c0ffb257aed6ea63822-f33e5c25483735ef-02","cor...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-10233c2b5095d9217eaf7706dbc586a6-738872153af9ec56-02","cor...
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -1582,6 +1585,7 @@ The original Activity asked for SQL Server "if available" without steps (C10-6),
 Checked: the build, the Visual Studio rebuild (four projects) and the migration on RC3; requests.http and the README's curl.exe commands both passed on a LocalDB instance (SQL Server 2025 LocalDB, 17.0) with the sqlserver profile, the same 26 statuses as on SQLite, including the 409 from the CHECK constraint and the 400s from the unique index and the restricted delete; the https profile still runs on SQLite (26 of 26). The check dropped its SQL Server database afterward.
 
 The reader-path check rebuilt `AdventureWorks/Chapter10-Activity` from the Chapter 10 checkpoint: no differences.
+The Activity adds 103 lines of code: 33 in 1 new file and 70 new or changed in existing files, plus 8 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: the same store on SQL Server
 
@@ -1600,7 +1604,7 @@ The template "Class Library" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.SqlServerMigrations\AdventureWorks.SqlServerMigrations.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.SqlServerMigrations\AdventureWorks.SqlServerMigrations.csproj (in 89 ms).
+  Restored AdventureWorks.SqlServerMigrations\AdventureWorks.SqlServerMigrations.csproj (in 106 ms).
 Restore succeeded.
 ```
 
@@ -1657,7 +1661,7 @@ info : Adding PackageReference for package 'Microsoft.EntityFrameworkCore.SqlSer
 info : Restoring packages for AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
 warn : NU1902: Package 'System.Security.Cryptography.Pkcs' 9.0.18 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2fmv-rv2c-59x7
 warn : NU1903: Package 'System.Security.Cryptography.Pkcs' 9.0.18 has a known high severity vulnerability, https://github.com/advisories/GHSA-846f-f764-76mx
 info : Package 'Microsoft.EntityFrameworkCore.SqlServer' is compatible with all the specified frameworks in project 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
@@ -1681,7 +1685,7 @@ info : Adding PackageReference for package 'System.Security.Cryptography.Pkcs' i
 info : Restoring packages for AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
 info : Package 'System.Security.Cryptography.Pkcs' is compatible with all the specified frameworks in project 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : PackageReference for package 'System.Security.Cryptography.Pkcs' version '11.0.0' added to file 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : Writing assets file to disk. Path: AdventureWorks.Infrastructure\obj\project.assets.json
@@ -1929,7 +1933,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-177e7972c1bd261f85a892d6e342d40f-3a91b3b797e762ce-02","...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"SKU HLM-1001 is already in the catalog.","traceId":"00-f443b3424ff4fda6553eca9de3315ecd-2a637699768425e1-02","...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/6)
@@ -1943,7 +1947,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 - `DELETE /api/v2/products/1` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-317b30ab9a05bb02e8f092a60ec22397-a4e38f97b1e30f49-02","cor...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Invalid request","status":400,"detail":"Product 1 is on orders, so it stays.","traceId":"00-53622c05364c4f4364f014247d4bb346-7116ed6c883ca674-02","cor...
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -1963,7 +1967,7 @@ Run with the new profile, `dotnet run --project AdventureWorks --launch-profile 
 ## Notes for the writers
 
 - Departure from "the endpoints do not change": true for the catalog, the v1 and v2 product APIs and the pages, which keep their code. The order handlers keep their routes and results but now await the repository, because Chapter 2's IOrderRepository was synchronous and the EF Core one is not. Say so in one sentence.
-- Core's records stay the app's model and EF Core maps separate entity classes in Infrastructure, so the decimal-to-cents conversion happens in one place (design decision 3). Money.FromCents multiplies by 0.01m, which keeps two decimal places (1299.00, not 1299).
+- Core's records stay the app's model and EF Core maps separate entity classes in Infrastructure, so the decimal-to-cents conversion happens in one place (design decision 3). Money.FromCents multiplies by 0.01m, which keeps two decimal places (1299.00, not 1299). Review (Chapter 10, blocker 1): do not say SQLite cannot sum decimals. EF Core 11 maps a decimal column to TEXT on SQLite and sums it exactly with its own ef_sum function (the Chapter 10 review's run on RC3). The reason for cents is that SQLite has no exact decimal type, so whole cents in INTEGER columns keep money exact and simple to compare in SQL.
 - The SQL Server switch is the Activity, verified on LocalDB, not part of the main checkpoint. The main app stays on SQLite, so every later chapter does too.
 - OrderNote is gone (C10-3; it is not in the design's domain). The notes PUT carries the concurrency lesson, and TransferAsync carries the transaction lesson. Figure 10.1's redraw (E12) should show TransferAsync: two SaveChanges calls inside one BeginTransactionAsync to CommitAsync bracket.
 - Order has a Status column now ("Pending"), so Chapter 11's cancel needs no second migration.

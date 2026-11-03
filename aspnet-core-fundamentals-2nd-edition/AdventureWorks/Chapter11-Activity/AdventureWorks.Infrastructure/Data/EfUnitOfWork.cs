@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AdventureWorks.Infrastructure.Data;
 
-// One SaveChanges for the request, translating the two expected
+// One SaveChanges for the request, translating the expected
 // database failures into Core exceptions. Anything else is a real
 // failure and stays an exception.
 public sealed class EfUnitOfWork(AdventureWorksDbContext db)
@@ -17,6 +17,13 @@ public sealed class EfUnitOfWork(AdventureWorksDbContext db)
         }
         catch (DbUpdateConcurrencyException ex)
         {
+            // No row left to compare with: deleted, not changed.
+            foreach (var entry in ex.Entries)
+            {
+                var row = await entry.GetDatabaseValuesAsync(ct);
+                if (row is null)
+                    throw new OrderDeletedException(ex);
+            }
             throw new OrderChangedException(ex);
         }
         catch (DbUpdateException ex)

@@ -26,6 +26,8 @@ Chapter 13 reshapes the order API as REST resources over Chapter 11's OrderServi
 | `AdventureWorks.Infrastructure/Data/EfOrderWriter.cs` | changed |
 | `AdventureWorks/OrderInputs.cs` | changed |
 
+The reader types 347 lines of code: 49 in 1 new file and 298 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+
 ## Steps, in order
 
 Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 85 of 85 files identical and no differences.
@@ -223,17 +225,22 @@ In `AdventureWorks.Core/OrderService.cs`, add the following above `static OrderR
         var order = await orders.GetByIdAsync(id);
         if (order is null || order.OwnerId != ownerId)
             return new(OrderOutcome.NotFound);
-        await writer.SetNotesAsync(id, notes, version, ct);
+        if (!await writer.SetNotesAsync(id, notes, version, ct))
+            return new(OrderOutcome.NotFound);
         try
         {
             await unitOfWork.SaveChangesAsync(ct);
+        }
+        catch (OrderDeletedException)
+        {
+            return new(OrderOutcome.NotFound);
         }
         catch (OrderChangedException)
         {
             return new(OrderOutcome.Conflict, Error:
                 "The order changed; read it again.");
         }
-        return new(OrderOutcome.Updated,
+        return Saved(OrderOutcome.Updated,
             await orders.GetByIdAsync(id));
     }
 ```
@@ -657,7 +664,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-193b40fb4eb30f03b2913bc9f3a7568f-53699417b0867ae0-02","correlationId":"2e237cf08eeb49a190f142c3a0f350c1"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-c800fa8c970a95fbd8f87b66f8ffc8b2-0031e50fd972d4cd-02","correlationId":"10fc9c0507a64ed9a6a06371751dbe59"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -669,7 +676,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbjJn1hkFPwUtJi24efAGMxxOaaTc_lQyEJUy5u7r-1qtm46OGAf1-7ifP1hrul3wfKqBLQNGwmHVBayixanVjKws30iRhRqxP5lOnAo2XujDd49DDiq5nzj3GHvN-Cu0InbJLFXd9EAzGuRpAAD33HC5P3OnvkjAoCyN-4TAweLA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqY2jAnKgeIlaw16ntkvJJ1U2ULpgGfK3ckqztVU_uKW1Ob2lF-vs02GZ8Ijf6xo9D2GnVlsa15_SpeMePquBu0GfvbquC6cvepfmoCf_Ge2ZGfqR3YFHkF45VSouI5aZSUeOo4WeZyIxFPlLr-Pb0vsZKq9lfvL5TeM6sLbaUUVAQ"}
   ```
 
 - `GET /api/orders?page=1&pageSize=5` returned **200** (Link: <https://localhost:7001/api/orders?page=2&pageSize=5>; rel="next")
@@ -687,10 +694,10 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders?pageSize=500` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"pageSize":["The field pageSize must be between 1 and 50."]},"traceId":"00-a8f1ae08267...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"pageSize":["The field pageSize must be between 1 and 50."]},"traceId":"00-6151b3a724f...
   ```
 
-- `GET /api/orders/1` returned **200** (ETag: "5569fbe7-1089-4775-a2fb-d60acc72f68e")
+- `GET /api/orders/1` returned **200** (ETag: "84ca142b-8794-4d4c-98ef-8338f25c6975")
 
   ```text
   {"id":1,"orderNumber":"AW-0001","status":"Pending","archived":false,"total":49.99,"notes":null,"items":[{"productId":2,"quantity":1,"unitPrice":49.99}]}
@@ -699,7 +706,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `PATCH /api/orders/1` returned **428**
 
   ```text
-  {"title":"Precondition Required","status":428,"detail":"Send If-Match with the ETag.","traceId":"00-671800b28d26509f9886cb496d0b7fa4-a6cf29cf0b7020cd-02","correlationId":"19ff7e6d3ec14de085be140d09fda22d"}
+  {"title":"Precondition Required","status":428,"detail":"Send If-Match with the ETag.","traceId":"00-fe7431242fcceb9f23f308d5ab8d616a-7d74eddd4626f12b-02","correlationId":"bcd4712970934a66b5e7064d17931834"}
   ```
 
 - `PATCH /api/orders/1` returned **200**
@@ -711,7 +718,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `PATCH /api/orders/1` returned **412**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.13","title":"Precondition Failed","status":412,"detail":"The order changed; read it again.","traceId":"00-1753798dc1337827b04d9207315b6d2b-154346a11dd80f8a-02","c...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.13","title":"Precondition Failed","status":412,"detail":"The order changed; read it again.","traceId":"00-6c743f43183fae0582cfa4b3bcfbf961-1f253731c05e0772-02","c...
   ```
 
 - `PATCH /api/orders/1` returned **200**
@@ -731,7 +738,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `DELETE /api/orders/13` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The order is already cancelled.","traceId":"00-8ca2d7688889604109abe6e19ded78a5-257621c2566a5ef5-02","correlationId"...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The order is already cancelled.","traceId":"00-3b864cf87ba296982e2a7a1bf840e884-9684a61f9f1c02a5-02","correlationId"...
   ```
 
 - `GET /api/orders/13` returned **200**
@@ -743,7 +750,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/nope` returned **404** (Content-Type: application/problem+json)
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-2a89a14ce6df8465e2e6b2c97294eefc-aef5a16bf36eee7c-02","correlationId":"ef25cec826854a5e8e128120f68043c1"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-a0cbb39441006c94d006be30e66991b9-f05045e9b2c1931b-02","correlationId":"8cf63ac4b2de4bd98158a918276eb1c3"}
   ```
 
 - `GET /api/nope` returned **404** (Content-Type: text/plain)
@@ -761,7 +768,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbjx7RjFvEF9kJLPM7dDCR-M1UoTSTmy0pZkI8dITTlcZCreZxmOsOUAXYnH2bZ5SfRTdasCNwHOvH3RXMH3UNrico1hlVRcbS9QJ-hpbGZDdVvfR2yahgh_2NeKZN712xosvJVBh6I63xalIcPPa4ENabdGnJwo4345BaCsl2E1A"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb8rHzKc_wkrf3T9hraDs1JsPNlsdkPtemXG5LYDfheYslbxGxlnyv9IBMKpU8D919SyIDscreZx8_o9ds6g_VdB9mKby-urdpowmsrkldty0v9FtG3t0LZVigInsMuTW9c6oLdepfExWuOZWHqNFmWXttftMtBzw0MP244t7GnbA"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -771,6 +778,8 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 ### Other runs
 
 - requests.http ran twice against the same database (the requests run, then the README's curl.exe run): 21 of 21 both times. The order it places is cancelled and then deleted by the Admin.
+- InventoryService may stay stopped for this chapter's requests (review P11), and the requests.http header now says so: with nothing listening on 127.0.0.1:42132, requests.http gave 21 of 21 and the README's curl.exe run 21 of 21 (the Activity: 28 of 28 both ways), and the app log never mentions port 42132. No request here reads stock.
+- Delete race (review 11-P10): the scratch probe from Chapter 11 (tools/scenarios/DeleteRaceProbe.cs, X-Delete-At: stage, save or reread) deleted the order at each point of PATCH, DELETE (cancel) and POST. Each answered 404, with X-Probe-Deleted showing the deletion, and the order read 404 afterward; without the header PATCH answered 200 and DELETE 204: 24 of 24 (`tools/scenarios/ch13-delete-race.http`). Against the printed (pre-fix) code: PATCH 500, 412, 500; DELETE 204, 409, 204; POST 500. Checked; Chapters 14 and 15 pass the same file.
 - The README's curl.exe commands keep the ETag from a saved header file (`curl.exe -D order.txt`, then `-match '^ETag:'`) and send it back in If-Match. The app reads the version inside If-Match with or without its quotes, so the way Windows PowerShell 5.1 passes quotes to curl.exe does not matter; the If-Match checks passed (428, 200, 412, 200).
 
 ## A breakpoint for this chapter
@@ -797,6 +806,7 @@ The endpoint has read If-Match as text, quotes and all, and parsed the GUID insi
 The original Activity's sub-collection (the order's line items) carries over, on this app: `OrderItemEndpoints.cs` maps `GET /api/orders/{id}/items` with the same bounds and Link header as the collection, after Chapter 9's read rule (owner or Finance), and StoreJsonContext gains `PagedResponse<OrderLineDto>`. A missing order is 404; pageSize outside 1 to 50 is 400. Checked: an order with three lines, pageSize=2: two lines, totalCount 3 and a next link; page 2: the third line (productId 4) and no Link header.
 
 The reader-path check rebuilt `AdventureWorks/Chapter13-Activity` from the Chapter 13 checkpoint: no differences.
+The Activity adds 53 lines of code: 51 in 1 new file and 2 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: an order's lines as a paged sub-collection
 
@@ -891,7 +901,7 @@ app.MapOrderItemEndpoints();
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYZ_0g6ikBnWDTWCRPJCCoc3mx4mnohXHZfLGj99IBk2J7avJKhF3bFobjJ18bm7-rN0sAeREmhqRAt4QH_nPqWOPiJpCP6GVJ8UYFU51EbWOdO3wzQPP2AydFVR-xyUOLepJ9QiWAxlJe9eVLgSbUDSfJAA3LABHUyTI-Sn2vfvQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaUNdLm3Ggm6RXs9HsEfWCZKGBIIzqjYFZjehf8VGIT4JZTCgxFPDlCds8bHZQyTKyUuoxitYIyC-fd3MxfpugGAvyhyGXBsBDLADFFO-W-BZ6K-sMTNQcIAMRIvIhkMhhWe1AGhDwkQFIOiljW24oyB8un6n9viu18x0JL_YAPWA"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -915,6 +925,7 @@ app.MapOrderItemEndpoints();
 
 - Accuracy 13.1: status-code pages fill an otherwise empty 400 to 599 response whatever the Accept header; only the format depends on it. Checked here (signed in, on an unmapped /api path): `Accept: application/json` gave 404 `application/problem+json`; `Accept: text/html` gave 404 `text/plain` with the body "Status Code: 404; Not Found". Anonymous requests to unmapped paths get 401 instead, because of Chapter 9's fallback policy.
 - DELETE cancels instead of deleting, so a customer's order history survives and the order stays readable (status Cancelled). Say why the Admin's permanent delete moved to /api/admin/orders/{id}: one method, one meaning, on the customer's resource.
+- Review 11-P10: UpdateNotesAsync follows CancelAsync, so a PATCH whose order is deleted part-way through answers 404 at each point: SetNotesAsync finds no row (NotFound), the UPDATE matches no row and the database has none (EfUnitOfWork's OrderDeletedException, NotFound; a row with another version stays 412), or the read-back after the save finds nothing (OrderService.Saved, NotFound). Before the fix the printed code answered 500 (NullReferenceException in SetETag, called from Represent) when the order was deleted before staging or before the read-back, and 412 when it was deleted before the save.
 - The ETag is Chapter 10's Version token, quoted. PATCH compares it through the unit of work's concurrency check: the If-Match value goes into the UPDATE's WHERE clause, so a lost race also answers 412.
 - 428 Problem Details has no "type" link (the framework has none for 428); 412 links to RFC 9110 section 15.5.13.
 - The Link header uses absolute URIs (LinkGenerator.GetUriByName), for example `<https://localhost:7001/api/orders?page=2&pageSize=5>; rel="next"`.

@@ -20,6 +20,8 @@ Chapter 14 documents the app's API, including Chapter 5's two product API versio
 | `AdventureWorks/Controllers/ProductsController.cs` | changed |
 | `AdventureWorks/ProductEndpointsV2.cs` | changed |
 
+The reader types 56 lines of code: 53 in 1 new file and 3 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+
 ## Steps, in order
 
 Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 86 of 86 files identical and no differences.
@@ -319,7 +321,21 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ### Other runs
 
-- Production: nothing maps /openapi outside Development, so under Chapter 9's fallback policy GET /openapi/v1.json answers 302 to the sign-in page (not 404), and /api/v2/products/1 still answers 200. Checked.
+- Production: nothing maps /openapi outside Development, so under Chapter 9's fallback policy GET /openapi/v1.json answers 302 to the sign-in page (not 404), and /api/v2/products/1 still answers 200. Checked. The two requests (`tools/scenarios/ch14-production.http`, run against `dotnet run --project AdventureWorks -- --environment Production`) carry `# @no-redirect` directly above the 302 request, so VS Code REST Client and Visual Studio show the 302 instead of following it to the sign-in page's 200; Visual Studio's HTTP editor treats the line as a comment.
+
+  ```http
+  @host = https://localhost:7001
+
+  ###
+  # No documents outside Development: nothing maps the path, so
+  # the fallback policy sends the request to sign in. Expect 302
+  # @no-redirect
+  GET {{host}}/openapi/v1.json
+
+  ###
+  # The API itself still answers. Expect 200
+  GET {{host}}/api/v2/products/1
+  ```
 
 ## A breakpoint for this chapter
 
@@ -363,15 +379,17 @@ The original Activity's checks (fetch both documents, compare their paths, switc
 Checked: two reader-path builds produced byte-identical files; the files carry no version or time stamp, so they diff cleanly in code review; the build-time store document has 20 paths and none of the Development-only routes (/dev, /examples), because the build does not run the host in the Development environment; the build and the Visual Studio rebuild stayed free of warnings.
 
 The reader-path check rebuilt `AdventureWorks/Chapter14-Activity` from the Chapter 14 checkpoint: no differences.
+The Activity adds 1 line of code: 0 in 0 new files and 1 new or changed in existing files, plus 3 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: write the documents at build time
 
 Work in a copy of the Chapter 14 checkpoint folder; Chapter 15 starts from the checkpoint. With Microsoft.Extensions.ApiDescription.Server, every build starts the app's host the way the ef tools do, asks it for each registered document, and writes the documents to files, so the contract can be committed and compared in code review. OpenApiDocumentsDirectory puts them in the project's docs folder instead of obj.
 
-Run this from the `AdventureWorks` folder. The package name makes this command longer than the print line; type it as one line.
+Run this from the working folder. The backtick at the end of the first line continues the command on the next line in PowerShell.
 
-```shell
-dotnet add package Microsoft.Extensions.ApiDescription.Server@11.0.0
+```powershell
+dotnet add AdventureWorks package `
+    Microsoft.Extensions.ApiDescription.Server@11.0.0
 ```
 
 It prints:

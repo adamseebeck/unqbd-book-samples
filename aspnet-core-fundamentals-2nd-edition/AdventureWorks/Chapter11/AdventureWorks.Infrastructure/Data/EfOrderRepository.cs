@@ -66,7 +66,9 @@ public sealed class EfOrderRepository(AdventureWorksDbContext db)
         }
         catch (DbUpdateConcurrencyException)
         {
-            return UpdateOutcome.Conflict;
+            // No row matched: the order changed, or was deleted.
+            return await db.Orders.AnyAsync(o => o.Id == id)
+                ? UpdateOutcome.Conflict : UpdateOutcome.NotFound;
         }
     }
 

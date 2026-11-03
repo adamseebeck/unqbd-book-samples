@@ -34,7 +34,7 @@ public sealed class OrderService(IOrderRepository orders,
             return new(OrderOutcome.Conflict, Error:
                 "Another order took that number; send it again.");
         }
-        return new(OrderOutcome.Created,
+        return Saved(OrderOutcome.Created,
             await orders.GetByNumberAsync(number));
     }
 
@@ -47,18 +47,24 @@ public sealed class OrderService(IOrderRepository orders,
         if (order.Status == OrderStatus.Cancelled)
             return Invalid("The order is already cancelled.");
         // Staged with the version just read; the save checks it.
-        await writer.SetStatusAsync(
-            id, OrderStatus.Cancelled, order.Version, ct);
+        // False: the order was deleted after the read above.
+        if (!await writer.SetStatusAsync(
+                id, OrderStatus.Cancelled, order.Version, ct))
+            return new(OrderOutcome.NotFound);
         try
         {
             await unitOfWork.SaveChangesAsync(ct);
+        }
+        catch (OrderDeletedException)
+        {
+            return new(OrderOutcome.NotFound);
         }
         catch (OrderChangedException)
         {
             return new(OrderOutcome.Conflict, Error:
                 "The order changed; read it again.");
         }
-        return new(OrderOutcome.Cancelled,
+        return Saved(OrderOutcome.Cancelled,
             await orders.GetByIdAsync(id));
     }
 
@@ -76,17 +82,22 @@ public sealed class OrderService(IOrderRepository orders,
         var order = await orders.GetByIdAsync(id);
         if (order is null || order.OwnerId != ownerId)
             return new(OrderOutcome.NotFound);
-        await writer.SetNotesAsync(id, notes, version, ct);
+        if (!await writer.SetNotesAsync(id, notes, version, ct))
+            return new(OrderOutcome.NotFound);
         try
         {
             await unitOfWork.SaveChangesAsync(ct);
+        }
+        catch (OrderDeletedException)
+        {
+            return new(OrderOutcome.NotFound);
         }
         catch (OrderChangedException)
         {
             return new(OrderOutcome.Conflict, Error:
                 "The order changed; read it again.");
         }
-        return new(OrderOutcome.Updated,
+        return Saved(OrderOutcome.Updated,
             await orders.GetByIdAsync(id));
     }
 
@@ -103,4 +114,11 @@ public sealed class OrderService(IOrderRepository orders,
 
     static OrderResult Invalid(string error) =>
         new(OrderOutcome.Invalid, Error: error);
+
+    // The order read back after a save, for the response. Null:
+    // it was deleted since, so the caller gets NotFound.
+    static OrderResult Saved(OrderOutcome outcome,
+        Order? order) =>
+        order is null
+            ? new(OrderOutcome.NotFound) : new(outcome, order);
 }

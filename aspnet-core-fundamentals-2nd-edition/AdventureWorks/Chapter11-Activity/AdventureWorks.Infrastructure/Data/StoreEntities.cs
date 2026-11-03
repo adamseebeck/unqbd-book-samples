@@ -41,8 +41,9 @@ public sealed class InventoryItemEntity
     public int Quantity { get; set; }
 }
 
-// Core and the API use decimal; the database stores whole cents,
-// because SQLite cannot sum decimal columns.
+// Core and the API use decimal; the database stores whole cents.
+// SQLite has no exact decimal type, and whole cents keep money
+// exact and simple to compare.
 public static class Money
 {
     public static long ToCents(decimal amount) =>

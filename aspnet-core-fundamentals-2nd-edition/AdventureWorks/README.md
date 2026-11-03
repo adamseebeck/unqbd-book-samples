@@ -2,7 +2,7 @@
 
 One AdventureWorks outdoor-gear store app that grows through the book. The reader creates it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own.
 
-This folder currently holds Chapters 1 to 13. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder currently holds Chapters 1 to 14. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
 
 ## Folders
 
@@ -49,3 +49,4 @@ Every checkpoint has a `requests.http` file with each request and the status you
 | 11 | An application service for placing and cancelling orders (server-side prices, owner from the sign-in), narrow repositories, one unit of work, a logging decorator, and scope validation in every environment |
 | 12 | Output caching of the anonymous catalog with tag eviction on every product write, a partitioned rate limit on search, compression for the public catalog only, and warehouse stock from the InventoryService tool project through a resilient, cached HttpClient |
 | 13 | The order API as REST resources on the same service: a paged collection with Link headers, OrderDto with an ETag, PATCH with If-Match, DELETE as cancel, the Admin delete under /api/admin, and source-generated JSON |
+| 14 | Three OpenAPI documents: the store routes, and the product API's v1 (controllers, marked deprecated) and v2 (Minimal APIs), chosen by group name. The Activity writes them at build time |

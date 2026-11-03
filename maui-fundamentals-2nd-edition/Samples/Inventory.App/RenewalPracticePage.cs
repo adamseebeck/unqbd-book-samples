@@ -38,7 +38,7 @@ public sealed class RenewalPracticePage : ContentPage
                 if (!token.IsCancellationRequested)
                     status.Text = $"Session expires {result.ExpiresAt:O}. Token content is hidden.";
             }
-            catch (OperationCanceledException)when (token.IsCancellationRequested)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
             }
             catch (Exception)

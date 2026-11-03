@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+ <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+ <resheader name="version"><value>2.0</value></resheader>
+ <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+ <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+ <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
+ <data name="SectionHeading" xml:space="preserve"><value>Inventory settings</value></data>
+ <data name="CompactLabel" xml:space="preserve"><value>Use compact view</value></data>
+ <data name="DemoValue" xml:space="preserve"><value>Masked demonstration value</value></data>
+ <data name="ContrastInstruction" xml:space="preserve"><value>Check this page with large text, keyboard navigation and your system high contrast setting.</value></data>
+ <data name="ConfigurationUnavailable" xml:space="preserve"><value>Public settings unavailable.</value></data>
+ <data name="PublicConfiguration" xml:space="preserve"><value>Public configuration identifier: {0}</value></data>
+</root>

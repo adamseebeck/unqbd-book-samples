@@ -11,4 +11,5 @@
  <data name="ContrastInstruction" xml:space="preserve"><value>Compruebe esta página con texto grande, navegación por teclado y el modo de alto contraste del sistema.</value></data>
  <data name="ConfigurationUnavailable" xml:space="preserve"><value>La configuración pública no está disponible.</value></data>
  <data name="PublicConfiguration" xml:space="preserve"><value>Identificador de configuración pública: {0}</value></data>
+ <data name="Footer" xml:space="preserve"><value>La configuración se guarda en este dispositivo.</value></data>
 </root>

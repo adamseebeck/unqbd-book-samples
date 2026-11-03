@@ -116,6 +116,19 @@ public sealed class DashboardPage : ContentPage
         };
         update.Clicked += (_, _) => metrics.PendingCount = (int.Parse(metrics.PendingCount) + 1).ToString();
         stack.Children.Add(update);
+        var reorder = new MetricCard
+        {
+            Title = "Reorder",
+            TrendDirection = TrendDirection.Neutral
+        };
+        reorder.SetBinding(MetricCard.ValueProperty, nameof(metrics.ReorderCount));
+        stack.Children.Add(reorder);
+        var updateReorder = new Button
+        {
+            Text = "Change reorder count only"
+        };
+        updateReorder.Clicked += (_, _) => metrics.ReorderCount = (int.Parse(metrics.ReorderCount) + 1).ToString();
+        stack.Children.Add(updateReorder);
         stack.Children.Add(new TemplatedNotice { Heading = "Template contract", Message = "This notice binds its declared Heading and Message properties." });
         Content = new ScrollView
         {
@@ -135,10 +148,15 @@ public partial class DashboardMetrics : ObservableObject
     [ObservableProperty]
     public partial string PendingCount { get; set; }
 
+    // Activity 11 solution: a fourth card with its own property.
+    [ObservableProperty]
+    public partial string ReorderCount { get; set; }
+
     public DashboardMetrics()
     {
         ProductCount = "3";
         LowStockCount = "1";
         PendingCount = "0";
+        ReorderCount = "0";
     }
 }

@@ -22,7 +22,7 @@ public sealed class ShakeMonitor : IDisposable
         Accelerometer.Default.ReadingChanged += Reading;
         try
         {
-            Accelerometer.Default.Start(SensorSpeed.Default);
+            Accelerometer.Default.Start(SensorSpeed.Game);
             ownsMonitoring = true;
         }
         catch
@@ -100,7 +100,7 @@ public sealed class InspectionPage : ContentPage
                 if (active && !token.IsCancellationRequested)
                     status.Text = location.Status;
             }
-            catch (OperationCanceledException)when (token.IsCancellationRequested)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
             }
             catch (Exception)
@@ -206,7 +206,7 @@ public sealed class InspectionPage : ContentPage
             photos.Add(Path.GetFileName(result.FileName));
             status.Text = "Photo added to this temporary exercise list.";
         }
-        catch (OperationCanceledException)when (token.IsCancellationRequested)
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
         }
         catch (Exception)
@@ -249,15 +249,5 @@ public sealed class InspectionPage : ContentPage
         {
             confirming = false;
         }
-    }
-}
-
-internal static class GridPlacement
-{
-    public static T AtRow<T>(this T view, int row)
-        where T : View
-    {
-        Grid.SetRow(view, row);
-        return view;
     }
 }

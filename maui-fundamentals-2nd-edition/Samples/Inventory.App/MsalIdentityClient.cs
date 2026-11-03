@@ -12,13 +12,14 @@ public sealed class MsalIdentityClient : IIdentityClient
     public const string TenantId = "00000000-0000-0000-0000-000000000000";
     public const string CallbackScheme = "msal" + ClientId;
     private IPublicClientApplication Client => client ??= CreateClient();
+    private static bool IsConfigured => Guid.TryParse(ClientId, out var clientId) && clientId != Guid.Empty && Guid.TryParse(TenantId, out var tenantId) && tenantId != Guid.Empty;
 
     private static IPublicClientApplication CreateClient()
     {
 #if MACCATALYST
         throw new PlatformNotSupportedException("This pinned MSAL sample has no Mac Catalyst native adapter. Use the controlled renewal exercise.");
 #else
-        if (!Guid.TryParse(ClientId, out var clientId) || clientId == Guid.Empty || !Guid.TryParse(TenantId, out var tenantId) || tenantId == Guid.Empty)
+        if (!IsConfigured)
             throw new InvalidOperationException("Register and configure an Entra public client before signing in.");
         var redirect = DeviceInfo.Platform == DevicePlatform.WinUI ? "http://localhost" : $"msal{ClientId}://auth";
         return PublicClientApplicationBuilder.Create(ClientId).WithAuthority(AzureCloudInstance.AzurePublic, TenantId).WithRedirectUri(redirect).Build();
@@ -37,7 +38,7 @@ public sealed class MsalIdentityClient : IIdentityClient
         {
             var interactive = Client.AcquireTokenInteractive(Scopes).WithUseEmbeddedWebView(false);
 #if ANDROID
-            interactive=interactive.WithParentActivityOrWindow(()=>Platform.CurrentActivity!);
+            interactive = interactive.WithParentActivityOrWindow(() => Platform.CurrentActivity!);
 #endif
             var result = await interactive.ExecuteAsync(cancellationToken);
             return new AccessSession(result.AccessToken, result.ExpiresOn);
@@ -46,12 +47,14 @@ public sealed class MsalIdentityClient : IIdentityClient
 
     public async Task SignOutAsync(CancellationToken cancellationToken)
     {
-        if (client is null)
+        // MSAL keeps its cache across restarts on Android and iOS, so a configured app removes accounts even before
+        // this object creates its client. Mac Catalyst has no MSAL adapter in this sample.
+        if (OperatingSystem.IsMacCatalyst() || (client is null && !IsConfigured))
             return;
-        foreach (var account in await client.GetAccountsAsync())
+        foreach (var account in await Client.GetAccountsAsync())
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await client.RemoveAsync(account);
+            await Client.RemoveAsync(account);
         }
     }
 }

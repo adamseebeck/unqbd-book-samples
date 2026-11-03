@@ -7,7 +7,7 @@ public static class ContactExercise
         if (await Permissions.RequestAsync<Permissions.ContactsRead>() != PermissionStatus.Granted)
             return null;
         token.ThrowIfCancellationRequested();
-        var contacts = await Contacts.Default.GetAllAsync(); // This API has no token overload.
+        var contacts = await Contacts.Default.GetAllAsync(token);
         token.ThrowIfCancellationRequested();
         return contacts.Count(); // No names, telephone numbers or addresses are retained/logged.
     }

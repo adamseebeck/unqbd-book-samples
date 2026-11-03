@@ -66,7 +66,7 @@ public partial class CategoryViewModel(ICategoryRepository repository, ITextFile
             ErrorMessage = "";
             await operation(token);
         }
-        catch (OperationCanceledException)when (token.IsCancellationRequested)
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
             ErrorMessage = "Operation canceled.";
         }

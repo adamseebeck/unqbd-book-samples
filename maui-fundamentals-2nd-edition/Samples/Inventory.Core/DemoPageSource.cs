@@ -15,7 +15,7 @@ public sealed class DemoPageSource : IPageSource
         }
 
         if (page >= 3)
-            return[];
+            return [];
         return Enumerable.Range(page * pageSize + 1, page == 2 ? 5 : pageSize).Select(i => new Product { Id = i, Sku = $"P{i}", Name = $"Product {i}", Quantity = (i % 4) switch
         {
             0 => 9,

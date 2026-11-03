@@ -14,7 +14,7 @@ public partial class ResourcePracticePage : ContentPage
             await source.CopyToAsync(buffer);
             var bytes = buffer.ToArray();
             Preview.Source = ImageSource.FromStream(() => new MemoryStream(bytes, writable: false));
-            ImageStatus.Text = "Loaded a trusted packaged fixture. The control sizes its display, not its encoded file.";
+            ImageStatus.Text = "Loaded the packaged image. The control sizes how it is shown, not the file itself.";
         }
         catch (Exception)
         {

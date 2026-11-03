@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiInventory.App.AdaptiveSettingsPage" Title="Adaptive settings" SafeAreaEdges="All">
+ <ContentPage.Resources>
+  <Style x:Key="SettingsHeader" TargetType="Label">
+   <Setter Property="FontSize" Value="24"/><Setter Property="FontAttributes" Value="Bold"/>
+  </Style>
+  <Style x:Key="SettingsCard" TargetType="Border">
+   <Setter Property="Padding" Value="16"/><Setter Property="StrokeShape"><RoundRectangle CornerRadius="12"/></Setter>
+  </Style>
+ </ContentPage.Resources>
+ <Grid x:Name="AdaptiveGrid" RowDefinitions="Auto,*" ColumnDefinitions="250,*" RowSpacing="12" Padding="16">
+  <VisualStateManager.VisualStateGroups>
+   <VisualStateGroup x:Name="WidthStates">
+    <VisualState x:Name="Narrow"><VisualState.Setters>
+     <Setter TargetName="Sidebar" Property="IsVisible" Value="False"/>
+     <Setter TargetName="Body" Property="Grid.Column" Value="0"/>
+     <Setter TargetName="Heading" Property="Grid.ColumnSpan" Value="1"/>
+    </VisualState.Setters></VisualState>
+    <VisualState x:Name="Wide"><VisualState.Setters>
+     <Setter TargetName="Sidebar" Property="IsVisible" Value="True"/>
+     <Setter TargetName="Body" Property="Grid.Column" Value="1"/>
+     <Setter TargetName="Heading" Property="Grid.ColumnSpan" Value="2"/>
+    </VisualState.Setters></VisualState>
+   </VisualStateGroup>
+  </VisualStateManager.VisualStateGroups>
+  <Label x:Name="Heading" Text="Settings" Style="{StaticResource SettingsHeader}" Grid.ColumnSpan="2" SemanticProperties.HeadingLevel="Level1"/>
+  <VerticalStackLayout x:Name="Sidebar" Grid.Row="1" Spacing="8">
+   <Button Text="Appearance"/><Button Text="Inventory"/>
+  </VerticalStackLayout>
+  <ScrollView x:Name="Body" Grid.Row="1" Grid.Column="1">
+   <Border Style="{StaticResource SettingsCard}">
+    <VerticalStackLayout Spacing="12">
+     <Label Text="Appearance" FontSize="20"/>
+     <Entry Placeholder="Display name"/>
+     <Label Text="Use compact inventory rows"/>
+     <Switch SemanticProperties.Description="Use compact inventory rows"/>
+     <Label Text="Resize across 600 units. Try large text and keyboard navigation."/>
+     <Button Text="Compare shared resources and wrapped tags" Clicked="OpenResources"/>
+    </VerticalStackLayout>
+   </Border>
+  </ScrollView>
+ </Grid>
+</ContentPage>

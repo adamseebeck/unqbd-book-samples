@@ -7,7 +7,7 @@ Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Ch
 Chapter 12 adds caching, rate limiting, compression and a resilient HTTP dependency to the running app, around the catalog and a new stock route. No separate Chapter12 project: the app keeps every earlier feature.
 
 - `InventoryService/`: a companion tool project beside the app, the warehouse's stock service on 127.0.0.1:42132 (GET /stock/{sku}) with /control routes that make the next calls fail with a status, wait, count attempts or reset. It is in the solution so it builds and starts from Visual Studio.
-- `InventoryClient.cs`: the typed HttpClient with the standard resilience handler (1-second attempts, 5-second total, two retries 100 ms apart, a breaker at half of at least five attempts in 30 seconds, open for 15 seconds), and `StockAvailability`, a cache-aside read over IDistributedCache (30 seconds).
+- `InventoryClient.cs`: the typed HttpClient with the standard resilience handler (1-second attempts, 5-second total, two retries with a 100 ms base delay, exponential backoff and jitter, a breaker at half of at least five attempts in 30 seconds, open for 15 seconds), and `StockAvailability`, a cache-aside read over IDistributedCache (30 seconds).
 - `StorePerformance.cs`: AddStorePerformance registers the "catalog" output-cache policy (one minute, tag "catalog"), the distributed memory cache, the partitioned "search" rate limiter (five per ten seconds per signed-in user or client address, with Retry-After), response compression (Brotli and gzip, HTTPS allowed) and the inventory client.
 - `CatalogCacheEviction.cs`: a decorator around EfProductService that evicts the "catalog" tag after every successful product write, whichever API or page made it.
 - CatalogEndpoints: CacheOutput on the list and the item, the search limiter, and `GET /api/catalog/{id}/availability` (503 Problem Details when the warehouse cannot answer). Program.cs: AddStorePerformance, and after UseAntiforgery a UseWhen branch that compresses /api/catalog only, then UseRateLimiter and UseOutputCache: 88 lines.
@@ -173,7 +173,7 @@ info : Adding PackageReference for package 'Microsoft.Extensions.Http.Resilience
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
 info : Package 'Microsoft.Extensions.Http.Resilience' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.Extensions.Http.Resilience' version '10.11.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
@@ -703,7 +703,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/status` returned **200** (no Content-Encoding header)
 
   ```text
-  {"status":"Operational","timestamp":"2026-11-03T16:23:37.6603165Z"}
+  {"status":"Operational","timestamp":"2026-11-03T17:06:54.4574016Z"}
   ```
 
 - `GET /api/catalog/1/availability` returned **200**
@@ -751,7 +751,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/3/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-9655d86d399dfcb5a512a5f99d83cc6e-dee2e2e92cc...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-a0bb528c2b6551b4a2bda658493c7d22-ec3d46d388f...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -767,7 +767,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-201b626c77d27f3867c11f5f858c5608-d475bdbe0f7...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-d9bbb0c3b65a67b7d5e6da2380f63410-8ee8a0dd44a...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -779,7 +779,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-9c6a581053e1d5d5d532733d12359100-06e533ceba2...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-8615b35c4ee29a0a061ddd01b0efa654-fce1bca976f...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -823,7 +823,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/search?q=trail` returned **429** (Retry-After: 9)
 
   ```text
-  {"title":"Too Many Requests","status":429,"traceId":"00-8c1d39b96429e3ba23ffa56f610d7dae-be64ad6193f61883-02","correlationId":"2868ea256846404aabf6397ea394b9f8"}
+  {"title":"Too Many Requests","status":429,"traceId":"00-c887080081162f5ee1d55f0426ba3d03-32863c32dd8559fb-02","correlationId":"ae4acbb5348947f6939daa7c5641f0d4"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -897,7 +897,7 @@ The distributed cache had nothing under key, so cached is null and the next line
 
 ## What the Activity adds
 
-The original Activity needs a Redis server (not verifiable here), a Redis lease helper, and a webhook. This one replaces the stock cache-aside with HybridCache (Microsoft.Extensions.Caching.Hybrid 10.11.0): `GetOrCreateAsync` lets one caller fill a missing entry while concurrent callers wait for it, and it keeps the entry in memory and in the registered IDistributedCache.
+The original Activity needs a Redis server (not verifiable here), a Redis lease helper, and a webhook. This one replaces the stock cache-aside with HybridCache (Microsoft.Extensions.Caching.Hybrid 10.11.0): `GetOrCreateAsync` lets one caller fill a missing entry while concurrent callers wait for it, and it keeps the entry in this process's memory. It adds a second level only when an out-of-process IDistributedCache such as Redis is registered; with this app's AddDistributedMemoryCache it stays a memory cache (Microsoft Learn, "HybridCache library in ASP.NET Core", Cache storage).
 
 Checked: ten concurrent requests for an uncached SKU made exactly one call to InventoryService and all ten got 200 with 3 available; the timeout behavior is unchanged; requests.http passed with the checkpoint's results.
 
@@ -905,7 +905,7 @@ The reader-path check rebuilt `AdventureWorks/Chapter12-Activity` from the Chapt
 
 ### Activity: one fill for many concurrent misses
 
-Work in a copy of the Chapter 12 checkpoint folder; Chapter 13 starts from the checkpoint. With cache-aside, every request that misses calls the service, so ten requests at once for an uncached SKU make ten calls (a cache stampede). HybridCache (the .NET extensions' two-level cache) lets one caller fill the entry while the others wait for it. It keeps entries in memory and, when an IDistributedCache is registered, as this app's is, in that cache too.
+Work in a copy of the Chapter 12 checkpoint folder; Chapter 13 starts from the checkpoint. With cache-aside, every request that misses calls the service, so ten requests at once for an uncached SKU make ten calls (a cache stampede). HybridCache (the .NET extensions' two-level cache) lets one caller fill the entry while the others wait for it. It keeps entries in this process's memory, and adds a second level only when an out-of-process IDistributedCache such as Redis is registered; the in-memory one this app registers (AddDistributedMemoryCache) does not count.
 
 Run this from the `AdventureWorks` folder.
 
@@ -922,7 +922,7 @@ info : Adding PackageReference for package 'Microsoft.Extensions.Caching.Hybrid'
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
 info : Package 'Microsoft.Extensions.Caching.Hybrid' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.Extensions.Caching.Hybrid' version '10.11.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
@@ -934,8 +934,10 @@ In `AdventureWorks/InventoryClient.cs`, replace the StockAvailability class with
 ```csharp
 // Activity: HybridCache instead of cache-aside. GetOrCreateAsync
 // lets one caller fill a missing entry while the others wait for
-// it, so ten requests at once make one call. It keeps entries in
-// memory and, when one is registered, in IDistributedCache too.
+// it, so ten requests at once make one call. Entries live in this
+// process's memory. HybridCache adds a second level only when an
+// out-of-process IDistributedCache, such as Redis, is registered;
+// AddDistributedMemoryCache does not count.
 public sealed class StockAvailability(HybridCache cache,
     InventoryClient client)
 {
@@ -999,7 +1001,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/status` returned **200** (no Content-Encoding header)
 
   ```text
-  {"status":"Operational","timestamp":"2026-11-03T16:25:23.408857Z"}
+  {"status":"Operational","timestamp":"2026-11-03T17:08:27.2470908Z"}
   ```
 
 - `GET /api/catalog/1/availability` returned **200**
@@ -1047,7 +1049,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/3/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-0578a89ffd9a717a82e2488dd64519bb-691319d131a...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-5559b0fa431d7fbffcf4a11142eea40d-8f608fb8029...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -1063,7 +1065,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-9ad9833859cd656060edf9f475a22378-382856a790a...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-ceaa3f5c350a7353e110c85fb328f547-554c6185e70...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -1075,7 +1077,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-1ee900644c623492df3a46e159576338-6400c0c5a6a...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-4d61f6fcacccee583eba8fc6a88d7f4f-6a8dbedb3bf...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -1119,7 +1121,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/search?q=trail` returned **429** (Retry-After: 9)
 
   ```text
-  {"title":"Too Many Requests","status":429,"traceId":"00-2f11adfa49087d8be7f4d562a40276f5-4ec90329837008f4-02","correlationId":"506d88ed792848feb7aab60faf45af68"}
+  {"title":"Too Many Requests","status":429,"traceId":"00-49ed0c538cf73e501936eefb97b861a8-c06335ffcda8c917-02","correlationId":"4cc61acaea234a0ca072e21009430728"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**

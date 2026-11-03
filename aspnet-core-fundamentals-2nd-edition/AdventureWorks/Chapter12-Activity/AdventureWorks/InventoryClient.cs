@@ -25,8 +25,10 @@ public sealed class InventoryClient(HttpClient http)
 
 // Activity: HybridCache instead of cache-aside. GetOrCreateAsync
 // lets one caller fill a missing entry while the others wait for
-// it, so ten requests at once make one call. It keeps entries in
-// memory and, when one is registered, in IDistributedCache too.
+// it, so ten requests at once make one call. Entries live in this
+// process's memory. HybridCache adds a second level only when an
+// out-of-process IDistributedCache, such as Redis, is registered;
+// AddDistributedMemoryCache does not count.
 public sealed class StockAvailability(HybridCache cache,
     InventoryClient client)
 {

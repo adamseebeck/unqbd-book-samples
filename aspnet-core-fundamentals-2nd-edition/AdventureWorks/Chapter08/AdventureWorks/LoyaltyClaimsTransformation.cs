@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AdventureWorks;
 
-// Adds the stored loyalty number as a claim. It can run more than
-// once per request, so it skips a principal that already has one.
+// Adds the stored loyalty number as a claim, on a clone. The
+// principal the authentication handler built stays unchanged,
+// so running again still leaves exactly one loyalty claim. A
+// principal that already has the claim comes back unchanged,
+// with no database lookup.
 public sealed class LoyaltyClaimsTransformation(
     UserManager<ApplicationUser> users) : IClaimsTransformation
 {

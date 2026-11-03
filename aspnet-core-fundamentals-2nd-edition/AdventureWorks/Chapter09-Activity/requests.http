@@ -39,6 +39,7 @@ Content-Type: application/json
 
 ###
 # A page redirects to sign in instead. Expect 302
+# @no-redirect
 GET {{host}}/Admin
 
 ###
@@ -84,6 +85,7 @@ Content-Type: application/json
 ###
 # A page sends a signed-in user who fails its policy to the
 # access-denied page. Expect 302
+# @no-redirect
 GET {{host}}/Products/Edit/1
 
 ###
@@ -136,6 +138,7 @@ POST {{host}}/dev/sign-in/riley
 
 ###
 # Under 21: sent to the access-denied page. Expect 302
+# @no-redirect
 GET {{host}}/Products/Restricted
 
 ###

@@ -23,11 +23,11 @@ The AdventureWorks store app at the end of Chapter 10. The catalog, orders and s
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-dotnet user-secrets set Training:Password "Practice-Pass-2026!"
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
+dotnet user-secrets set Training:Password "Practice-Pass-2026!" `
+    --project AdventureWorks
 dotnet run --project AdventureWorks
 ```
 

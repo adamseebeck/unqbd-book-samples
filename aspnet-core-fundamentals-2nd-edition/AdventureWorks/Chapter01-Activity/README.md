@@ -8,7 +8,7 @@ It adds `EnvironmentLoggingMiddleware`, which logs the environment name for each
 
 From this folder, the one that holds global.json:
 
-```shell
+```powershell
 dotnet run --project AdventureWorks
 ```
 
@@ -16,7 +16,7 @@ In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch
 
 To see the middleware switch off, run in Staging instead. The command-line value overrides the launch profile's environment variable:
 
-```shell
+```powershell
 dotnet run --project AdventureWorks -- --environment Staging
 ```
 

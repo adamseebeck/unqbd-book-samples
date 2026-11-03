@@ -8,26 +8,30 @@ It adds validated `PaymentOptions` (Core), their appsettings.json section, and a
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-dotnet user-secrets set PaymentOptions:TimeoutSeconds 45
-dotnet run
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
+dotnet user-secrets set PaymentOptions:TimeoutSeconds 45 `
+    --project AdventureWorks
+dotnet run --project AdventureWorks
 ```
 
-These commands run in the web project folder. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
-Then check precedence and validation, still in the AdventureWorks folder:
+Then check precedence and validation, from this folder too:
 
-```shell
-dotnet run -- --PaymentOptions:TimeoutSeconds=50
-dotnet user-secrets set PaymentOptions:TimeoutSeconds 100
-dotnet run
-dotnet user-secrets set PaymentOptions:TimeoutSeconds 30
-dotnet run -- --environment Production
+```powershell
+dotnet run --project AdventureWorks -- `
+    --PaymentOptions:TimeoutSeconds=50
+dotnet user-secrets set PaymentOptions:TimeoutSeconds 100 `
+    --project AdventureWorks
+dotnet run --project AdventureWorks
+dotnet user-secrets set PaymentOptions:TimeoutSeconds 30 `
+    --project AdventureWorks
+dotnet run --project AdventureWorks -- --environment Production
 ```
 
-The first run reports 50. With 100 stored, startup stops with an OptionsValidationException naming TimeoutSeconds. With 30 restored it starts again, and in Production `/api/payment/config` returns 404. The checkpoints share one UserSecretsId, so remove the Activity's value when you finish: `dotnet user-secrets remove PaymentOptions:TimeoutSeconds`.
+The first run reports 50. With 100 stored, startup stops with an OptionsValidationException naming TimeoutSeconds. With 30 restored it starts again, and in Production `/api/payment/config` returns 404. The checkpoints share one UserSecretsId, so remove the Activity's value when you finish: `dotnet user-secrets remove PaymentOptions:TimeoutSeconds --project AdventureWorks`.
 
 ## Sending requests
 

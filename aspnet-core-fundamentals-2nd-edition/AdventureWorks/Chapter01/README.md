@@ -8,7 +8,7 @@ The `AdventureWorks` folder is the web project, and `AdventureWorks.slnx` is the
 
 From this folder, the one that holds global.json:
 
-```shell
+```powershell
 dotnet run --project AdventureWorks
 ```
 

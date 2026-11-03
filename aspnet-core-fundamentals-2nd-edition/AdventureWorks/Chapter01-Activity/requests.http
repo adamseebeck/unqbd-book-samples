@@ -7,6 +7,7 @@
 
 ###
 # The root redirects to the status endpoint. Expect 302
+# @no-redirect
 GET {{host}}/
 
 ###

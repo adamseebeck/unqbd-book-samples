@@ -14,20 +14,21 @@ The AdventureWorks store app at the end of Chapter 2: the Chapter 1 host split i
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
 dotnet run --project AdventureWorks
 ```
 
-The first three lines store Chapter 2's harmless User Secret outside the project (Step 5); run them once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+The first command stores Chapter 2's harmless User Secret outside the project (Step 5); run it once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
-To see the 503 branch, start with checkout switched off; to see startup validation stop the host, start with an invalid value. Run these in the AdventureWorks folder:
+To see the 503 branch, start with checkout switched off; to see startup validation stop the host, start with an invalid value. Run these from this folder too:
 
-```shell
-dotnet run -- --FeatureFlags:EnableNewCheckout=false
-dotnet run -- --FeatureFlags:MaxCartItems=0
+```powershell
+dotnet run --project AdventureWorks -- `
+    --FeatureFlags:EnableNewCheckout=false
+dotnet run --project AdventureWorks -- `
+    --FeatureFlags:MaxCartItems=0
 ```
 
 The second command ends with an OptionsValidationException that names MaxCartItems.

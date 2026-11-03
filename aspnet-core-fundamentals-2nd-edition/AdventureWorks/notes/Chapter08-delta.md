@@ -147,7 +147,7 @@ public sealed class RefreshToken
 }
 ```
 
-Create `AdventureWorks/LoyaltyClaimsTransformation.cs` (32 lines).
+Create `AdventureWorks/LoyaltyClaimsTransformation.cs` (35 lines).
 
 ```csharp
 using System.Security.Claims;
@@ -157,8 +157,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AdventureWorks;
 
-// Adds the stored loyalty number as a claim. It can run more than
-// once per request, so it skips a principal that already has one.
+// Adds the stored loyalty number as a claim, on a clone. The
+// principal the authentication handler built stays unchanged,
+// so running again still leaves exactly one loyalty claim. A
+// principal that already has the claim comes back unchanged,
+// with no database lookup.
 public sealed class LoyaltyClaimsTransformation(
     UserManager<ApplicationUser> users) : IClaimsTransformation
 {
@@ -1039,7 +1042,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ## A breakpoint for this chapter
 
-Set a breakpoint in `AdventureWorks/LoyaltyClaimsTransformation.cs` on line 27:
+Set a breakpoint in `AdventureWorks/LoyaltyClaimsTransformation.cs` on line 30:
 
 ```csharp
 var clone = principal.Clone();
@@ -1059,7 +1062,7 @@ The Bearer handler has validated the token and built the principal from its clai
 
 ## What the Activity adds
 
-The Activity needs no new production code; it exercises the checkpoint (sign in, inspect the cookie flags, call the Bearer API, rotate and replay a refresh token, change the stored loyalty number). The companion's copy adds `LoyaltyEditor.cs`, a Development-only `PUT /dev/loyalty/{name}` that changes the stored value the way a back-office tool would, so the last step can be scripted. Checked: signed in as casey, `/api/account/me` lists `["AW-001"]`; after the change, signing out and in again lists `["AW-901"]`, exactly once, because the transformation skips a principal that already has the claim and the claim is not stored in the cookie.
+The Activity needs no new production code; it exercises the checkpoint (sign in, inspect the cookie flags, call the Bearer API, rotate and replay a refresh token, change the stored loyalty number). The companion's copy adds `LoyaltyEditor.cs`, a Development-only `PUT /dev/loyalty/{name}` that changes the stored value the way a back-office tool would, so the last step can be scripted. Checked: signed in as casey, `/api/account/me` lists `["AW-001"]`; after the change, signing out and in again lists `["AW-901"]`, exactly once: the transformation adds the claim to a clone of the principal the cookie handler built, so each request starts again from a principal without it, and the claim is never stored in the cookie.
 
 The concurrent-refresh step is scripted too: `RefreshRace.ps1` in the Activity folder signs in casey, then sends two refreshes of the same refresh token from one HttpClient before either answers, for five rounds. Run on RC3 in Windows PowerShell 5.1 (`.\RefreshRace.ps1` from the working folder, with the Activity app running), it printed:
 

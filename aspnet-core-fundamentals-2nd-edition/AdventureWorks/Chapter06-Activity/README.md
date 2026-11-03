@@ -8,10 +8,9 @@ It adds a customer profile page at `/Customer/Profile` over one fixed, fictional
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
 dotnet run --project AdventureWorks
 ```
 

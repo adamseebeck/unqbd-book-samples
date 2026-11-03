@@ -1,9 +1,10 @@
 # Chapter 8 Activity. Start the app first:
 #   dotnet run --project AdventureWorks
 # (https://localhost:7001 and http://localhost:5001, Development).
-# Set the test password once first (Step 7), in the AdventureWorks
-# folder:
-# dotnet user-secrets set Training:Password "Practice-Pass-2026!"
+# Set the test password once first (Chapter 8, Step 3), from the
+# working folder, typed as one line:
+#   dotnet user-secrets set Training:Password
+#     "Practice-Pass-2026!" --project AdventureWorks
 # Each "Expect" line is the status you should see. Send them in
 # order: later requests use earlier tokens and the cookie.
 
@@ -68,6 +69,7 @@ GET {{host}}/api/account/me
 
 ###
 # A page redirects to the sign-in page instead. Expect 302
+# @no-redirect
 GET {{host}}/Account/Profile
 
 ###

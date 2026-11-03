@@ -8,11 +8,11 @@ It adds `GET /api/orders/{id}/items`, an order's lines as a paged sub-collection
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-dotnet user-secrets set Training:Password "Practice-Pass-2026!"
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
+dotnet user-secrets set Training:Password "Practice-Pass-2026!" `
+    --project AdventureWorks
 dotnet run --project InventoryService
 ```
 

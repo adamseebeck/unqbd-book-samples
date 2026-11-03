@@ -9,6 +9,7 @@
 
 ###
 # Chapter 1's routes still answer. Expect 302
+# @no-redirect
 GET {{host}}/
 
 ###

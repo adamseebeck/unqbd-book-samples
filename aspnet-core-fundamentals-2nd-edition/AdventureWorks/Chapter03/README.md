@@ -18,16 +18,15 @@ Order 500 makes the in-memory repository throw a simulated storage failure, so y
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
 dotnet run --project AdventureWorks
 ```
 
-The first three lines store Chapter 2's harmless User Secret outside the project (Step 5); run them once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+The first command stores Chapter 2's harmless User Secret outside the project (Step 5); run it once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
-To compare the unexpected-error response, run in Production from the AdventureWorks folder with `dotnet run -- --environment Production` and request `/api/orders/500` again.
+To compare the unexpected-error response, run in Production from this folder with `dotnet run --project AdventureWorks -- --environment Production` and request `/api/orders/500` again.
 
 ## Sending requests
 

@@ -8,10 +8,9 @@ It adds `HeaderOnlyForms`, a separate seven-line host on http://localhost:5107 w
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
 dotnet run --project AdventureWorks
 dotnet run --project HeaderOnlyForms
 ```

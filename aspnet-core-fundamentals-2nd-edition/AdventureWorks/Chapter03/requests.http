@@ -45,6 +45,7 @@ GET {{host}}/missing
 
 ###
 # Chapter 1 and 2 routes still answer. Expect 302
+# @no-redirect
 GET {{host}}/
 
 ###

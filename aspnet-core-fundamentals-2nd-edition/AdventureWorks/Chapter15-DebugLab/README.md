@@ -6,11 +6,11 @@ A copy of the Chapter 15 checkpoint for the chapter's debugging lab. It adds a v
 
 From this folder, the one that holds global.json:
 
-```shell
-cd AdventureWorks
-dotnet user-secrets set FeatureFlags:MaxCartItems 30
-dotnet user-secrets set Training:Password "Practice-Pass-2026!"
-cd ..
+```powershell
+dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
+    --project AdventureWorks
+dotnet user-secrets set Training:Password "Practice-Pass-2026!" `
+    --project AdventureWorks
 dotnet run --project InventoryService
 ```
 

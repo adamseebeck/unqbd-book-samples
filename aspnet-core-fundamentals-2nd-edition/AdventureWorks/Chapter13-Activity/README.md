@@ -26,6 +26,7 @@ The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `
 
 ```powershell
 Remove-Item cookies.txt -ErrorAction SilentlyContinue
+$p2 = 'page=2&pageSize=2'
 
 # The orders collection belongs to a signed-in customer.
 # Expect 401
@@ -153,26 +154,25 @@ curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
     { "productId": 2, "quantity": 1 },
     { "productId": 4, "quantity": 1 } ] }
 '@ | Set-Content body.json
-curl.exe -s -D - -o three.json -b cookies.txt -c cookies.txt `
+curl.exe -s -D - -o o3.json -b cookies.txt -c cookies.txt `
     -H "Content-Type: application/json" `
     -H "X-CSRF-TOKEN: $($token.token)" `
     --data-binary "@body.json" https://localhost:7001/api/orders
-$three = Get-Content three.json | ConvertFrom-Json
+$o3 = Get-Content o3.json | ConvertFrom-Json
 
 # Two lines per page; the Link header points to page 2. Expect 200
 # with "totalCount": 3, and it has a Link header
-$lines = "https://localhost:7001/api/orders/$($three.id)/items"
 curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
-    "$($lines)?pageSize=2"
+    "https://localhost:7001/api/orders/$($o3.id)/items?pageSize=2"
 
 # The second page holds the third line. Expect 200 with
 # "productId": 4, and it has no Link header
 curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
-    "$($lines)?page=2&pageSize=2"
+    "https://localhost:7001/api/orders/$($o3.id)/items?$p2"
 
 # Expect 400
 curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
-    "$($lines)?pageSize=0"
+    "https://localhost:7001/api/orders/$($o3.id)/items?pageSize=0"
 
 # No such order. Expect 404
 curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
@@ -181,7 +181,7 @@ curl.exe -i -w "\n" -b cookies.txt -c cookies.txt `
 # Expect 204
 curl.exe -i -w "\n" -X DELETE -b cookies.txt -c cookies.txt `
     -H "X-CSRF-TOKEN: $($token.token)" `
-    "https://localhost:7001/api/orders/$($three.id)"
+    "https://localhost:7001/api/orders/$($o3.id)"
 
 # The Admin removes the cancelled order for good. Expect 200
 curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
@@ -200,7 +200,7 @@ curl.exe -i -w "\n" -X DELETE -b cookies.txt -c cookies.txt `
 # Expect 204
 curl.exe -i -w "\n" -X DELETE -b cookies.txt -c cookies.txt `
     -H "X-CSRF-TOKEN: $($averyToken.token)" `
-    "https://localhost:7001/api/admin/orders/$($three.id)"
+    "https://localhost:7001/api/admin/orders/$($o3.id)"
 
 # Expect 204
 curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `

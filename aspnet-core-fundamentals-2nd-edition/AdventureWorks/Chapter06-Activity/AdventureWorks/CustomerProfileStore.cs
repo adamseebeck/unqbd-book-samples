@@ -4,7 +4,7 @@ using AdventureWorks.Pages.Customer;
 namespace AdventureWorks;
 
 // Fictional local data for the Activity: one fixed customer.
-// Chapter 8 takes the customer from the signed-in user instead.
+// Real profile pages read the signed-in user (Chapter 8).
 public sealed class CustomerProfileStore
 {
     private readonly Lock _gate = new();

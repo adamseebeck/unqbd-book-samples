@@ -9,6 +9,10 @@
 @host = https://localhost:7001
 
 ###
+# Start signed out, whatever an earlier run left. Expect 204
+POST {{host}}/dev/sign-out
+
+###
 # Placing an order needs a signed-in user. Expect 401
 POST {{host}}/api/orders
 Content-Type: application/json

@@ -68,9 +68,9 @@ public sealed class OrderService(IOrderRepository orders,
     }
 
     public async Task<OrderPage> ListAsync(string ownerId,
-        int page, int pageSize, CancellationToken ct = default) =>
-        new(await orders.ListAsync(ownerId, page, pageSize), page,
-            pageSize, await orders.CountAsync(ownerId));
+        int page, int pageSize) =>
+        new(await orders.ListAsync(ownerId, page, pageSize),
+            await orders.CountAsync(ownerId));
 
     // The same staging and version check as CancelAsync, for the
     // notes the customer may change.

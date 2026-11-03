@@ -8,7 +8,7 @@ public sealed record Order(int Id, string OrderNumber,
     bool Archived, string? Notes, Guid Version,
     IReadOnlyList<OrderItem> Items);
 
-// One row of an owner's order report.
+// One row of an owner's order list.
 public sealed record OrderSummary(int Id, string OrderNumber,
     decimal Total, string Status, bool Archived);
 

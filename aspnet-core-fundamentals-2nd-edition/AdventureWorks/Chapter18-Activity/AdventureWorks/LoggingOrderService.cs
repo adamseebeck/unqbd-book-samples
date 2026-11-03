@@ -20,8 +20,8 @@ public sealed class LoggingOrderService(IOrderService inner,
             inner.CancelAsync(ownerId, id, ct));
 
     public Task<OrderPage> ListAsync(string ownerId, int page,
-        int pageSize, CancellationToken ct = default) =>
-        inner.ListAsync(ownerId, page, pageSize, ct);
+        int pageSize) =>
+        inner.ListAsync(ownerId, page, pageSize);
 
     public Task<OrderResult> UpdateNotesAsync(string ownerId,
         int id, string? notes, Guid version,

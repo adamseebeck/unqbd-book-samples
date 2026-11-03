@@ -51,8 +51,8 @@ public sealed class MeteredOrderService(IOrderService inner,
             ownerId, id, notes, version, ct));
 
     public Task<OrderPage> ListAsync(string ownerId, int page,
-        int pageSize, CancellationToken ct = default) =>
-        inner.ListAsync(ownerId, page, pageSize, ct);
+        int pageSize) =>
+        inner.ListAsync(ownerId, page, pageSize);
 
     async Task<OrderResult> TrackAsync(string operation,
         Func<Task<OrderResult>> call)

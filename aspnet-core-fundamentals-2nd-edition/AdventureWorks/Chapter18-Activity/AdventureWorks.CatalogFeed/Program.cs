@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-// Chapter 18 Activity: a read-only price feed small enough for
+// Chapter 18 Activity: a read-only catalog feed small enough for
 // Native AOT. The slim builder, a source-generated JSON context
 // and no reflection; the store app itself is not AOT-compatible.
 var builder = WebApplication.CreateSlimBuilder(args);

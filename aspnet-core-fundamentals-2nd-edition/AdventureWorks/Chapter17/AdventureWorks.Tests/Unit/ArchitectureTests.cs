@@ -18,6 +18,6 @@ public sealed class ArchitectureTests
         Assert.DoesNotContain(used, name =>
             name.StartsWith("Microsoft.AspNetCore") ||
             name.StartsWith("Microsoft.EntityFrameworkCore") ||
-            name.StartsWith("AdventureWorks."));
+            name.StartsWith("AdventureWorks"));
     }
 }

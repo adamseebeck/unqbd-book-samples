@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AdventureWorks.Infrastructure.Data;
 
-// Rules the database enforces, whatever code writes to it.
+// The database's rules; SQLite does not enforce HasMaxLength.
 internal sealed class ProductConfiguration
     : IEntityTypeConfiguration<ProductEntity>
 {
@@ -31,7 +31,7 @@ internal sealed class OrderConfiguration
         order.HasIndex(o => o.OrderNumber).IsUnique();
         order.Property(o => o.Status).HasMaxLength(20);
         order.Property(o => o.Notes).HasMaxLength(500);
-        // Each UPDATE checks this value; see SaveChangesAsync.
+        // Tracked UPDATEs check this value; see SaveChangesAsync.
         order.Property(o => o.Version).IsConcurrencyToken();
         order.HasOne<ApplicationUser>().WithMany()
             .HasForeignKey(o => o.OwnerId)

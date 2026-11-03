@@ -7,8 +7,8 @@
 # is cancelled and then deleted, so it can run again.
 
 @host = https://localhost:7001
-# Activity: the line items of the order the Activity places
-@lines = {{host}}/api/orders/{{three.response.body.$.id}}/items
+# Activity: the second page of the order's line items
+@p2 = page=2&pageSize=2
 
 ###
 # The orders collection belongs to a signed-in customer.
@@ -125,7 +125,7 @@ Accept: text/html
 
 ###
 # Activity: an order with three lines. Expect 201
-# @name three
+# @name o3
 POST {{host}}/api/orders
 Content-Type: application/json
 X-CSRF-TOKEN: {{token.response.body.$.token}}
@@ -137,16 +137,16 @@ X-CSRF-TOKEN: {{token.response.body.$.token}}
 ###
 # Two lines per page; the Link header points to page 2.
 # Expect 200 with "totalCount": 3, and it has a Link header
-GET {{lines}}?pageSize=2
+GET {{host}}/api/orders/{{o3.response.body.$.id}}/items?pageSize=2
 
 ###
 # The second page holds the third line.
 # Expect 200 with "productId": 4, and it has no Link header
-GET {{lines}}?page=2&pageSize=2
+GET {{host}}/api/orders/{{o3.response.body.$.id}}/items?{{p2}}
 
 ###
 # Expect 400
-GET {{lines}}?pageSize=0
+GET {{host}}/api/orders/{{o3.response.body.$.id}}/items?pageSize=0
 
 ###
 # No such order. Expect 404
@@ -154,7 +154,7 @@ GET {{host}}/api/orders/9999/items
 
 ###
 # Expect 204
-DELETE {{host}}/api/orders/{{three.response.body.$.id}}
+DELETE {{host}}/api/orders/{{o3.response.body.$.id}}
 X-CSRF-TOKEN: {{token.response.body.$.token}}
 
 ###
@@ -173,7 +173,7 @@ X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
 
 ###
 # Expect 204
-DELETE {{host}}/api/admin/orders/{{three.response.body.$.id}}
+DELETE {{host}}/api/admin/orders/{{o3.response.body.$.id}}
 X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
 
 ###

@@ -16,7 +16,8 @@ public sealed class CreateModel(IProductService products,
     [BindProperty]
     public IFormFile? Upload { get; set; }
 
-    public string? StatusMessage { get; private set; }
+    [TempData]
+    public string? StatusMessage { get; set; }
 
     public void OnGet() { }
 
@@ -36,7 +37,8 @@ public sealed class CreateModel(IProductService products,
         StatusMessage = "Input validated for " +
             $"{Input.Quantity} x {product!.Name}. " +
             "No order has been placed.";
-        return Page();
+        // Redirect, so a refresh cannot store a second file.
+        return RedirectToPage();
     }
 
     async Task SavePrivateCopyAsync(IFormFile upload)

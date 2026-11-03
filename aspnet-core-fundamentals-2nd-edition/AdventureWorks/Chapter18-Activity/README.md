@@ -2,7 +2,7 @@
 
 This is a worked solution to the chapter's Activity, built in a copy of the Chapter 18 checkpoint. Try the Activity yourself first. Chapter 18 is the last chapter; `../Chapter18` is the finished app.
 
-It adds `AdventureWorks.CatalogFeed`, a small read-only price feed published with Native AOT, and `Dockerfile.aot`, which compiles it in the -aot SDK image and runs it on runtime-deps: `docker build -f Dockerfile.aot -t adventureworks-feed:ch18 .`, then `docker run --rm -p 8081:8080 adventureworks-feed:ch18` and http://localhost:8081/feed.
+It adds `AdventureWorks.CatalogFeed`, a small read-only catalog feed published with Native AOT, and `Dockerfile.aot`, which compiles it in the -aot SDK image and runs it on runtime-deps: `docker build -f Dockerfile.aot -t adventureworks-feed:ch18 .`, then `docker run --rm -p 8081:8080 adventureworks-feed:ch18` and http://localhost:8081/feed.
 
 ## Run it
 

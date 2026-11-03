@@ -28,6 +28,10 @@ The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `
 Remove-Item cookies.txt -ErrorAction SilentlyContinue
 $inventory = 'http://127.0.0.1:42132'
 
+# Start signed out, whatever an earlier run left. Expect 204
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-out
+
 # Start the warehouse stand-in clean. Expect 204
 curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
     "$inventory/control/reset"

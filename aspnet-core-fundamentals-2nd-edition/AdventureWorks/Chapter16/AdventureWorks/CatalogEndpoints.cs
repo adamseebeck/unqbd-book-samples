@@ -2,6 +2,7 @@ using AdventureWorks.Core;
 using AdventureWorks.Infrastructure.Data;
 using Microsoft.AspNetCore.OutputCaching;
 using Polly.CircuitBreaker;
+using Polly.RateLimiting;
 using Polly.Timeout;
 
 namespace AdventureWorks;
@@ -99,7 +100,8 @@ public static class CatalogEndpoints
                     found.Available });
         }
         catch (Exception ex) when (ex is HttpRequestException
-            or TimeoutRejectedException or BrokenCircuitException)
+            or TimeoutRejectedException or BrokenCircuitException
+            or RateLimiterRejectedException)
         {
             return Results.Problem(
                 "The warehouse did not answer; try again soon.",

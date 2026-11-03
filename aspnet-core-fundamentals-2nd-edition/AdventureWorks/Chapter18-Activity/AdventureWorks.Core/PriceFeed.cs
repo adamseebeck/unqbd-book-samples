@@ -14,7 +14,7 @@ public static class PriceFeed
     public static async Task<int> CountAsync(Stream body,
         CancellationToken ct)
     {
-        using var reader = new StreamReader(body, Strict);
+        using var reader = new StreamReader(body, Strict, false);
         var records = 0;
         while (await reader.ReadLineAsync(ct) is { } line)
         {

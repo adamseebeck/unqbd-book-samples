@@ -27,6 +27,10 @@ The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `
 ```powershell
 Remove-Item cookies.txt -ErrorAction SilentlyContinue
 
+# Start signed out, whatever an earlier run left. Expect 204
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-out
+
 # Placing an order needs a signed-in user. Expect 401
 @'
 { "items": [ { "productId": 1, "quantity": 2 } ] }

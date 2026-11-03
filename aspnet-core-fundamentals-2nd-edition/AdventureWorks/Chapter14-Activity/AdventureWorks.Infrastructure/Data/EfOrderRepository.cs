@@ -8,9 +8,6 @@ public sealed class EfOrderRepository(AdventureWorksDbContext db)
 {
     public async Task<Order?> GetByIdAsync(int id)
     {
-        if (id == 500) // Chapter 3's unexpected-error demo
-            throw new InvalidOperationException(
-                "Simulated storage failure.");
         var row = await db.Orders.AsNoTracking()
             .Include(o => o.Items)
             .SingleOrDefaultAsync(o => o.Id == id);

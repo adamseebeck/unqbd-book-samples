@@ -10,7 +10,7 @@ The order form and the API validate input only; no order is placed.
 | `AdventureWorks.Core` | Domain types and contracts |
 | `AdventureWorks.Infrastructure` | Implementations of the Core contracts |
 
-`AdventureWorks.slnx` lists all three. Core references nothing; Infrastructure references Core; Web references both.
+`AdventureWorks.slnx` lists every project in this folder. Core references nothing; Infrastructure references Core; Web references both.
 
 ## Run it
 
@@ -132,8 +132,8 @@ $token = [regex]::Match($page, $pattern).Groups[1].Value
 'test upload bytes' | Set-Content note.txt
 $show = @('-s', '-w', '\nHTTP/%{http_version} %{response_code}\n')
 
-# A valid submission with an upload. Expect 200
-curl.exe @show -b cookies.txt `
+# A valid submission with an upload. Expect 200 (after a redirect)
+curl.exe @show -L -b cookies.txt -c cookies.txt `
     -F "__RequestVerificationToken=$token" `
     -F "Input.ProductId=1" -F "Input.Quantity=2" `
     -F "Input.Email=ada@example.com" -F "Upload=@note.txt" `
@@ -141,4 +141,4 @@ curl.exe @show -b cookies.txt `
     Select-String 'HTTP/|Input validated'
 ```
 
-The page reports "Input validated for 2 x Trail Helmet. No order has been placed." The file is now in AdventureWorks/PrivateUploads under a generated .bin name; no URL serves it. Delete it when you finish.
+The post answers 302 and curl.exe follows it to the page, which reports "Input validated for 2 x Trail Helmet. No order has been placed." once: the redirect means a browser refresh repeats the GET, not the upload. The file is now in AdventureWorks/PrivateUploads under a generated .bin name; no URL serves it. Delete it when you finish.

@@ -5,11 +5,16 @@
 # both as startup projects). The app listens on
 # https://localhost:7001, InventoryService on 127.0.0.1:42132.
 # Each "Expect" line is the status you should see. Send them in
-# order, within a minute of starting the app: the resilience
+# order: the eighteen resilience requests within about 30
+# seconds, and the six searches within ten. The resilience
 # requests count attempts and depend on the breaker's history.
 
 @host = https://localhost:7001
 @inventory = http://127.0.0.1:42132
+
+###
+# Start signed out, whatever an earlier run left. Expect 204
+POST {{host}}/dev/sign-out
 
 ###
 # Start the warehouse stand-in clean. Expect 204

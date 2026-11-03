@@ -8,7 +8,7 @@ The AdventureWorks store app at the end of Chapter 11. Orders are placed and can
 | `AdventureWorks.Core` | Domain types and contracts |
 | `AdventureWorks.Infrastructure` | Implementations of the Core contracts |
 
-`AdventureWorks.slnx` lists all three. Core references nothing; Infrastructure references Core; Web references both.
+`AdventureWorks.slnx` lists every project in this folder. Core references nothing; Infrastructure references Core; Web references both.
 
 ## Run it
 
@@ -32,6 +32,10 @@ The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `
 
 ```powershell
 Remove-Item cookies.txt -ErrorAction SilentlyContinue
+
+# Start signed out, whatever an earlier run left. Expect 204
+curl.exe -i -w "\n" -X POST -b cookies.txt -c cookies.txt `
+    https://localhost:7001/dev/sign-out
 
 # Placing an order needs a signed-in user. Expect 401
 @'

@@ -10,7 +10,7 @@ Identity's cookie is the only cookie scheme. Pages redirect to the sign-in page;
 | `AdventureWorks.Core` | Domain types and contracts |
 | `AdventureWorks.Infrastructure` | Implementations of the Core contracts |
 
-`AdventureWorks.slnx` lists all three. Core references nothing; Infrastructure references Core; Web references both.
+`AdventureWorks.slnx` lists every project in this folder. Core references nothing; Infrastructure references Core; Web references both.
 
 ## Run it
 

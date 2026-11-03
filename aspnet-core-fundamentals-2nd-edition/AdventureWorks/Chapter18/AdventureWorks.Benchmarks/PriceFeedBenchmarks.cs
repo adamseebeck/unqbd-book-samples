@@ -4,7 +4,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace AdventureWorks.Benchmarks;
 
-// The same check two ways over 1,000 feed lines: Split makes an
+// Two checks of the same 1,000 feed lines: Split makes an
 // array and three strings a line; PriceFeed.IsRecord reads spans.
 // Each returns its count, so the work cannot be optimized away.
 [MemoryDiagnoser]

@@ -75,14 +75,14 @@ public static class OrderEndpoints
     // header (RFC 8288) and the total in the body.
     static async Task<IResult> ListOrders(IOrderService service,
         ClaimsPrincipal user, HttpContext context,
-        LinkGenerator links, CancellationToken ct,
+        LinkGenerator links,
         [Range(1, 1000)] int page = 1,
         [Range(1, 50)] int pageSize = 10)
     {
         var owner = user.FindFirstValue(
             ClaimTypes.NameIdentifier)!;
         var result =
-            await service.ListAsync(owner, page, pageSize, ct);
+            await service.ListAsync(owner, page, pageSize);
         var body = new PagedResponse<OrderSummary>(result.Items,
             page, pageSize, result.TotalCount);
         List<string> rels = [];
@@ -193,7 +193,8 @@ public static class OrderEndpoints
             user, order, StorePolicies.OrderOwner);
         if (!owner.Succeeded) return Results.Forbid();
         var result = await service.CancelAsync(
-            order.OwnerId, id, ct);
+            user.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            id, ct);
         return result.Outcome switch
         {
             OrderOutcome.Cancelled => Results.NoContent(),

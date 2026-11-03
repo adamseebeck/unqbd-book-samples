@@ -34,13 +34,13 @@ public enum OrderOutcome { Created, Updated, Cancelled, NotFound,
 public sealed record OrderResult(OrderOutcome Outcome,
     Order? Order = null, string? Error = null);
 
-public sealed record OrderPage(OrderSummary[] Items, int Page,
-    int PageSize, int TotalCount);
+public sealed record OrderPage(OrderSummary[] Items,
+    int TotalCount);
 
 public interface IOrderService
 {
     Task<OrderPage> ListAsync(string ownerId, int page,
-        int pageSize, CancellationToken ct = default);
+        int pageSize);
     Task<OrderResult> CreateAsync(string ownerId,
         CreateOrderRequest request,
         CancellationToken ct = default);

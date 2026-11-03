@@ -1,8 +1,8 @@
-# Chapter 15 debugging lab. Start InventoryService, then the app:
-#   dotnet run --project InventoryService
+# Chapter 15 debugging lab. Run the app from this folder:
 #   dotnet run --project AdventureWorks
-# (two terminals, both from this folder; in Visual Studio, set
-# both as startup projects). Each "Expect" line is the status
+# InventoryService may stay stopped: none of these requests
+# reads stock (in Visual Studio, AdventureWorks alone as the
+# startup project is enough). Each "Expect" line is the status
 # you should see. The documents exist in Development only.
 
 @host = https://localhost:7001

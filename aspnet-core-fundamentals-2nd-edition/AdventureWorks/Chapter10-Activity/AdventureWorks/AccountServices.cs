@@ -12,8 +12,8 @@ namespace AdventureWorks;
 
 public static class AccountServices
 {
-    // Visual Studio installs LocalDB. To use another server, set
-    // ConnectionStrings:SqlServer.
+    // Visual Studio's ASP.NET and data workloads install LocalDB.
+    // To use another server, set ConnectionStrings:SqlServer.
     const string LocalDb = @"Server=(localdb)\MSSQLLocalDB;"
         + "Database=AdventureWorksStore;Trusted_Connection=True";
 

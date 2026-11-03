@@ -117,7 +117,8 @@ public static class OrderEndpoints
             user, order, StorePolicies.OrderOwner);
         if (!owner.Succeeded) return Results.Forbid();
         var result = await service.CancelAsync(
-            order.OwnerId, id, ct);
+            user.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            id, ct);
         return result.Outcome == OrderOutcome.Cancelled
             ? Results.Ok(result.Order) : ToProblem(result);
     }

@@ -1,8 +1,8 @@
-# Chapter 17 Activity. Start InventoryService, then the app:
-#   dotnet run --project InventoryService
+# Chapter 17 Activity. Run the app from this folder:
 #   dotnet run --project AdventureWorks
-# (two terminals, both from this folder; in Visual Studio, set
-# both as startup projects). Each "Expect" line is the status
+# InventoryService may stay stopped: none of these requests
+# reads stock (in Visual Studio, AdventureWorks alone as the
+# startup project is enough). Each "Expect" line is the status
 # you should see. Send them in order.
 @host = https://localhost:7001
 

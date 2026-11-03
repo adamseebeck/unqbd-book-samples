@@ -41,7 +41,7 @@ public static class StoreSeed
     }
 
     // AW-0002 is jordan's. casey owns the other eleven, so her
-    // order report has two pages.
+    // order list has two pages.
     public static async Task AddOrdersAsync(
         AdventureWorksDbContext db,
         UserManager<ApplicationUser> users)

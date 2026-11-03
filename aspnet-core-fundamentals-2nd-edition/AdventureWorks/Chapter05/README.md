@@ -10,7 +10,7 @@ A product created, changed or deleted through either version shows up in the oth
 | `AdventureWorks.Core` | Domain types and contracts |
 | `AdventureWorks.Infrastructure` | Implementations of the Core contracts |
 
-`AdventureWorks.slnx` lists all three. Core references nothing; Infrastructure references Core; Web references both.
+`AdventureWorks.slnx` lists every project in this folder. Core references nothing; Infrastructure references Core; Web references both.
 
 ## Run it
 

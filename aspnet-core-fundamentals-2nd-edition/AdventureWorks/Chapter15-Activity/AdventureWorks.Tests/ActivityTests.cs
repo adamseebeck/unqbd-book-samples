@@ -42,7 +42,11 @@ public sealed class OrderServiceMockTests
     {
         _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
                 It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new OperationCanceledException());
+            .Returns((int[] _, CancellationToken token) =>
+            {
+                token.ThrowIfCancellationRequested();
+                return Task.FromResult(Array.Empty<Product>());
+            });
         using var request = new CancellationTokenSource();
         await request.CancelAsync();
 

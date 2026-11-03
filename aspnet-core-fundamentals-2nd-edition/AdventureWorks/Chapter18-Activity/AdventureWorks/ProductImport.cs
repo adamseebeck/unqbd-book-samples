@@ -8,7 +8,7 @@ namespace AdventureWorks;
 
 // Chapter 17: the Admin posts a price feed as text. The app
 // reads it as a stream, checks and counts it, and saves nothing.
-// Kestrel refuses a body over 64 KB with 413.
+// A body over 64 KB is 413.
 public static class ProductImport
 {
     public static IEndpointRouteBuilder MapProductImport(
@@ -31,6 +31,14 @@ public static class ProductImport
             var records = await PriceFeed.CountAsync(
                 context.Request.Body, ct);
             return Results.Ok(new { Records = records });
+        }
+        // Kestrel throws when a read passes 64 KB: at the first
+        // read with Content-Length, later for a chunked body.
+        catch (BadHttpRequestException tooLarge)
+            when (tooLarge.StatusCode == 413)
+        {
+            return Results.Problem("The feed is over 64 KB.",
+                statusCode: StatusCodes.Status413PayloadTooLarge);
         }
         catch (Exception ex) when (ex is FormatException
             or DecoderFallbackException)

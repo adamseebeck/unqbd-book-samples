@@ -7,7 +7,7 @@ Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Ch
 Chapter 17 measures before it optimizes: a price-feed import for the Admin that reads its body as a bounded stream, and a BenchmarkDotNet project that compares two ways to check a feed line.
 
 - Core `PriceFeed.cs`: CountAsync reads "sku,name,price" lines with a strict UTF-8 decoder, skips empty lines, and refuses a line over 1,024 characters, a record past 1,000, a quote, a missing field or a price that is not a positive number (FormatException; an invalid byte sequence is DecoderFallbackException). IsRecord checks one line through spans.
-- Web `ProductImport.cs`: `POST /api/admin/products/import` (Admin, antiforgery, text body) answers 200 `{"records":n}`, 400 with the reason, 403 for a customer, and 413 above 64 KB (RequestSizeLimit metadata, so Kestrel refuses the body before the endpoint reads it). Program.cs gains `app.MapProductImport();`: 90 lines.
+- Web `ProductImport.cs`: `POST /api/admin/products/import` (Admin, antiforgery, text body) answers 200 `{"records":n}`, 400 with the reason, 403 for a customer, and 413 Problem Details above 64 KB (RequestSizeLimit metadata sets the route's limit; the read that passes it throws BadHttpRequestException, which the endpoint catches). Program.cs gains `app.MapProductImport();`: 90 lines.
 - `AdventureWorks.Benchmarks`: a console project (`dotnet new console`) referencing Core, with BenchmarkDotNet 0.16.0-preview.2; `PriceFeedBenchmarks` compares Split with PriceFeed.IsRecord over 1,000 lines, with MemoryDiagnoser. Six projects in AdventureWorks.slnx.
 
 ## Files added or changed
@@ -24,7 +24,7 @@ Chapter 17 measures before it optimizes: a price-feed import for the Admin that 
 | (command) `dotnet add AdventureWorks.Benchmarks reference AdventureWorks.Core` | creates or edits project files |
 | (command) `dotnet add AdventureWorks.Benchmarks package BenchmarkDotNet@0.16.0-preview.2` | creates or edits project files |
 
-The reader types 131 lines of code: 125 in 3 new files and 6 new or changed in existing files, plus 7 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 139 lines of code: 133 in 3 new files and 6 new or changed in existing files, plus 7 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -91,9 +91,9 @@ PriceFeed.cs, part 2 of 2 (14 lines):
 
 ### Step 2: The import endpoint
 
-Admin only, with Chapter 9's antiforgery check like the other Admin writes. RequestSizeLimit caps this route's body at 64 KB, so Kestrel answers 413 for a larger one, with Content-Length or chunked, before the endpoint reads a byte. A feed the parser refuses is 400 with the reason.
+Admin only, with Chapter 9's antiforgery check like the other Admin writes. RequestSizeLimit caps this route's body at 64 KB. The limit applies when the endpoint reads the body: with a Content-Length over 64 KB the first read throws BadHttpRequestException before any byte reaches the code, and a chunked body throws once the read passes 64 KB. The endpoint catches it and answers its own 413 Problem Details, so nothing reaches the developer exception page. A feed the parser refuses is 400 with the reason.
 
-Create `AdventureWorks/ProductImport.cs` (42 lines).
+Create `AdventureWorks/ProductImport.cs` (50 lines).
 
 ProductImport.cs, part 1 of 2 (22 lines):
 
@@ -108,7 +108,7 @@ namespace AdventureWorks;
 
 // Chapter 17: the Admin posts a price feed as text. The app
 // reads it as a stream, checks and counts it, and saves nothing.
-// Kestrel refuses a body over 64 KB with 413.
+// A body over 64 KB is 413.
 public static class ProductImport
 {
     public static IEndpointRouteBuilder MapProductImport(
@@ -122,7 +122,7 @@ public static class ProductImport
     }
 ```
 
-ProductImport.cs, part 2 of 2 (19 lines):
+ProductImport.cs, part 2 of 2 (27 lines):
 
 ```csharp
     static async Task<IResult> ImportAsync(HttpContext context,
@@ -135,6 +135,14 @@ ProductImport.cs, part 2 of 2 (19 lines):
             var records = await PriceFeed.CountAsync(
                 context.Request.Body, ct);
             return Results.Ok(new { Records = records });
+        }
+        // Kestrel throws when a read passes 64 KB: at the first
+        // read with Content-Length, later for a chunked body.
+        catch (BadHttpRequestException tooLarge)
+            when (tooLarge.StatusCode == 413)
+        {
+            return Results.Problem("The feed is over 64 KB.",
+                statusCode: StatusCodes.Status413PayloadTooLarge);
         }
         catch (Exception ex) when (ex is FormatException
             or DecoderFallbackException)
@@ -169,7 +177,7 @@ The template "Console App" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 111 ms).
+  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 90 ms).
 Restore succeeded.
 ```
 
@@ -429,7 +437,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZkziXqR574Wg9JnZEjQrvhF5eoOzi5dfMBa9eND0vVUvXBBpZ_c5qatv96gO0jVzsTs-E_JQNK-JFukCyPFBoLQz92XPdmdcOk_Mf9k7G7PURhMIcM4Pp18fFmEB3XGpYCRcde5KzzxWzN66rK-RGbIBtYl7Jpeu2escbdha0lKg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqain6JzyQsly19LHhL62AoJoKCx6AnxCVG06RXOIzNE4EWrK-GiIauRr_KZ8XKdEwLLw3_Re02iAw241KvXjm8Y17Ln_eT9WsxbLJakYIQT4rk0RKOhlUplGfGL3rwThGYhy_LesEEzVCkoDe6-cfatIvIMDQeeK2mca1LTQdvB7A"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -441,13 +449,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-b764af0d6df1c8920083480785fdd967-afae5d0d62bb6312-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-7876f94450d3b37b29e85c8790527484-8c70da55306a12f2-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-172f64ba0abfd7c6f041667689de5790-e9b3f3acac1116ba-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-cbf0dcf737f9cb5823821341266b3283-ffc11fbc88dbe89d-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -459,13 +467,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbKy3uNYMPij_BUzYXRGrXoyFEFKFL1OKsajVOhxwPRUiMlQ--jdqCRAXhBLFuqbwmb25Sz7mEnu_X3D3vOb2uJ-DTA7ixboUTbKAqC-8JmZA_pwf-rOoJl2rYsaIxt7iBW5-3kOrlQa2pKsvptjzugKfH1O6iI0tL8A5JNph8q-w"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb49p9FeCk-hiMrAwZTb-xsLqvtmbopJ1Hs0vhYIzMpLyVudAaK3sTSsq9aSvfrOak1b1JATRdfQV7SXRTsnK-i72-C5MHw_k4908M-m-YYO-RraDgEVl-5Q22-OptZxwNS14tj_NAxnK3HtTMIuXmoevEUyfVryT1TW-zTs8X-Cg"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-d608bc971c095ee6e303e7d64e362c6b-922b601738b35c6d-03","correlationId":"d608bc971c095ee6e303e7d64e362c6b"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-b1944987dcbacec0fd7d588022fda26c-d217b9a37c7a5424-03","correlationId":"b1944987dcbacec0fd7d588022fda26c"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -492,7 +500,8 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   Split allocates 168 bytes a line (an array and three strings), Span nothing. The short job's three iterations give a wide Error column; two earlier runs on the same machine measured 123.83 and 67.22 us, and 131.52 and 58.42 us. Say "about twice as fast, and no allocation", not a precise ratio. BenchmarkDotNet ran the benchmarks out of process on the host runtime with no runtime moniker given.
 - `dotnet test --project AdventureWorks.Tests`: total 7, succeeded 7 (Chapter 16's suite; this chapter adds no tests); the unit filter 3. The Visual Studio 2026 rebuild built all six projects without warnings.
 - requests.http 9 of 9, and the README's curl.exe run 9 of 9: avery's three-line feed gave 200 `{"records":3}`; a quoted field and the price "free" gave 400 "Record 1 is not sku,name,price."; casey got 403.
-- The limits, with bodies a .http file cannot type (`tools/scenarios/ch17_import.py`), 8 of 8: a line of exactly 1,024 characters ending in CRLF, then a last line without a newline: 200 `{"records":2}`; 1,025 characters: 400; 1,001 records: 400 "Over 1,000 records."; the bytes E2 82 (a cut-off three-byte character) at the end: 400 "Unable to translate bytes [E2][82] at index -2 from specified code page to Unicode."; 80,000 bytes with Content-Length: 413; 80,000 bytes chunked (80 lines of 1,000 bytes, so the record limit cannot fire first): 413, with Kestrel logging "Request body too large. The max request body size is 65536 bytes."; a valid feed afterward: 200. Checked.
+- The limits, with bodies a .http file cannot type (`tools/scenarios/ch17_import.py`), 8 of 8: a line of exactly 1,024 characters ending in CRLF, then a last line without a newline: 200 `{"records":2}`; 1,025 characters: 400; 1,001 records: 400 "Over 1,000 records."; the bytes E2 82 (a cut-off three-byte character) at the end: 400 "Unable to translate bytes [E2][82] at index -2 from specified code page to Unicode."; 80,000 bytes with Content-Length, and 80,000 bytes chunked (80 lines of 1,000 bytes, so the record limit cannot fire first): both 413 with `{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.14","title":"Content Too Large","status":413,"detail":"The feed is over 64 KB.","traceId":"...","correlationId":"..."}`; a valid feed afterward: 200. The app log for the whole run has no `fail:` or `warn:` line: each import logs only `Selected endpoint HTTP: POST /api/admin/products/import => ImportAsync`, the user lookup and `POST /api/admin/products/import elapsed 4.4087 ms` (5.5721 ms for the chunked one). Checked.
+- Review 17-S2, before the catch: both 413s came from the developer exception page. The console logged `fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1] An unhandled exception has occurred while executing the request.` with `Microsoft.AspNetCore.Server.Kestrel.Core.BadHttpRequestException: Request body too large. The max request body size is 65536 bytes.` and a stack trace, and the 413 body carried the exception's details.
 
 ## A breakpoint for this chapter
 
@@ -598,7 +607,7 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbY1Oi2_VB3GG_1HxFPUVdub7fDObQZt_xZpxlRTzzViespRux80WHzzAPjzDYI-Pvng-ordTok3BJCCpIytuPChIRvisuMxCSuL6wVtwdlQcbL8Ecj7hZQo9Fpvwrb962ar2IwyXPAYnz_A0lAyU8LMcOh1cvVAxVDw0XRgUc-kg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqabn9PQVc7GSOu4beIMp6aFh3QPzm1yRpge8dppETt37Jw3KdAKJLMtWgb-9x4MXj0nO1B8to0CtGUT_hwcWdnc3bt6VouX_YhpNPKWjX15TLOeERA91fcbzVTqM68OC4ggkhT9ztNnLYdANsUOdUOG8ep1UASUFMXpEDMHRoaIpg"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -610,13 +619,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-9cc9b656124860b53a2431f54b585ba6-c2b828961a10b654-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-4cf8104e362387ae19d2f1f6ba2cfabc-16ff36a5c731ef96-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-c1f1b4bb61fe182f39e8a10fe7ef81b1-b47cc7438d1eaacc-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-66b1a6f425a0ff588252a8c67801696d-7a585cb8b2788d28-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -628,13 +637,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZRRP8OpTzyQ_8I2Y2xkwqxCmYfqc_ACjF_RXg-UxC8so1oRhvddg3Mh_zQrTMZjINkfkdFRni0lXArHAePKAQ0RA93MTXGdvzjyy5n5i4P9xOC_sVGqZ0mmKc5gn8f-1tm_wbdpfV9VQ-3ysv09NDyWt81B7UV5qxIUKLBi5zk4Q"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZJcgFD_JwLBl6LD6ShJHqeHK0w5J2N1OO6tZz2Cf76pqy4sOCd99hH300HkqB8HURGFPBd6h1_tTDUV-JeMO-CJXHr-HSick5lOxuEAbxiYEL3_rwBdl2qFrkh8OX_7BFqa1RyfUZvTAPsImBDJNLy1Xa6AwwqmEPU6bq5xWsPYw"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-2da121ea3eccd4d6711c55fecd1c9d16-58afa673f9809350-03","correlationId":"2da121ea3eccd4d6711c55fecd1c9d16"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-c22c329a84cbb88af56eab89cf81e142-be48277737aef3af-03","correlationId":"c22c329a84cbb88af56eab89cf81e142"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -654,6 +663,6 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - Accuracy 17.1: BenchmarkDotNet 0.16.0-preview.2 (the newest on nuget.org on November 3, 2026; no stable 0.16 yet). 0.15.8 knows runtimes only up to net10.0, and on a .NET 11 host its out-of-process jobs fail validation with NotImplementedException; this chapter does not use --inProcess. Leave the runtime unspecified so the benchmark runs on the host runtime.
 - The benchmark project references Core only, so BenchmarkDotNet's generated project builds Core and the benchmarks, not the web app.
 - Release is required: BenchmarkDotNet refuses a Debug build of the benchmarks.
-- 413 for a chunked body comes from Kestrel when the endpoint's read passes 64 KB: RequestSizeLimit metadata on the endpoint sets that request's limit, and Kestrel throws BadHttpRequestException (logged), which becomes 413. With Content-Length, Kestrel refuses before the endpoint reads.
+- Review 17-S2: the limit applies when the endpoint reads the body, not before it runs. The endpoint and its antiforgery check run in both cases; with Content-Length the first read throws (Http1ContentLengthMessageBody.OnReadStarting), chunked the read that passes 64 KB does. ImportAsync catches BadHttpRequestException with StatusCode 413 and returns Results.Problem("The feed is over 64 KB.", statusCode: 413), so the reader sees a clean 413 and no exception in the log. Say so where the chapter explains the limit.
 - StreamReader with `new UTF8Encoding(false, true)` throws DecoderFallbackException for invalid bytes instead of inserting U+FFFD; the endpoint turns it and FormatException into 400 (accuracy 17.7).
 - Program.cs is 90 lines.

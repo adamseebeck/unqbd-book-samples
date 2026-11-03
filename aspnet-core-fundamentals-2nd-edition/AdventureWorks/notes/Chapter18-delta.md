@@ -401,7 +401,7 @@ The template "ASP.NET Core Empty" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj (in 105 ms).
+  Restored AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj (in 106 ms).
 Restore succeeded.
 ```
 

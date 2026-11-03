@@ -42,6 +42,8 @@ Chapter 9 protects the running app with policies instead of a separate Chapter09
 | `AdventureWorks/Areas/Admin/Pages/Index.cshtml` | replaced |
 | `AdventureWorks/DevelopmentSeed.cs` | changed |
 
+The reader types 387 lines of code: 158 in 5 new files and 229 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+
 ## Steps, in order
 
 Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 61 of 61 files identical and no differences.
@@ -966,13 +968,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/1` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-a0972cccb45f03501d3d6924d96cdc23-d027ff3dfa951c1e-02","correlationId":"a74d5f5bfa8f46dbac276e6b7c2e783a"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-570872e5c3c5e70826b66d915a7b66c8-40deffc1c7661964-02","correlationId":"cb6a687f36d141b6ae5aa8efd324f994"}
   ```
 
 - `POST /api/v1/products` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-3872c15f7bd8332e6eed0466708d5ae9-873b05677e0dc77d-02","correlationId":"28662fecae1e47bfac3f46792f71e0e0"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-d9f12b0f2a461c906026d0aabd6b14c5-610d0eb75e5ea723-02","correlationId":"3085ae7a51714bef9a115dd98f2292c1"}
   ```
 
 - `GET /Admin` returned **302** (Location: https://localhost:7001/Account/Login?ReturnUrl=%2FAdmin)
@@ -980,7 +982,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/orders/1/archive` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-3f30457a237e1fbd2fd257f9fe177c0a-b61b2fac0b18de5c-02","correlationId":"28812c1933474c2caa3b367a03a43829"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-042c8461cee9570903d27e34e7aed014-3edc47c9eb9158b5-02","correlationId":"0626295faa004da190a0e8fb7afc3b08"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -992,25 +994,25 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"cda4073d-d7e7-49d5-afa3-079e1f1da7ff","total":49.00,"archived":false}
+  {"id":1,"orderNumber":"AW-0001","ownerId":"580a7cb5-e1ab-4e34-9f7c-c0a856817059","total":49.00,"archived":false}
   ```
 
 - `GET /api/orders/2` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-45b702054803cced04b68d5eb830b7bf-bb810b3249eb88c0-02","correlationId":"d6e235c207914ee1901416b28b8801ad"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-2a8b87b1d8300cea278ac86dece1f050-1845ed36cad1ec6d-02","correlationId":"e5b58c97acf34792afdc523952f0d94e"}
   ```
 
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZUa4CjpDB3-RRSrP4ZOlTinLs92aGruA2TaM902bG1n6MxUgTWp1QiIeNmPUjuIR7k86byvIoXDgh0nY7e6M7hA3FZemUImIVgbbvSI3wl2YS69EvZCse9AdnGA3hHDowDwgFdLPf-d5r8B2PWKd5AZsmdgofIsFuQCulrPAQq5w"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbwJNNBy6AHWx2LRAdXd0c6d_gWtb3_BE32XPU-l0id-UMUjT-4u8q--eB6z0dpU5G2B5wPHXL2_-650cUR6WDsA64gwDbvExyW3zKAT9-cseQrJmEcgk6qtBISRa5xdNtT4YvsUaiSe548XwFal22piyWtZmAgao-5pC--FTWZnQ"}
   ```
 
 - `POST /api/orders/1/archive` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-360ecad04d440d3a7c6f9be6175dd1c2-0f4f143981b96414-02","correlationId":"b2cb1fae8c64420cac1089093d5219eb"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-edbdf8e7f483a1742226ffd99fabc01a-bae747fa71978617-02","correlationId":"e3c36e0e306c431c85d46382aa4cf0f8"}
   ```
 
 - `GET /Products/Restricted` returned **200**
@@ -1022,7 +1024,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/v2/products` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-199ef942337c79361cf578ddd1746492-c20e652ee6dbeba6-02","correlationId":"2f850fb0a02b477fb33d3b2943ca7748"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-1451adc4d18ccbcdd62beee3dfdaad93-1ed1cffff3bba97f-02","correlationId":"eb91a8d7b5764591ade5087c42c29a11"}
   ```
 
 - `GET /Products/Edit/1` returned **302** (Location: https://localhost:7001/Account/AccessDenied?ReturnUrl=%2FProducts%2FEdit%2F1)
@@ -1036,19 +1038,19 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/1` returned **200**
 
   ```text
-  {"id":1,"orderNumber":"AW-0001","ownerId":"cda4073d-d7e7-49d5-afa3-079e1f1da7ff","total":49.00,"archived":false}
+  {"id":1,"orderNumber":"AW-0001","ownerId":"580a7cb5-e1ab-4e34-9f7c-c0a856817059","total":49.00,"archived":false}
   ```
 
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbzz0rUcWdgxF33BQpuUnmF_j3xA1zDOoyJXAa_G2l9nSEuCWnScxxopXKhby9DSx0EGd7zbPM4_R1JLKG87DjOUsYuLM9IzA6DOFlHDdtdb1ZK3Hup0C5mV-jIHV-GtIPbvoLe9U4_XMFvgIE-rpSM0jwBxA7oZ0WKmSTknGyoCw"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYuSCMAomLqu2dYlREjVMADDmDjuC-YvZBrNn9moji6oU5Cji9crbW2efqoQQhlwH6Auq4dEdFuK6VcxYItlx8bXIK5NR9y6fpR-Zls2VAXKtAT_K7vDU--kTnrXfHaRr3VVngBCPNIURcQ9Qr44eNyCU-JzuiLmuj1utRXjh4dqQ"}
   ```
 
 - `POST /api/orders/1/archive` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-afa0a106697a327d706f2e354f7f936b-fbedaa25f16c1cd4-02","correlationId":"a9b2de7d18a84dccb2cc596f078dd09c"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-00ac7188ca74aa07c792a69ca3a1924b-a3e16069254f6dfb-02","correlationId":"54362256f3d6493994528a68c3f212f1"}
   ```
 
 - `POST /dev/sign-in/jordan` returned **200**
@@ -1060,13 +1062,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYMZoRuk2wxRSSkkXZkchbGy3XCJtK3K4UKdqFn-LIoYIgXOJw7mD2PL-olOReS53F_1O6KM3oU6UeGKpPdisPl_Bz7ZUYCoOD6SG_YT5vJ2YdWFPcyhMq_C5Tl43RQse2vNaDVv6Qt-6Ztf9fXJ0lYHbzbZKB0ks4s0VtqwMEt9g"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqahU6c3SHx5Lx9oRyzVPJwOeufYjnY6yFs1CIN__x11Ccxbyek3eiBeYu5PcFV1l_UD4cE4Gw1SbJZvS5DHbuczsWJQDQv1OEmjW7h35XSU8b1DClK8Hd17abTCd7Z3ZTJ5QRNPpY4lua89jsxEV5-PhWq-ms8w5EWg9kPUwQTJWg"}
   ```
 
 - `POST /api/orders/2/archive` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-7e0ca3a920392fd98ff414a8daeeba44-cd4ef7171b77844d-02","correlationId":"41c871d72ef7446282460ef47fd9833b"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-2ed9aa654cc0edcbb5bffacc307a29eb-4fadacd8a2f165dd-02","correlationId":"ed74171196e1460fac0fbefccf0017b9"}
   ```
 
 - `POST /api/orders/2/archive` returned **204**
@@ -1074,7 +1076,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/2` returned **200**
 
   ```text
-  {"id":2,"orderNumber":"AW-0002","ownerId":"08b4be43-7567-44b8-8d4d-0f4ae3c6cc10","total":1299.00,"archived":true}
+  {"id":2,"orderNumber":"AW-0002","ownerId":"d35e02f1-3475-4d8d-9d18-4e138162f49c","total":1299.00,"archived":true}
   ```
 
 - `POST /dev/sign-in/riley` returned **200**
@@ -1094,7 +1096,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZ_3iWt-vm4on8Lrl6bWZ-pvn9P2rx-kpaa83TPC7OJYLfGjT9wbdYSE4rThhkDtFFe926_eXMZsm0ozGAOt7EUJr7JXuZI3c1AtUaKnqur07CA0zfdR_F1x-inzZDxMAbcUPfQbnXox_zd1M5VA3T2uyiBhS54iVRajpvA1-3w_g"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZQEUd4SqxbZAj-R25XMvv-woUjT6upHTccrYVs3zlCxEVYi4ObS77JCYfOtobYScd9jl0F7CJ5SvXed4uCxYci1UtdFXGaRyOJJ3z43_SCj_cpKjCUmbdjR8hQYT1HOvuDvVQXVWqJUDkZuJxsgsClWXnw0PSAccLDhUGo_8B65g"}
   ```
 
 - `DELETE /api/orders/3` returned **204**
@@ -1102,7 +1104,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders/3` returned **404**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Resource not found","status":404,"detail":"Order 3 was not found.","traceId":"00-2ebf3b2f7f3bbb3fbd890499ee13a1ab-1157e4c0b95f977c-02","correlationId"...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Resource not found","status":404,"detail":"Order 3 was not found.","traceId":"00-a0217e965b16af64f8cf2eb61d7427f6-97aadcf5f381d246-02","correlationId"...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/5)
@@ -1156,6 +1158,7 @@ The handler runs inside AuthorizeAsync, after the endpoint loaded the order. id 
 The original Activity repeated the Full Example (continuity finding C09-2). This one adds new code: a Shipping staff account (sam) and `ShippingHolds.cs`, with `POST /api/orders/{id}/hold` guarded by Department:Shipping, the provider's second known department, and `GET /api/policies/department/{name}`, which asks the policy provider directly and shows its closed set. Checked: anonymous hold 401; sam 200 with `{"orderId":1,"held":true}`; morgan (Finance) 403; Shipping exists, Marketing does not.
 
 The reader-path check rebuilt `AdventureWorks/Chapter09-Activity` from the Chapter 9 checkpoint: no differences.
+The Activity adds 35 lines of code: 32 in 1 new file and 3 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: a shipping hold on the second department policy
 
@@ -1224,7 +1227,7 @@ app.MapShippingHolds();
 - `POST /api/orders/1/hold` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-6304597bffe10044e10e54c46d5032bf-25feb6f729e42a54-02","correlationId":"70dd504bed184f19a954e60c3d8ad04d"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-d01cbc68d346d0f015abeb8c59a40d55-a4fe439348ae874c-02","correlationId":"c4654888de5148e491d4fed3ead887b8"}
   ```
 
 - `POST /dev/sign-in/sam` returned **200**
@@ -1260,7 +1263,7 @@ app.MapShippingHolds();
 - `POST /api/orders/1/hold` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-ab57925fa0735c5110d560f62a7c2012-a1924da16914ddb9-02","correlationId":"93e3d4572d284ebd9da6880b7f52f378"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-a638afbdb72226277164d5fc8541293b-e63a251135b1a336-02","correlationId":"35cf60371c8c44e48969fa798bc4ed00"}
   ```
 
 ## The chapter's current listings: replaced, kept or removed

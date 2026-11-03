@@ -28,6 +28,8 @@ Chapter 12 adds caching, rate limiting, compression and a resilient HTTP depende
 | (command) `dotnet sln add InventoryService` | creates or edits project files |
 | (command) `dotnet add package Microsoft.Extensions.Http.Resilience@10.11.0` | creates or edits project files |
 
+The reader types 375 lines of code: 291 in 6 new files and 84 new or changed in existing files, plus 2 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+
 ## Steps, in order
 
 Each step names the file and, for an existing file, the exact line the new code goes after or the block it replaces. Applying these steps to the previous checkpoint reproduces this checkpoint: the reader-path check found 84 of 84 files identical and no differences.
@@ -173,7 +175,7 @@ info : Adding PackageReference for package 'Microsoft.Extensions.Http.Resilience
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'Microsoft.Extensions.Http.Resilience' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.Extensions.Http.Resilience' version '10.11.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
@@ -512,7 +514,8 @@ In `AdventureWorks/CatalogEndpoints.cs`, add the following above `static async T
                     found.Available });
         }
         catch (Exception ex) when (ex is HttpRequestException
-            or TimeoutRejectedException or BrokenCircuitException)
+            or TimeoutRejectedException or BrokenCircuitException
+            or RateLimiterRejectedException)
         {
             return Results.Problem(
                 "The warehouse did not answer; try again soon.",
@@ -528,6 +531,7 @@ In `AdventureWorks/CatalogEndpoints.cs`, add these lines after the line `using A
 ```csharp
 using Microsoft.AspNetCore.OutputCaching;
 using Polly.CircuitBreaker;
+using Polly.RateLimiting;
 using Polly.Timeout;
 ```
 
@@ -678,7 +682,9 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ## Requests and real responses
 
-`requests.http` holds these requests in this order; 39 of 39 returned their commented status. The README has the same requests as curl.exe commands for Windows PowerShell 5.1, which also passed when run as printed.
+`requests.http` holds these requests in this order; 40 of 40 returned their commented status. The README has the same requests as curl.exe commands for Windows PowerShell 5.1, which also passed when run as printed.
+
+- `POST /dev/sign-out` returned **204**
 
 - `POST http://127.0.0.1:42132/control/reset` returned **204**
 
@@ -703,7 +709,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/status` returned **200** (no Content-Encoding header)
 
   ```text
-  {"status":"Operational","timestamp":"2026-11-03T17:06:54.4574016Z"}
+  {"status":"Operational","timestamp":"2026-11-03T22:55:29.7803217Z"}
   ```
 
 - `GET /api/catalog/1/availability` returned **200**
@@ -751,7 +757,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/3/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-a0bb528c2b6551b4a2bda658493c7d22-ec3d46d388f...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-2fed504b81d7d78254c7aceffe463a49-04d66169628...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -767,7 +773,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-d9bbb0c3b65a67b7d5e6da2380f63410-8ee8a0dd44a...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-495d6a146af4ff18113c9636a8ca0703-545014d5333...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -779,7 +785,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-8615b35c4ee29a0a061ddd01b0efa654-fce1bca976f...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-4740ebd121ef46dbb7b103574defeff9-a665278eade...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -823,7 +829,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/catalog/search?q=trail` returned **429** (Retry-After: 9)
 
   ```text
-  {"title":"Too Many Requests","status":429,"traceId":"00-c887080081162f5ee1d55f0426ba3d03-32863c32dd8559fb-02","correlationId":"ae4acbb5348947f6939daa7c5641f0d4"}
+  {"title":"Too Many Requests","status":429,"traceId":"00-0da49a112a4b822bb84927618e8ae867-79e2c109de11a92b-02","correlationId":"9da52a2ab8a547b586ade71d01da6677"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -902,6 +908,7 @@ The original Activity needs a Redis server (not verifiable here), a Redis lease 
 Checked: ten concurrent requests for an uncached SKU made exactly one call to InventoryService and all ten got 200 with 3 available; the timeout behavior is unchanged; requests.http passed with the checkpoint's results.
 
 The reader-path check rebuilt `AdventureWorks/Chapter12-Activity` from the Chapter 12 checkpoint: no differences.
+The Activity adds 23 lines of code: 0 in 0 new files and 23 new or changed in existing files, plus 1 command line. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: one fill for many concurrent misses
 
@@ -922,7 +929,7 @@ info : Adding PackageReference for package 'Microsoft.Extensions.Caching.Hybrid'
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'Microsoft.Extensions.Caching.Hybrid' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.Extensions.Caching.Hybrid' version '10.11.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
@@ -976,7 +983,9 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 
 ### Activity requests and responses
 
-39 of 39 requests in `Chapter12-Activity/requests.http` returned their commented status. They are the checkpoint's requests, with the same results; the Activity's change shows only under concurrency (below).
+40 of 40 requests in `Chapter12-Activity/requests.http` returned their commented status. They are the checkpoint's requests, with the same results; the Activity's change shows only under concurrency (below).
+
+- `POST /dev/sign-out` returned **204**
 
 - `POST http://127.0.0.1:42132/control/reset` returned **204**
 
@@ -1001,7 +1010,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/status` returned **200** (no Content-Encoding header)
 
   ```text
-  {"status":"Operational","timestamp":"2026-11-03T17:08:27.2470908Z"}
+  {"status":"Operational","timestamp":"2026-11-03T22:57:24.568929Z"}
   ```
 
 - `GET /api/catalog/1/availability` returned **200**
@@ -1049,7 +1058,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/3/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-5559b0fa431d7fbffcf4a11142eea40d-8f608fb8029...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-bec948e2566307f9e6d796381e0d9e68-a54f546da44...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -1065,7 +1074,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-ceaa3f5c350a7353e110c85fb328f547-554c6185e70...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-cb7b74a1c1846377adf50bb7b98c352e-ce00652cccf...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -1077,7 +1086,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/4/availability` returned **503**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-4d61f6fcacccee583eba8fc6a88d7f4f-6a8dbedb3bf...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.4","title":"Stock is unavailable","status":503,"detail":"The warehouse did not answer; try again soon.","traceId":"00-504ddc99df4df04730c67fec1f6e3a8c-5cf465ba5a2...
   ```
 
 - `GET http://127.0.0.1:42132/control/attempts` returned **200**
@@ -1121,7 +1130,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - `GET /api/catalog/search?q=trail` returned **429** (Retry-After: 9)
 
   ```text
-  {"title":"Too Many Requests","status":429,"traceId":"00-49ed0c538cf73e501936eefb97b861a8-c06335ffcda8c917-02","correlationId":"4cc61acaea234a0ca072e21009430728"}
+  {"title":"Too Many Requests","status":429,"traceId":"00-6eee82119813873f73550d5878b30e83-c4fcdad09314d683-02","correlationId":"5f94f0dc56fb47c18c20d2df7494400d"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -1186,7 +1195,7 @@ In `AdventureWorks/InventoryClient.cs`, add these lines above the line `services
 - The resilience handler retries transient results only: two 503s were retried (four attempts in all, then 200), a 400 was not (one attempt, then 503 from the app).
 - The circuit breaker opened when three of the last six attempts had failed (FailureRatio 0.5, MinimumThroughput 5); after that, the app answered 503 without calling the service (the attempt count stayed at 1). The options must keep SamplingDuration at least twice AttemptTimeout, or validation fails at startup.
 - The rate limiter returned 429 with Retry-After: 9 on the sixth anonymous search within ten seconds; casey, signed in on the same machine, had her own partition and got 200.
-- The stock route catches HttpRequestException, TimeoutRejectedException and BrokenCircuitException and answers 503 with Problem Details; anything else stays a 500.
+- The stock route catches HttpRequestException, TimeoutRejectedException, BrokenCircuitException and RateLimiterRejectedException (the standard pipeline's concurrency limiter) and answers 503 with Problem Details; anything else stays a 500. Checked with a scratch copy (tools/key_rate_probe.py rate; permit limit 1, /control/delay/1500, two concurrent reads): the refused read answered 503 Problem Details in 0.16 s, with no exception in the log; before the catch named it, the same read was an unhandled 500.
 - Departure: the design extends the Development seed in Chapter 12; the warehouse stock lives in InventoryService, so the app's seed does not change.
 - Departure: no Redis code path, because nothing here can verify it; the text can show the one-line swap (AddStackExchangeRedisCache) as a pointer, not a tested listing.
 - Program.cs is 88 lines.

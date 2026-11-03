@@ -193,7 +193,7 @@ public sealed class ArchitectureTests
         Assert.DoesNotContain(used, name =>
             name.StartsWith("Microsoft.AspNetCore") ||
             name.StartsWith("Microsoft.EntityFrameworkCore") ||
-            name.StartsWith("AdventureWorks."));
+            name.StartsWith("AdventureWorks"));
     }
 }
 ```
@@ -466,13 +466,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+6/x0/?0] (5s 026ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+6/x0/?0] (4s 390ms)
 Test run summary: Passed!
   total: 6
   failed: 0
   succeeded: 6
   skipped: 0
-  duration: 6s 431ms
+  duration: 5s 505ms
 ```
 
 Run this from the working folder. The backtick at the end of the first line continues the command on the next line in PowerShell.
@@ -486,13 +486,13 @@ It prints:
 
 ```text
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+3/x0/?0] (754ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+3/x0/?0] (669ms)
 Test run summary: Passed!
   total: 3
   failed: 0
   succeeded: 3
   skipped: 0
-  duration: 1s 161ms
+  duration: 1s 011ms
 ```
 
 ## Program.cs at the checkpoint (88 lines)
@@ -712,21 +712,21 @@ The whole request ran in memory: the Test scheme signed the request in from its 
 The original Activity's ideas carry over to this app (Chapter15-Activity, `ActivityTests.cs`; Moq is already in the checkpoint, so no package command):
 
 - Moq's Verify: the service calls GetByIdsAsync once, with product 1 and the caller's own cancellation token. A literal `new[] { 1 }` is enough: Moq 4.21.0 compares an array argument element by element, so no It.Is is needed (review 15-S2; checked: the test passes with `{ 1 }` and fails with `{ 2 }`).
-- A cancelled request: the catalog mock throws OperationCanceledException, the service lets it through, and the unit of work's SaveChangesAsync was never called.
+- A cancelled request: the catalog mock honors the token it is given (ThrowIfCancellationRequested), so the test also proves the service passes the request's token on; the service lets the OperationCanceledException through, and the unit of work's SaveChangesAsync was never called.
 - WithWebHostBuilder: a second factory whose InventoryClient uses StubInventory, a handler that answers every call with 503 and counts them, for one test only. The stock route answers 503 after three calls, one and Chapter 12's two retries. The shared factory's CreateHost runs again for the second factory, so StoreFactory seeds only what is missing and opens the connection only once.
 
 Checked: total 9, succeeded 9; the unit filter 5.
 
 The reader-path check rebuilt `AdventureWorks/Chapter15-Activity` from the Chapter 15 checkpoint: no differences.
-The Activity adds 102 lines of code: 102 in 1 new file and 0 new or changed in existing files, plus 1 command line. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The Activity adds 106 lines of code: 106 in 1 new file and 0 new or changed in existing files, plus 1 command line. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: a verified call, a cancelled request and a one-test override
 
 Work in a copy of the Chapter 15 checkpoint folder; Chapter 16 starts from the checkpoint. Moq's Verify checks that the service passed the caller's cancellation token to the catalog. A cancelled request must throw and save nothing. WithWebHostBuilder makes a second factory with one more replacement for one test: a stub that answers every stock call with 503, so the endpoint answers 503 after one call and Chapter 12's two retries.
 
-Create `AdventureWorks.Tests/ActivityTests.cs` (102 lines).
+Create `AdventureWorks.Tests/ActivityTests.cs` (106 lines).
 
-ActivityTests.cs, part 1 of 3 (34 lines):
+ActivityTests.cs, part 1 of 4 (34 lines):
 
 ```csharp
 using System.Net;
@@ -765,7 +765,7 @@ public sealed class OrderServiceMockTests
             request.Token);
 ```
 
-ActivityTests.cs, part 2 of 3 (38 lines):
+ActivityTests.cs, part 2 of 4 (25 lines):
 
 ```csharp
         _catalog.Verify(c => c.GetByIdsAsync(new[] { 1 },
@@ -777,7 +777,11 @@ ActivityTests.cs, part 2 of 3 (38 lines):
     {
         _catalog.Setup(c => c.GetByIdsAsync(It.IsAny<int[]>(),
                 It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new OperationCanceledException());
+            .Returns((int[] _, CancellationToken token) =>
+            {
+                token.ThrowIfCancellationRequested();
+                return Task.FromResult(Array.Empty<Product>());
+            });
         using var request = new CancellationTokenSource();
         await request.CancelAsync();
 
@@ -789,7 +793,11 @@ ActivityTests.cs, part 2 of 3 (38 lines):
             It.IsAny<CancellationToken>()), Times.Never);
     }
 }
+```
 
+ActivityTests.cs, part 3 of 4 (20 lines):
+
+```csharp
 // Activity: WithWebHostBuilder changes one test's app only; the
 // class's shared factory keeps the real InventoryClient.
 [Trait("Category", "Integration")]
@@ -806,15 +814,15 @@ public sealed class StockOverrideTests(StoreFactory factory)
                 services.AddHttpClient<InventoryClient>()
                     .ConfigurePrimaryHttpMessageHandler(
                         () => stub)));
-```
 
-ActivityTests.cs, part 3 of 3 (28 lines):
-
-```csharp
         var response = await failing.CreateClient().GetAsync(
             "/api/catalog/4/availability",
             TestContext.Current.CancellationToken);
+```
 
+ActivityTests.cs, part 4 of 4 (24 lines):
+
+```csharp
         Assert.Equal(HttpStatusCode.ServiceUnavailable,
             response.StatusCode);
         // One call and Chapter 12's two retries.
@@ -854,11 +862,11 @@ Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.d
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
 warn: Polly[3]
-      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '0', Execution Time: 24.7347ms
+      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '0', Execution Time: 18.7044ms
 warn: Polly[0]
       Resilience event occurred. EventName: 'OnRetry', Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503'
 warn: Polly[3]
-      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '1', Execution Time: 0.1068ms
+      Execution attempt. Source: 'InventoryClient-standard//Standard-Retry', Operation Key: '', Result: '503', Handled: 'True', Attempt: '1', Execution Time: 0.1136ms
 warn: Polly[0]
 (12 more lines)
 ```

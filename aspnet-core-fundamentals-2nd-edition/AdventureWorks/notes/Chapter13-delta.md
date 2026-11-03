@@ -26,7 +26,7 @@ Chapter 13 reshapes the order API as REST resources over Chapter 11's OrderServi
 | `AdventureWorks.Infrastructure/Data/EfOrderWriter.cs` | changed |
 | `AdventureWorks/OrderInputs.cs` | changed |
 
-The reader types 347 lines of code: 49 in 1 new file and 298 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 348 lines of code: 49 in 1 new file and 299 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -155,7 +155,7 @@ In `AdventureWorks.Core/OrderContracts.cs`, replace the IOrderService interface 
 public interface IOrderService
 {
     Task<OrderPage> ListAsync(string ownerId, int page,
-        int pageSize, CancellationToken ct = default);
+        int pageSize);
     Task<OrderResult> CreateAsync(string ownerId,
         CreateOrderRequest request,
         CancellationToken ct = default);
@@ -170,8 +170,8 @@ public interface IOrderService
 In `AdventureWorks.Core/OrderContracts.cs`, add these lines above the line `public interface IOrderService`.
 
 ```csharp
-public sealed record OrderPage(OrderSummary[] Items, int Page,
-    int PageSize, int TotalCount);
+public sealed record OrderPage(OrderSummary[] Items,
+    int TotalCount);
 ```
 
 In `AdventureWorks.Core/OrderContracts.cs`, replace the IOrderWriter interface with the following.
@@ -208,9 +208,9 @@ In `AdventureWorks.Core/OrderService.cs`, add the following above `static OrderR
 
 ```csharp
     public async Task<OrderPage> ListAsync(string ownerId,
-        int page, int pageSize, CancellationToken ct = default) =>
-        new(await orders.ListAsync(ownerId, page, pageSize), page,
-            pageSize, await orders.CountAsync(ownerId));
+        int page, int pageSize) =>
+        new(await orders.ListAsync(ownerId, page, pageSize),
+            await orders.CountAsync(ownerId));
 ```
 
 In `AdventureWorks.Core/OrderService.cs`, add the following above `static OrderResult Invalid(string error) =>`.
@@ -249,8 +249,8 @@ In `AdventureWorks/LoggingOrderService.cs`, add the following above `async Task<
 
 ```csharp
     public Task<OrderPage> ListAsync(string ownerId, int page,
-        int pageSize, CancellationToken ct = default) =>
-        inner.ListAsync(ownerId, page, pageSize, ct);
+        int pageSize) =>
+        inner.ListAsync(ownerId, page, pageSize);
 ```
 
 In `AdventureWorks/LoggingOrderService.cs`, add the following above `async Task<OrderResult> LogAsync(string operation,`.
@@ -359,14 +359,14 @@ In `AdventureWorks/OrderEndpoints.cs`, add the following below `public static IE
     // header (RFC 8288) and the total in the body.
     static async Task<IResult> ListOrders(IOrderService service,
         ClaimsPrincipal user, HttpContext context,
-        LinkGenerator links, CancellationToken ct,
+        LinkGenerator links,
         [Range(1, 1000)] int page = 1,
         [Range(1, 50)] int pageSize = 10)
     {
         var owner = user.FindFirstValue(
             ClaimTypes.NameIdentifier)!;
         var result =
-            await service.ListAsync(owner, page, pageSize, ct);
+            await service.ListAsync(owner, page, pageSize);
         var body = new PagedResponse<OrderSummary>(result.Items,
             page, pageSize, result.TotalCount);
         List<string> rels = [];
@@ -493,7 +493,8 @@ In `AdventureWorks/OrderEndpoints.cs`, replace the CancelOrder method with the f
             user, order, StorePolicies.OrderOwner);
         if (!owner.Succeeded) return Results.Forbid();
         var result = await service.CancelAsync(
-            order.OwnerId, id, ct);
+            user.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            id, ct);
         return result.Outcome switch
         {
             OrderOutcome.Cancelled => Results.NoContent(),
@@ -664,7 +665,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-c800fa8c970a95fbd8f87b66f8ffc8b2-0031e50fd972d4cd-02","correlationId":"10fc9c0507a64ed9a6a06371751dbe59"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-f21c9a26f36722ce66bb7c32bc6ee6fb-8954798ad74f8bbf-02","correlationId":"b0d05f2beb674bfe9a02b56f2fa91d84"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -676,7 +677,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqY2jAnKgeIlaw16ntkvJJ1U2ULpgGfK3ckqztVU_uKW1Ob2lF-vs02GZ8Ijf6xo9D2GnVlsa15_SpeMePquBu0GfvbquC6cvepfmoCf_Ge2ZGfqR3YFHkF45VSouI5aZSUeOo4WeZyIxFPlLr-Pb0vsZKq9lfvL5TeM6sLbaUUVAQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYtRFwOgGIRs7WFvUONH1adb_AhOBUXHogJ8p1z4vAPfVqTefpWOETKxxdhry5owEKLFm6__s208uYAdyJT1XJmcv3nnxEsPnzDpc4g6znF2cuv0jB808k6WQNZff7EML8r5_889PvoqTM-dTEH95UI0VIntZUfIjrwtCF-yyP-Ww"}
   ```
 
 - `GET /api/orders?page=1&pageSize=5` returned **200** (Link: <https://localhost:7001/api/orders?page=2&pageSize=5>; rel="next")
@@ -694,10 +695,10 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/orders?pageSize=500` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"pageSize":["The field pageSize must be between 1 and 50."]},"traceId":"00-6151b3a724f...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"pageSize":["The field pageSize must be between 1 and 50."]},"traceId":"00-6d8af174115...
   ```
 
-- `GET /api/orders/1` returned **200** (ETag: "84ca142b-8794-4d4c-98ef-8338f25c6975")
+- `GET /api/orders/1` returned **200** (ETag: "7b67434e-00ee-4447-87cd-29120811af42")
 
   ```text
   {"id":1,"orderNumber":"AW-0001","status":"Pending","archived":false,"total":49.99,"notes":null,"items":[{"productId":2,"quantity":1,"unitPrice":49.99}]}
@@ -706,7 +707,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `PATCH /api/orders/1` returned **428**
 
   ```text
-  {"title":"Precondition Required","status":428,"detail":"Send If-Match with the ETag.","traceId":"00-fe7431242fcceb9f23f308d5ab8d616a-7d74eddd4626f12b-02","correlationId":"bcd4712970934a66b5e7064d17931834"}
+  {"title":"Precondition Required","status":428,"detail":"Send If-Match with the ETag.","traceId":"00-6ca0abdbd89408e65687443a33470408-a61def1bc9321cc9-02","correlationId":"d7bc7ca10c9a4359bd8b4465cd36696e"}
   ```
 
 - `PATCH /api/orders/1` returned **200**
@@ -718,7 +719,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `PATCH /api/orders/1` returned **412**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.13","title":"Precondition Failed","status":412,"detail":"The order changed; read it again.","traceId":"00-6c743f43183fae0582cfa4b3bcfbf961-1f253731c05e0772-02","c...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.13","title":"Precondition Failed","status":412,"detail":"The order changed; read it again.","traceId":"00-79feca2429c75527c83a049d6737c1fa-73b6fcc74a1a1dab-02","c...
   ```
 
 - `PATCH /api/orders/1` returned **200**
@@ -738,7 +739,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `DELETE /api/orders/13` returned **409**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The order is already cancelled.","traceId":"00-3b864cf87ba296982e2a7a1bf840e884-9684a61f9f1c02a5-02","correlationId"...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The order is already cancelled.","traceId":"00-add115e91baa5f1e44f2bd4911461bfc-f1062684c383feda-02","correlationId"...
   ```
 
 - `GET /api/orders/13` returned **200**
@@ -750,7 +751,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/nope` returned **404** (Content-Type: application/problem+json)
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-a0cbb39441006c94d006be30e66991b9-f05045e9b2c1931b-02","correlationId":"8cf63ac4b2de4bd98158a918276eb1c3"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-1be57ce83454da1bcad0fee05ba0e673-2446709114a919c5-02","correlationId":"8d141bc58dcb445fa8c1b8faef4a0d76"}
   ```
 
 - `GET /api/nope` returned **404** (Content-Type: text/plain)
@@ -768,7 +769,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb8rHzKc_wkrf3T9hraDs1JsPNlsdkPtemXG5LYDfheYslbxGxlnyv9IBMKpU8D919SyIDscreZx8_o9ds6g_VdB9mKby-urdpowmsrkldty0v9FtG3t0LZVigInsMuTW9c6oLdepfExWuOZWHqNFmWXttftMtBzw0MP244t7GnbA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbS9nRwoz_IZJxSzMVhZaspiNgwDoGif3gOg6HfX4Qw8wQBq6G4luijH1Bv_qqXgdcovTCyqO29f32_gNFoudUx77une_Ea41HjlO762YztEEYqEtamvQxuqSRZFmtznUwVZuI8tJUB66_e-NZTtz0vx3pviz9DAwFj3muYBDgYSA"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -794,8 +795,8 @@ Press F5 (the https profile), then send PATCH https://localhost:7001/api/orders/
 
 ```text
 id = 1 [Int32]
-ifMatch = "277816d3-5894-4b7e-9cbe-9e5e15fa7600" [String]
-version = 277816d3-5894-4b7e-9cbe-9e5e15fa7600 [Guid]
+ifMatch = "5067a770-e0db-4ae9-87ee-57fbbbcc5cb1" [String]
+version = 5067a770-e0db-4ae9-87ee-57fbbbcc5cb1 [Guid]
 patch.Notes = Leave it at the side door. [String]
 ```
 
@@ -901,7 +902,7 @@ app.MapOrderItemEndpoints();
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaUNdLm3Ggm6RXs9HsEfWCZKGBIIzqjYFZjehf8VGIT4JZTCgxFPDlCds8bHZQyTKyUuoxitYIyC-fd3MxfpugGAvyhyGXBsBDLADFFO-W-BZ6K-sMTNQcIAMRIvIhkMhhWe1AGhDwkQFIOiljW24oyB8un6n9viu18x0JL_YAPWA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqacpKf7BMdSDOYwZEfE6lzVyjJhJdAQzEJVF-zQG6qYAGgOoKYuvc3FIO4HoGN3j6jMBTUHh07H5crloCt-O1b7WBOMRkfiVO54Q1Yxnimaf1cQum3l_9_6cwL2TfPhsx_Wa2djajrrzj53pNkjZBsscRhTxC6Sh_kyjtQo52327Q"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**

@@ -13,7 +13,8 @@ Chapter 8 adds sign-in to the running app instead of a separate Chapter08 projec
 - `/Account/Login` (PasswordSignInAsync with lockout, LocalRedirect) and `/Account/Profile` (pinned to Identity.Application).
 - `AccountEndpoints`: `POST /api/auth/login` (password check with lockout, access and refresh tokens, no cookie), `POST /api/auth/refresh` (one-time rotation in one SaveChanges; a replay gets 401), `GET /api/account/me` (default cookie scheme) and the Bearer-only `GET /api/account/loyalty`, where a valid cookie alone gets 401.
 - Development: `SeedDevelopmentDataAsync` runs EnsureCreated and creates five accounts with one password from Training:Password (User Secrets): casey (customer, AW-001), jordan (business buyer, Department Finance, AW-002), morgan (Finance staff), riley (born 2010, AW-003) and avery (no claims yet; Chapter 9 makes avery the Admin). Each has a DateOfBirth claim. `DevSignIn` signs a seeded account in by name with the real Identity cookie for requests.http and curl.exe; outside Development it maps nothing.
-- The old "throw unless Development" is gone: the app starts in any environment. The signing key comes from Jwt:SigningKey; without one, each start uses a random key.
+- The old "throw unless Development" is gone: the app starts in any environment. The signing key comes from Jwt:SigningKey; without one, each start uses a random key. A key under 32 characters is an error. Checked (tools/key_rate_probe.py, 6 of 6, Jwt__SigningKey of 5, 31 and 32 characters and none): with 5 or 31 the app still starts and /api/status answers 200, because TokenIssuer is a singleton built at first use, but login and any Bearer route answer 500 with "Jwt:SigningKey needs 32 or more characters."; with 32 or none, login answers 200, the token works on /api/account/loyalty ("AW-001") and a bad token answers 401.
+- TokenIssuer writes tokens with JsonWebTokenHandler and SecurityTokenDescriptor (Microsoft.IdentityModel.JsonWebTokens, through the JwtBearer package), not JwtSecurityTokenHandler. That handler keeps claim types as given, so the payload now names http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier and .../name instead of nameid and unique_name; JwtBearer reads both to the same claims.
 
 ## Files added or changed
 
@@ -35,6 +36,8 @@ Chapter 8 adds sign-in to the running app instead of a separate Chapter08 projec
 | (command) `dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore@11.0.0` | creates or edits project files |
 | (command) `dotnet add package Microsoft.EntityFrameworkCore.Sqlite@11.0.0` | creates or edits project files |
 | (command) `dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer@11.0.0` | creates or edits project files |
+
+The reader types 551 lines of code: 527 in 11 new files and 24 new or changed in existing files, plus 4 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -59,7 +62,7 @@ info : Adding PackageReference for package 'Microsoft.AspNetCore.Identity.Entity
 info : Restoring packages for AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'Microsoft.AspNetCore.Identity.EntityFrameworkCore' is compatible with all the specified frameworks in project 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : PackageReference for package 'Microsoft.AspNetCore.Identity.EntityFrameworkCore' version '11.0.0' added to file 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : Generating MSBuild file AdventureWorks.Infrastructure\obj\AdventureWorks.Infrastructure.csproj.nuget.g.props.
@@ -81,7 +84,7 @@ info : Adding PackageReference for package 'Microsoft.EntityFrameworkCore.Sqlite
 info : Restoring packages for AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'Microsoft.EntityFrameworkCore.Sqlite' is compatible with all the specified frameworks in project 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : PackageReference for package 'Microsoft.EntityFrameworkCore.Sqlite' version '11.0.0' added to file 'AdventureWorks.Infrastructure\AdventureWorks.Infrastructure.csproj'.
 info : Generating MSBuild file AdventureWorks.Infrastructure\obj\AdventureWorks.Infrastructure.csproj.nuget.g.targets.
@@ -103,7 +106,7 @@ info : Adding PackageReference for package 'Microsoft.AspNetCore.Authentication.
 info : Restoring packages for AdventureWorks\AdventureWorks.csproj...
 info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
 info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.05.42.04/vulnerability.update.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
 info : Package 'Microsoft.AspNetCore.Authentication.JwtBearer' is compatible with all the specified frameworks in project 'AdventureWorks\AdventureWorks.csproj'.
 info : PackageReference for package 'Microsoft.AspNetCore.Authentication.JwtBearer' version '11.0.0' added to file 'AdventureWorks\AdventureWorks.csproj'.
 info : Generating MSBuild file AdventureWorks\obj\AdventureWorks.csproj.nuget.g.props.
@@ -187,16 +190,16 @@ public sealed class LoyaltyClaimsTransformation(
 }
 ```
 
-Create `AdventureWorks/TokenIssuer.cs` (48 lines). The signing key comes from configuration (Jwt:SigningKey, at least 32 characters, from User Secrets or a deployment secret store). Without one, every environment uses a random key per start, so the app never refuses to start and tokens simply end with the process.
+Create `AdventureWorks/TokenIssuer.cs` (58 lines). The signing key comes from configuration (Jwt:SigningKey, at least 32 characters, from User Secrets or a deployment secret store). Without one, every environment uses a random key per start, so the app never refuses to start and tokens simply end with the process. A shorter key is an error, not a reason to switch keys silently. JsonWebTokenHandler is the current handler, and its package arrives with JwtBearer.
 
-TokenIssuer.cs, part 1 of 2 (23 lines):
+TokenIssuer.cs, part 1 of 2 (28 lines):
 
 ```csharp
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AdventureWorks.Infrastructure.Identity;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AdventureWorks;
@@ -204,7 +207,8 @@ namespace AdventureWorks;
 // Signs short-lived access tokens for the mobile client. The key
 // comes from Jwt:SigningKey (User Secrets locally, a secret store
 // in deployment); without one, each start uses a random key, so
-// tokens never outlive the process.
+// tokens never outlive the process. A key under 32 characters is
+// a mistake, not a choice, so it fails instead of being ignored.
 public sealed class TokenIssuer(TimeProvider clock,
     IConfiguration configuration)
 {
@@ -212,12 +216,16 @@ public sealed class TokenIssuer(TimeProvider clock,
     public const string Audience = "AdventureWorks.Api";
 
     public SymmetricSecurityKey Key { get; } = new(
-        configuration["Jwt:SigningKey"] is { Length: >= 32 } key
-            ? Encoding.UTF8.GetBytes(key)
-            : RandomNumberGenerator.GetBytes(32));
+        configuration["Jwt:SigningKey"] switch
+        {
+            null => RandomNumberGenerator.GetBytes(32),
+            { Length: >= 32 } key => Encoding.UTF8.GetBytes(key),
+            _ => throw new InvalidOperationException(
+                "Jwt:SigningKey needs 32 or more characters.")
+        });
 ```
 
-TokenIssuer.cs, part 2 of 2 (24 lines):
+TokenIssuer.cs, part 2 of 2 (29 lines):
 
 ```csharp
     public string Issue(ApplicationUser user)
@@ -228,12 +236,17 @@ TokenIssuer.cs, part 2 of 2 (24 lines):
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Name, user.UserName ?? user.Id)
         ];
-        var signing = new SigningCredentials(
-            Key, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(Issuer, Audience, claims,
-            now.UtcDateTime, now.AddMinutes(15).UtcDateTime,
-            signing);
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JsonWebTokenHandler().CreateToken(
+            new SecurityTokenDescriptor
+            {
+                Issuer = Issuer,
+                Audience = Audience,
+                Subject = new ClaimsIdentity(claims),
+                NotBefore = now.UtcDateTime,
+                Expires = now.AddMinutes(15).UtcDateTime,
+                SigningCredentials = new SigningCredentials(
+                    Key, SecurityAlgorithms.HmacSha256)
+            });
     }
 
     public static string NewRefreshToken() =>
@@ -938,13 +951,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/auth/login` returned **200**
 
   ```text
-  {"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjY4MDFlOTM2LWU2MTYtNDQ5Zi04NmY0LWU5NGJiZTViYWU0MyIsImh0dHA6Ly9zY2hlbWF...
+  {"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBZHZlbnR1cmVXb3Jrcy5BcGkiLCJpc3MiOiJBZHZlbnR1cmVXb3JrcyIsImV4cCI6MTc5Mzc0Njg0MywibmJmIjoxNzkzNzQ1OTQzLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2l...
   ```
 
 - `POST /api/auth/login` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-e511bcaa0910b33638b352e404c3f937-65e063979842ea94-02","correlationId":"47cf158aa61e44a3b6941ba8e5bb166f"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-d5fb91296fd497e718055ef236ca6df1-8c164ba57ec1e6c8-02","correlationId":"d2d63bf3b10e4324ba4ea1bc1eb3c0a7"}
   ```
 
 - `GET /api/account/loyalty` returned **200**
@@ -956,31 +969,31 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/account/loyalty` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-aa1981937b7cc37f07373d97f7ec2ce9-b29e0fb4a38978c0-02","correlationId":"f3130071ab314c0896acb601cc0fc71b"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-f7fa115e81538c18fe64f79f0f4e6380-8de2390d7e33cb6d-02","correlationId":"1330da211e5e47a2b9086b1cc93953bc"}
   ```
 
 - `POST /api/auth/refresh` returned **200**
 
   ```text
-  {"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjY4MDFlOTM2LWU2MTYtNDQ5Zi04NmY0LWU5NGJiZTViYWU0MyIsImh0dHA6Ly9zY2hlbWF...
+  {"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBZHZlbnR1cmVXb3Jrcy5BcGkiLCJpc3MiOiJBZHZlbnR1cmVXb3JrcyIsImV4cCI6MTc5Mzc0Njg0NCwibmJmIjoxNzkzNzQ1OTQ0LCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2l...
   ```
 
 - `POST /api/auth/refresh` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-683ced461d47f737aaff23ae6da83a2b-0ee3e9bab67369a4-02","correlationId":"a47e2548e2a342548698c066a4690285"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-bdc5a1eafe38ebd6c066a2f8310c2bba-cb4c036a49f44e5f-02","correlationId":"2a5cb0169e5843dc9dc346a5a96fb6d5"}
   ```
 
 - `POST /api/auth/refresh` returned **200**
 
   ```text
-  {"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjY4MDFlOTM2LWU2MTYtNDQ5Zi04NmY0LWU5NGJiZTViYWU0MyIsImh0dHA6Ly9zY2hlbWF...
+  {"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBZHZlbnR1cmVXb3Jrcy5BcGkiLCJpc3MiOiJBZHZlbnR1cmVXb3JrcyIsImV4cCI6MTc5Mzc0Njg0NCwibmJmIjoxNzkzNzQ1OTQ0LCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2l...
   ```
 
 - `GET /api/account/me` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-73584b65db5748ba0235ccea6619851b-5963fb5dbe0c1e4c-02","correlationId":"e6301705672b469599629565bf4d8a57"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-9d312edbc01b4a50a64fa6bc72060e2f-53b476ab5bbc2815-02","correlationId":"81d8e362c7b34180abfc787b376699f9"}
   ```
 
 - `GET /Account/Profile` returned **302** (Location: https://localhost:7001/Account/Login?ReturnUrl=%2FAccount%2FProfile)
@@ -1012,7 +1025,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/account/loyalty` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-cb4562b2ab7ac20a305735417645e62b-c7a8c0878076fded-02","correlationId":"376fcea91dc6467ab922ace6bd555838"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-0d4a752601324011c194aed42508fed7-8a1c3e5995bc6731-02","correlationId":"b8990de26ab74b72a6f73952bd96eb1c"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -1020,7 +1033,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/account/me` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-15d1e35f074d9e0e45e54c43d930e734-0750d5cfec008cfc-02","correlationId":"70d624850b0945a2b40b204be116449d"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-1001db38ba9b8e4a148b822cbf02a1e6-0fb17bfed24d0307-02","correlationId":"bc2c2d247bb24818b8201fc2958e0cd5"}
   ```
 
 - `GET /api/catalog` returned **200**
@@ -1093,6 +1106,7 @@ POST /api/auth/refresh elapsed 322.9177 ms
 Across the five rounds the log has ten such UPDATE statements (two per round) and only five refresh-token INSERTs from the winners. EF Core logs no error for the losing save, so the 401 is the only visible sign. For comparison, two curl.exe calls started with Start-Job also answered 200 and 401 in each of three rounds, but the log had four UPDATEs for six refreshes: only one loser reached the concurrency check, and the other two failed at the earlier "already consumed" check, because each job starts its own PowerShell and the calls begin at slightly different times.
 
 The reader-path check rebuilt `AdventureWorks/Chapter08-Activity` from the Chapter 8 checkpoint: no differences.
+The Activity adds 68 lines of code: 67 in 2 new files and 1 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: change a stored claim value
 

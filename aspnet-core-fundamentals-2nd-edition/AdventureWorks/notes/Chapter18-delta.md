@@ -21,7 +21,7 @@ Chapter 18 ships the running app: one container image for the store, the warehou
 | `.dockerignore` | added |
 | `kubernetes.yaml` | added |
 
-The reader types 110 lines of code: 107 in 3 new files and 3 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 111 lines of code: 108 in 3 new files and 3 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -93,7 +93,7 @@ publish/
 
 The same image runs three ways: the warehouse (working folder /app/inventory, command InventoryService.dll), the migrations (an init container that runs /app/efbundle before the store starts), and the store, two replicas behind one Service. The liveness probe is /health/live, so a stuck process restarts; the readiness probe is /health/ready, so a pod whose database or warehouse does not answer stops receiving traffic without restarting (Chapter 16).
 
-Create `kubernetes.yaml` (71 lines).
+Create `kubernetes.yaml` (72 lines).
 
 kubernetes.yaml, part 1 of 2 (34 lines):
 
@@ -134,7 +134,7 @@ metadata:
   name: store
 ```
 
-kubernetes.yaml, part 2 of 2 (37 lines):
+kubernetes.yaml, part 2 of 2 (38 lines):
 
 ```text
 spec:
@@ -166,6 +166,7 @@ spec:
           readinessProbe:
             httpGet: { path: /health/ready, port: 8080 }
             periodSeconds: 5
+            timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -384,7 +385,7 @@ Native AOT was not compiled on Windows: it needs the Visual Studio C++ build too
 The reader-path check rebuilt `AdventureWorks/Chapter18-Activity` from the Chapter 18 checkpoint: no differences.
 The Activity adds 43 lines of code: 16 in 1 new file and 27 new or changed in existing files, plus 2 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
-### Activity: a Native AOT price feed
+### Activity: a Native AOT catalog feed
 
 Work in a copy of the Chapter 18 checkpoint folder. The store app cannot be compiled ahead of time (the AOT report below says why), so this Activity builds a separate, small read-only service that can: the slim builder, one source-generated JSON context and no reflection. The -aot SDK image has the native toolchain Native AOT needs, and the result runs on runtime-deps, which has no .NET runtime at all.
 
@@ -401,7 +402,7 @@ The template "ASP.NET Core Empty" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj (in 153 ms).
+  Restored AdventureWorks.CatalogFeed\AdventureWorks.CatalogFeed.csproj (in 97 ms).
 Restore succeeded.
 ```
 
@@ -431,7 +432,7 @@ Replace the whole of `AdventureWorks.CatalogFeed/Program.cs` with the following.
 ```csharp
 using System.Text.Json.Serialization;
 
-// Chapter 18 Activity: a read-only price feed small enough for
+// Chapter 18 Activity: a read-only catalog feed small enough for
 // Native AOT. The slim builder, a source-generated JSON context
 // and no reflection; the store app itself is not AOT-compatible.
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -565,7 +566,7 @@ The build fails with 41 warnings and 50 errors. The warnings are the trim and AO
 | Dockerfile (14 lines) | Replaced | Builds the store, the warehouse and the migrations bundle into one image; same multi-stage and non-root ideas. |
 | .dockerignore (7 lines) | Kept, adapted | bin, obj, *.db*, BenchmarkDotNet.Artifacts, .vs, publish. |
 | compose.yaml (8 lines) | Removed | The README's docker run commands (network, volume, bundle, warehouse, store) cover local runs; kubernetes.yaml covers orchestration. |
-| kubernetes.yaml (53 lines, companion) | Replaced | 71 lines: the warehouse and the store, an init container for the migrations, Chapter 16's probes. |
+| kubernetes.yaml (53 lines, companion) | Replaced | 72 lines: the warehouse and the store, an init container for the migrations, Chapter 16's probes. |
 | Dockerfile.aot (14 lines) | Kept, adapted | The Activity's feed on runtime-deps. |
 | ci.yml (21 lines) | Removed | It ran another app's tests (C18-1); the companion's checks are the README commands and requests. Say how CI would run `dotnet test --project AdventureWorks.Tests` if the chapter keeps a CI section. |
 

@@ -27,7 +27,7 @@ Chapter 11 puts order placement and cancellation behind an application service i
 | `AdventureWorks/OrderEndpoints.cs` | changed |
 | `AdventureWorks/Program.cs` | changed |
 
-The reader types 371 lines of code: 259 in 5 new files and 112 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
+The reader types 372 lines of code: 259 in 5 new files and 113 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -497,7 +497,8 @@ In `AdventureWorks/OrderEndpoints.cs`, add the following below `static async Tas
             user, order, StorePolicies.OrderOwner);
         if (!owner.Succeeded) return Results.Forbid();
         var result = await service.CancelAsync(
-            order.OwnerId, id, ct);
+            user.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            id, ct);
         return result.Outcome == OrderOutcome.Cancelled
             ? Results.Ok(result.Order) : ToProblem(result);
     }
@@ -652,12 +653,14 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 
 ## Requests and real responses
 
-`requests.http` holds these requests in this order; 18 of 18 returned their commented status. The README has the same requests as curl.exe commands for Windows PowerShell 5.1, which also passed when run as printed.
+`requests.http` holds these requests in this order; 19 of 19 returned their commented status. The README has the same requests as curl.exe commands for Windows PowerShell 5.1, which also passed when run as printed.
+
+- `POST /dev/sign-out` returned **204**
 
 - `POST /api/orders` returned **401**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-259cac7c501e303568d7df9a6c8d0186-61506fce46a3d457-02","correlationId":"f10369833bc244578de7666d026ea183"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-c8f3b2c677c222a8850ab9f53608031a-fda04e7125c8d3d3-02","correlationId":"4b268764912c40c783e6782d0d5ba7bd"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -669,19 +672,19 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYa5URoWzuy_hSRI-f_8ezdPQqHo4JkyJsk1dxMniWLMvao7zmlk-xBOs7TZvFYG2rJoPOSlt7EJdt16okMxyt8iNW329O6JGpNAc9B4FwrbVgqzJStZGH9wSzY0nYgsv8lkMbf_yzA9LwI3rTJqACSyvXL80b7PMwMtieSnnP5Zg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYxb_MBn2LGxSd9CSsiZNEiPjOAZ12UPovzJcTE3c_JNXq9zH1o9SxAfqgAMgas_JAymK2XbAgXHLxn5j2eX1Ya09wkuGx-OSnmN0Q4QS265lMX4EKf9sFUAugxkJJf1RmQwvUTuFYf64DtVZHoT_2bJtZGqVh7CdNObCMcNM-m7g"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
 
   ```text
-  {"id":13,"orderNumber":"AW-0013","ownerId":"e72a5673-9526-43a5-a99c-b1ed24b84878","total":248.98,"status":"Pending","archived":false,"notes":null,"version":"fa72fc07-001d-4484-8278-c961fe6ac875","items":[{"productId":1,"...
+  {"id":13,"orderNumber":"AW-0013","ownerId":"90deecf1-4111-4793-bd9d-9a2994d810f1","total":248.98,"status":"Pending","archived":false,"notes":null,"version":"e8bd3648-db49-4fc3-b965-717a4be8c8ca","items":[{"productId":1,"...
   ```
 
 - `GET /api/orders/13` returned **200**
 
   ```text
-  {"id":13,"orderNumber":"AW-0013","ownerId":"e72a5673-9526-43a5-a99c-b1ed24b84878","total":248.98,"status":"Pending","archived":false,"notes":null,"version":"fa72fc07-001d-4484-8278-c961fe6ac875","items":[{"productId":1,"...
+  {"id":13,"orderNumber":"AW-0013","ownerId":"90deecf1-4111-4793-bd9d-9a2994d810f1","total":248.98,"status":"Pending","archived":false,"notes":null,"version":"e8bd3648-db49-4fc3-b965-717a4be8c8ca","items":[{"productId":1,"...
   ```
 
 - `POST /api/orders` returned **400**
@@ -693,25 +696,25 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/orders` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Items[0].Quantity":["The field Quantity must be between 1 and 20."]},"traceId":"00-c7...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Items[0].Quantity":["The field Quantity must be between 1 and 20."]},"traceId":"00-a6...
   ```
 
 - `POST /api/orders` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Use one line per product.","traceId":"00-f9827f0e48985ec2897a7507a0bf9142-746695e5eb07a046-02","correlationId":"6d...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Use one line per product.","traceId":"00-02388b7fc552403b9fe17304ebfe41a9-634f63d9d2aa4bb6-02","correlationId":"61...
   ```
 
 - `POST /api/orders` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"A product on the order is not sold.","traceId":"00-842609180d7778445dbb8c14abac9435-0e1d9de06d059000-02","correlat...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"A product on the order is not sold.","traceId":"00-a3d07fdac33ff6ddcf41e1fd581b77b3-9b9adec52a9f7a2c-02","correlat...
   ```
 
 - `POST /api/orders` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-2993e1c31d4bc49eb93a94a154f9a92d-573e5b90d5a5a747-02","correlationId":"40dcbda00c8d4f778113e7640366cddc"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-89314dd424b92b096314401da6c3a1a3-fd14de560f08c604-02","correlationId":"1b63871deaef4a5c89e9355a1777fa9b"}
   ```
 
 - `POST /dev/sign-in/jordan` returned **200**
@@ -723,13 +726,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbXetjzgvCF6YQVDp4xeN8500yT5re1ueuBF6eiaMKj-fAgW74_NQvRuKzXL6eamUjjhsgolt2VQTsoqTvMybammM8KyyT35_znR6AQfHL4u-H32G_9e7E7V-w-I0BG79HbBucmhc6yfJdbHigmzNSZM2RDFRMQSdwYu8w23aClAQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbngekJiyaEB7J5mdSE4JFbH-9CZpEdu_re0nejJn0EtRNW-r3HkVseOfIZCc98u8rv2-wpTXxIKD-pNT-Ej01TS2OTsJW02JCBGZzlTO5ayvxqXuZrfd1iH0D7OG9P6Qj3eyptQQ5XxJyRtP0_8OL9xrQJJZJ5ANOCSQzo35s4tQ"}
   ```
 
 - `POST /api/orders/13/cancel` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-e5427becdd718531af884c1526329f11-a010a4d5585153f2-02","correlationId":"651e0d798ffa475b82e58889ad9d856d"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-dfc0163a9b3dd7adc4cb8efffce61ece-c5130de82ce6f86f-02","correlationId":"a4ffaa04bed34e1b981f5ddd8d614cf3"}
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -741,19 +744,19 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZrF9FYVRrzdfh-xfc0ZojsyYn9JgWuahnyIlyLZ3AhrzLIEkfs6Qn0UueFODqNEYsdUqjvH_IZlNtncDt3whR3tbVSLa7eRXXl6vfuN0C4YCWc6fn_q3ynFEky5zHZg4Szr9papEWWC5VEtRqtMyve3mZI5cEh-lNgbaRH-C8gBg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYJXPh-LYQGeXmXZ0b-tj58jpsbqTOBdrI7fVX5GV1563lDkupKFr3_wB_wFTYdABvmkmL40RcMzfmm8Uyr3Jq6jy5qhE4n6giquYMx5FO0CStDjhiOZCEs8SAa7OmIIevyVodBRYIh9Jr--xuSCzJ43Gpqz9IiQWZUW407W0duEw"}
   ```
 
 - `POST /api/orders/13/cancel` returned **200**
 
   ```text
-  {"id":13,"orderNumber":"AW-0013","ownerId":"e72a5673-9526-43a5-a99c-b1ed24b84878","total":248.98,"status":"Cancelled","archived":false,"notes":null,"version":"d5c086ad-3cb8-4cd8-8b11-1a7ccc7faaf2","items":[{"productId":1...
+  {"id":13,"orderNumber":"AW-0013","ownerId":"90deecf1-4111-4793-bd9d-9a2994d810f1","total":248.98,"status":"Cancelled","archived":false,"notes":null,"version":"209653f2-9e94-4ffe-9025-66745036f43c","items":[{"productId":1...
   ```
 
 - `POST /api/orders/13/cancel` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"The order is already cancelled.","traceId":"00-9da05085ef0ef3181dac32f5737667bd-ae20f074ae48049b-02","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"The order is already cancelled.","traceId":"00-f7504ad50332d33723062e9a5e0cbb3b-35f89155469e643b-02","correlationI...
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -764,7 +767,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - Eight orders placed at the same moment (eight sessions released by a barrier): one 201 (AW-0015) and seven 409s with "Another order took that number; send it again.", no 500, no duplicate number; the created order was cancelled afterward. All eight read the same newest order and picked the same number, and the unique index refused seven inserts. EF Core logged each refused insert at Error. Checked.
 - Production starts with both validation options and serves the catalog (200) and refuses an anonymous order (401). Checked.
 - A captive dependency, registered on purpose in a scratch copy (`AddSingleton<IOrderWriter, EfOrderWriter>`, which holds the scoped DbContext), stops the app at startup in Production: "Cannot consume scoped service 'AdventureWorks.Infrastructure.AdventureWorksDbContext' from singleton 'AdventureWorks.Core.IOrderWriter'." Without the new options, Production would have started and shared one context across requests. Checked.
-- requests.http ran twice against the same database: 18 of 18 both times; each run places one order and cancels it.
+- requests.http ran twice against the same database: 19 of 19 both times; each run places one order and cancels it. It opens with a sign-out, so a repeat run starts from the same state.
 - Delete race (review 11-P10): a scratch copy registers a probe (tools/scenarios/DeleteRaceProbe.cs, never part of the checkpoint) that deletes the order through a second connection, as the Admin delete would, at the point an X-Delete-At header names: after the load and before the staging FindAsync, after staging and before SaveChanges, or after SaveChanges and before the read-back. PUT notes, cancel and create each answered 404 at every point, with the probe's X-Probe-Deleted header showing the row was deleted, and the order read 404 afterward; without the header the same PUT and cancel answered 200: 24 of 24 (`tools/scenarios/ch11-delete-race.http`). The same file against the printed (pre-fix) code: PUT 404, 409, 200 with an empty body; cancel 200 with an empty body, 409, 200 with an empty body; create 500 (NullReferenceException in CreateOrder). Checked; Chapter 12 passes the same file.
 
 ## A breakpoint for this chapter
@@ -911,12 +914,12 @@ app.MapOrderAudit();
 
 ### Activity requests and responses
 
-21 of 21 requests in `Chapter11-Activity/requests.http` returned their commented status. The responses for the requests the Activity adds:
+22 of 22 requests in `Chapter11-Activity/requests.http` returned their commented status. The responses for the requests the Activity adds:
 
 - `GET /api/admin/orders/audit` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-f08315c06f7fdc482f283eff891b1b3d-99fe402f5bfcce4c-02","correlationId":"3ccec4da062a49b4837290fc2d1b105f"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-c563d6928b6dfa44a239532bd1b07e27-13353797f44aa1e5-02","correlationId":"53f7aed935f049499cd9e35e240a6fa5"}
   ```
 
 - `POST /dev/sign-in/avery` returned **200**
@@ -928,7 +931,7 @@ app.MapOrderAudit();
 - `GET /api/admin/orders/audit` returned **200**
 
   ```text
-  [{"at":"2026-11-03T17:52:15.8888922+00:00","operation":"Cancel","outcome":"Invalid","orderNumber":null},{"at":"2026-11-03T17:52:15.8829132+00:00","operation":"Cancel","outcome":"Cancelled","orderNumber":"AW-0013"},{"at":...
+  [{"at":"2026-11-03T22:54:20.4515467+00:00","operation":"Cancel","outcome":"Invalid","orderNumber":null},{"at":"2026-11-03T22:54:20.4459792+00:00","operation":"Cancel","outcome":"Cancelled","orderNumber":"AW-0013"},{"at":...
   ```
 
 - `POST /dev/sign-out` returned **204**

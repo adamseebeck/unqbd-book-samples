@@ -55,7 +55,7 @@ public static class PriceFeed
     public static async Task<int> CountAsync(Stream body,
         CancellationToken ct)
     {
-        using var reader = new StreamReader(body, Strict);
+        using var reader = new StreamReader(body, Strict, false);
         var records = 0;
         while (await reader.ReadLineAsync(ct) is { } line)
         {
@@ -177,7 +177,7 @@ The template "Console App" was created successfully.
 Processing post-creation actions...
 Restoring AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj:
   Determining projects to restore...
-  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 145 ms).
+  Restored AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj (in 95 ms).
 Restore succeeded.
 ```
 
@@ -219,13 +219,13 @@ info : X.509 certificate chain validation will use the default trust store selec
 info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
 info : Adding PackageReference for package 'BenchmarkDotNet' into project 'AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj'.
 info : Restoring packages for AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj...
-info :   GET https://api.nuget.org/v3/vulnerabilities/index.json
-info :   OK https://api.nuget.org/v3/vulnerabilities/index.json 111ms
-info :   GET https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
-info :   GET https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
-info :   OK https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json 4ms
-info :   OK https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json 12ms
-(6 more lines)
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.10.28.05.41.06/2026.11.03.11.42.14/vulnerability.update.json
+info : Package 'BenchmarkDotNet' is compatible with all the specified frameworks in project 'AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj'.
+info : PackageReference for package 'BenchmarkDotNet' version '0.16.0-preview.2' added to file 'AdventureWorks.Benchmarks\AdventureWorks.Benchmarks.csproj'.
+info : Generating MSBuild file AdventureWorks.Benchmarks\obj\AdventureWorks.Benchmarks.csproj.nuget.g.props.
+(3 more lines)
 ```
 
 Replace the whole of `AdventureWorks.Benchmarks/Program.cs` with the following.
@@ -247,7 +247,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace AdventureWorks.Benchmarks;
 
-// The same check two ways over 1,000 feed lines: Split makes an
+// Two checks of the same 1,000 feed lines: Split makes an
 // array and three strings a line; PriceFeed.IsRecord reads spans.
 // Each returns its count, so the work cannot be optimized away.
 [MemoryDiagnoser]
@@ -437,7 +437,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZJnqTYIBZIJhwrxJHoLU3v7juy8zovEa4MwfyElJfLimh1DluPTrRmWzZSOlLvARIc4leLntt9HC3dPQ00_n1jsI25K7kvXcuQOidqSGh1qsddWCNHcPF9HiV2UFCvFiVAuGICNHZv9KFOtDAxnNiT1QImkzllvmw7chDT4dBVEQ"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZB2wvq3sKoIxpcWJ3zrmbABgTbE6XPap_utx6JWgy2XPdXMCUfOctp4KTaQnYuqs7r3QqDB9SiiPSoenK7KY8SaYt9D6dGTE8mos0vwA1jDRdhwXQo28axbg9693l_AZoEYgQpWySDsPSZuDmGxXiOjzewozurFNxmeS0jML6pTw"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -449,13 +449,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-b0387e956a6488c094fbbae0121f86b5-b3b12daabd55896b-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-9ed3d48a08af810803b5d102c342fb24-dae94ed4570d82f7-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-497535242450c3b640f2c988c55ffdf4-16c7dbf37929ed2b-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-d6dfaa39cddd5d05541b692cf09c1161-2979ac0da0bed977-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -467,13 +467,13 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaP_JTIeI4Bd2Iyvq-ubSuQx69mqYKq7MxTAjjchjiNLOCfuDzu4fFmuxUeREc7pswqg8o39PCSFz0N6rCv6Ys_eFzWvUcFkDRD6NmV8-MVICFMR3ZP3bSxkMkcOwH0hSWor7onvQ3pCoFCeTn_Q91lmsKLoAuFImDST9V_ud7Fow"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZQ8m3pUdQTmyBWAipEDgNMxdPOe4MjPzRXDDdRuk3DWUCjUQ_ZXMgOOv-Rc_0dBGNIV8RxY0j6YTFDAuH2lf1_LI5HU00nBEMS-73_6DYuMa7-hXvrOfQ0qz3m0vXqF4nhZLEeEzfk_UMNlgtAKFj6fmLR8hv7Jbmpfhli5gPRhg"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-04bf1c1f47d9ff182fa26a380b132793-feed14adf90500de-03","correlationId":"04bf1c1f47d9ff182fa26a380b132793"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-5613074e89cd1f730f01e3c679d329b7-7aefd7ab9fa20e2c-03","correlationId":"5613074e89cd1f730f01e3c679d329b7"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -607,7 +607,7 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYIIQ0Xr5pIY1zTymyZrTLHShFaAPhL_XIyLxdncJ9RB-lu8NrWxHWTq2M8reupb8TSPyibwSJxf0e7bU5kd88RDP965hoAPbMN38-Ef-s9kZ3CeiVsY0kwbzcsEYofTzw_Ywr_Tzoeue7NCMjmr7uGtsICXkjoUxV5cBaDt36Xgg"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqY8Q9RPIKJpTmauGndG5mUhBFTzRmZysaP5Eg2-tLZ6NZ-DIRd9FbQb2MXGbCwizOU3K-L9CtNqLuH71U5eWFyjFj9PPAs1L1CdNbBGHeCV2WG9PV2Zljj6EsDlIHsoOOUDJwZWMotb-SIfaV6Nv-_AevGdo1ozNt0V0c6aH1eYKA"}
   ```
 
 - `POST /api/admin/products/import` returned **200**
@@ -619,13 +619,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-496cbe8853ad0d2b4510a0e63eb039e3-4f87580f2e82a3de-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-eef24018f23782d9c53e8872aa558899-048caeb1c512ff9f-03","correlationI...
   ```
 
 - `POST /api/admin/products/import` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-b63df5b9526a5e12a9b56fcddf3a4c5e-776b14dc3af3156a-03","correlationI...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"detail":"Record 1 is not sku,name,price.","traceId":"00-030c34dbc581819d911a93f448b05f82-c0a739fed5904e11-03","correlationI...
   ```
 
 - `POST /dev/sign-in/casey` returned **200**
@@ -637,13 +637,13 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqb5YZnxvXNxBMfgmYSGTKsMZUMJFisfw2ztIAuiGt2sHlyym1PP8I2GGgGjZv5VVxi_Y8ZxWv0ranxLOhOOydKL4Cw_UGqGoamq7hnHzFnLbT0dbex26krCnNn-p9g_55AUXEdfhQTxcQ4J08ZmA2pvEh02KkTHui-TLf07adbKsA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZ4T0cafw-G04hCjUIMLsBb0UuFckBkFb44gm4s2nl1sMqV5Vczl8u26dRNg-P9K8FzzaQkmLbDnhrJsaa7ot4FB-2tVYqVvIXqyiHXHDdW22pM30EMjWxFOnvH-p5GawhV8Yw2Lu9haVqqUdmqm3Hbz9l_2DW9Is575mxSMzKYyg"}
   ```
 
 - `POST /api/admin/products/import` returned **403**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-8dca5a7238bc7e24e51dfdd437753eba-d60ad1e4e978b6e4-03","correlationId":"8dca5a7238bc7e24e51dfdd437753eba"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Forbidden","status":403,"traceId":"00-5367ae742ecf9252a801983adec8e72f-365ba12f637fecbe-03","correlationId":"5367ae742ecf9252a801983adec8e72f"}
   ```
 
 - `POST /dev/sign-out` returned **204**
@@ -665,4 +665,5 @@ dotnet run -c Release --project AdventureWorks.Benchmarks `
 - Release is required: BenchmarkDotNet refuses a Debug build of the benchmarks.
 - Review 17-S2: the limit applies when the endpoint reads the body, not before it runs. The endpoint and its antiforgery check run in both cases; with Content-Length the first read throws (Http1ContentLengthMessageBody.OnReadStarting), chunked the read that passes 64 KB does. ImportAsync catches BadHttpRequestException with StatusCode 413 and returns Results.Problem("The feed is over 64 KB.", statusCode: 413), so the reader sees a clean 413 and no exception in the log. Say so where the chapter explains the limit.
 - StreamReader with `new UTF8Encoding(false, true)` throws DecoderFallbackException for invalid bytes instead of inserting U+FFFD; the endpoint turns it and FormatException into 400 (accuracy 17.7).
+- Chapter writer's finding, reproduced: StreamReader(body, Strict) detects byte order marks by default, so a UTF-8 mark swapped in a non-strict decoder and a bad byte after it answered 200. `new StreamReader(body, Strict, false)` closes it. Checked (ch17_import.py): FF FE and UTF-16 text 400; a UTF-8 mark and a bad byte 400; a UTF-8 mark and a valid record still 200 with one record; a bad byte without a mark 400.
 - Program.cs is 90 lines.

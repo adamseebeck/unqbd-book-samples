@@ -104,8 +104,8 @@ OrderTelemetry.cs, part 2 of 2 (36 lines):
             ownerId, id, notes, version, ct));
 
     public Task<OrderPage> ListAsync(string ownerId, int page,
-        int pageSize, CancellationToken ct = default) =>
-        inner.ListAsync(ownerId, page, pageSize, ct);
+        int pageSize) =>
+        inner.ListAsync(ownerId, page, pageSize);
 
     async Task<OrderResult> TrackAsync(string operation,
         Func<Task<OrderResult>> call)
@@ -618,13 +618,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+7/x0/?0] (8s 251ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+7/x0/?0] (5s 469ms)
 Test run summary: Passed!
   total: 7
   failed: 0
   succeeded: 7
   skipped: 0
-  duration: 9s 932ms
+  duration: 6s 600ms
 ```
 
 ## Program.cs at the checkpoint (89 lines)
@@ -773,7 +773,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   Healthy
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 9db00d5aa5421a97df8520266e4d4cdb)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 0dbd1d0084771b7be08ded1ee6e06db0)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -785,7 +785,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 74df6d1457d368c4eadd96d71b718b89)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: ac167e1ccf64c226938a68172eee6418)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -822,7 +822,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqY2Odbob5pvG8wv6bfQMdpoSxwVXqo2yQTyuoqQ0wMNsNkqyvcSKEg-RZj6u9VVbgQvtyiXPXpTRY4nVrvaCLsFA9EUCWoOZM2nZZRivLa1m1NZynaoFlgqwVhEQts3nPsSWunR2xTyO8Fs4mgUrrGNWWIPiaSeMsbzCSHvbdIzeA"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqbtxorLtommgqM6fqcFKTaoJjMpZiEpIPwnWiEiLaDmGh1q0rPhFcb3EvQADHAtEp-IIO_66wlULHmIa9dRW3swsh3PBfFfq4Dm0nKwexY0aQYiwPAS9JWFOTdH9CVwq86VXbtJ4Hbct0fk3zGlXZf5H5GOBCc2LN-cZXB8zHzqDg"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
@@ -842,7 +842,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZlICNOFqsSduIvnK0fP6ro0EHcdYAGWOXhBVZ_luge52IAICnP3XzdulV2CAKQ5m1At4UnOGNymzSDzYo8RJUaZPInUoz1xr5zc5E9Okac9lIwyC8fonLrGhstkIKjw81sSssNcUk4FMgI_Of_y-G2rQYtI3Fumo08e_vrSCrw2A"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqYNMtbnzWlAwNw1T2EzhQknw6ETxcNW_Mf3und-KZvqX3CHAU0n2s3vMBn5cn7L5_9ePkkSkoN7XyMHmOvHNy8SyMlz02K6yvH2BEu1xqhu2DllEu5GLqfVgELtmRqlz-TZrZ9-mOSV6wchkTFb40bNaUPFdFfc14wt-sQjm2ej8A"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**
@@ -987,13 +987,13 @@ It prints:
 Running tests from AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64)
 warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
       Failed to determine the https port for redirect.
-AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+8/x0/?0] (8s 006ms)
+AdventureWorks.Tests\bin\Debug\net11.0\AdventureWorks.Tests.dll (net11.0|x64) passed [+8/x0/?0] (5s 742ms)
 Test run summary: Passed!
   total: 8
   failed: 0
   succeeded: 8
   skipped: 0
-  duration: 10s 011ms
+  duration: 6s 890ms
 ```
 
 ### Activity requests and responses
@@ -1012,7 +1012,7 @@ Test run summary: Passed!
   Healthy
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 814354173fc72bfe56a331340d846a7d)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 91aedcf872959a8aa3b41fbaaeafb149)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -1024,7 +1024,7 @@ Test run summary: Passed!
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
   ```
 
-- `GET /api/catalog` returned **200** (X-Correlation-ID: 95bf0e032d4d2efdce8d821372f4debd)
+- `GET /api/catalog` returned **200** (X-Correlation-ID: 66e865910454472c8e80af826ae11429)
 
   ```text
   {"items":[{"id":1,"name":"Trail Helmet","sku":"HLM-1001","price":29.99,"category":"accessories","version":1},{"id":2,"name":"Trail Jersey","sku":"JRS-2001","price":49.99,"category":"clothing","version":1},{"id":3,"name":...
@@ -1061,7 +1061,7 @@ Test run summary: Passed!
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqaK8QNXI4yQtgGGBfAOeaIWNVC189xK0Vdp0wgjfrCrRzA_ENyLm5itil21GS7Jrb5K5P4V9CZQxzqCVOjQx6PdbOKffhN3_vhQfIxBJWXI0R5wmWYoXZQ9fNfkWxsg9d0Pse_PFAoqIqoBVoybP21cGO5QO7ZlkP4dlXAL84nLqw"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqY1TVP-bmsx8iGB9_Nopm3M6bPEt19WsDwX0erD5mjo3uIzp5cYbzcTWcuX3i8UcC38hm3syT6tzKdbb1a9y5tGH64631_abAa279sqWrB_b5GkPOTq_2xbHID5Jw6jk-wjakesGd4jm8qud99VQE4z0tACflNOqA5zbFFFL2iNoA"}
   ```
 
 - `POST /api/orders` returned **201** (Location: https://localhost:7001/api/orders/13)
@@ -1081,7 +1081,7 @@ Test run summary: Passed!
 - `GET /api/csrf` returned **200**
 
   ```text
-  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqawW8cZYUm_k8Jwp111T8jkDI9m-4UdM3tNwXuaRN-cy-j62EPZJAK3OCnnFkMZJ5fmY-oREWyR8ImLExyzukPcXTiaUAftjse61hsUERJB8NTRm0sgSZ9KHL6ORdcMSy9qtbKG0wW22BcQJoXdIA1OqBbI3Cuuu8ZDklFZThx-_Q"}
+  {"token":"CfDJ8B_g-SIhaa9Im_JmScWyQqZyEykBteAu6JOwQT9z14RR5uxot5VmjbinGPfFfpb37mUBkEiyos490-FTA_FHblCUmW-P5vw4oPQ0-ZQne135P1RIV0RREr15WZ4-32prL3FZQJrtwj5h8yI-N0mHj6F4fv5lLrVNmsslyysaxJ2M-cb_K9Clv1B6w3_IiyHG9g"}
   ```
 
 - `DELETE /api/admin/orders/13` returned **204**

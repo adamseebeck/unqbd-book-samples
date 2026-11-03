@@ -1,6 +1,6 @@
 # Chapter 6 delta: Razor Pages and Server-Side Rendering
 
-Generated October 30, 2026 (ET) from the companion checkpoint `AdventureWorks/Chapter06` and the operations that rebuild it from the Chapter 5 checkpoint. Every snippet below is copied from the checkpoint files, and every output and response was captured from a run on the .NET 11 RC3 SDK (shown here with the release version numbers the book uses).
+Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Chapter06` and the operations that rebuild it from the Chapter 5 checkpoint. Every snippet below is copied from the checkpoint files, and every output and response was captured from a run on the .NET 11 RC3 SDK (shown here with the release version numbers the book uses).
 
 ## What the chapter adds
 
@@ -31,6 +31,8 @@ Because there is one store, a page edit is visible at `/api/v2/products/1` with 
 | `AdventureWorks/ProductSummaryViewComponent.cs` | added |
 | `AdventureWorks/Pages/Shared/Components/ProductSummary/Default.cshtml` | added |
 | `AdventureWorks/Program.cs` | changed |
+
+The reader types 189 lines of code: 164 in 11 new files and 25 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -554,6 +556,7 @@ The breakpoint is hit once per save that passes validation (the two-letter name 
 A customer profile page over one fixed, fictional customer: `CustomerProfileStore` (System.Threading.Lock; Task-returning read, save and deactivate), `Pages/Customer/Profile` with `ProfileInput` (Name Required, StringLength 100; Email Required, EmailAddress), Post-Redirect-Get with a TempData message, a named `OnPostDeactivateAsync` handler that reads none of the edit fields and redirects to `/Customer/Deactivated`, and a `RecentOrders` View Component that lists Core `Order` records (AW-0001, AW-0002) rather than a new order type. Checked with the same form script: the page renders the recent orders; an invalid email redisplays the form; a valid save redirects, shows "Profile saved." once, then not again; Deactivate needs only the token and the confirmation page shows "Active: False"; a POST without cookie and token returns 400.
 
 The reader-path check rebuilt `AdventureWorks/Chapter06-Activity` from the Chapter 6 checkpoint: no differences.
+The Activity adds 135 lines of code: 134 in 6 new files and 1 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: a customer profile page
 
@@ -570,7 +573,7 @@ using AdventureWorks.Pages.Customer;
 namespace AdventureWorks;
 
 // Fictional local data for the Activity: one fixed customer.
-// Chapter 8 takes the customer from the signed-in user instead.
+// Real profile pages read the signed-in user (Chapter 8).
 public sealed class CustomerProfileStore
 {
     private readonly Lock _gate = new();
@@ -754,7 +757,7 @@ builder.Services.AddSingleton<CustomerProfileStore>();
 - `POST /Customer/Profile?handler=Deactivate` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-f2e506ee26f5e5dcaa958e0df7e25da2-b08f0654f696c739-02","correlationId":"1e13f139bb2441e49c46752b77f28ca9"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-d4dfa60a6c6bfafe3d1e9c684e296f45-f0384dfb4e7521ec-02","correlationId":"6835e6ee0c164ca79c9380a9fa6138b7"}
   ```
 
 - `GET /Customer/Deactivated` returned **200**

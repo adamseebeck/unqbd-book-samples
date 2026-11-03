@@ -1,6 +1,6 @@
 # Chapter 7 delta: Forms, Model Binding, and Validation
 
-Generated October 30, 2026 (ET) from the companion checkpoint `AdventureWorks/Chapter07` and the operations that rebuild it from the Chapter 6 checkpoint. Every snippet below is copied from the checkpoint files, and every output and response was captured from a run on the .NET 11 RC3 SDK (shown here with the release version numbers the book uses).
+Generated November 3, 2026 (ET) from the companion checkpoint `AdventureWorks/Chapter07` and the operations that rebuild it from the Chapter 6 checkpoint. Every snippet below is copied from the checkpoint files, and every output and response was captured from a run on the .NET 11 RC3 SDK (shown here with the release version numbers the book uses).
 
 ## What the chapter adds
 
@@ -32,6 +32,8 @@ Chapter 7 adds order input to the running app instead of a separate Chapter07Sam
 | `AdventureWorks/Pages/Shared/_Layout.cshtml` | replaced |
 | `AdventureWorks/Pages/Orders/Create.cshtml.cs` | added |
 | `AdventureWorks/Pages/Orders/Create.cshtml` | added |
+
+The reader types 216 lines of code: 175 in 6 new files and 41 new or changed in existing files, plus 0 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ## Steps, in order
 
@@ -270,9 +272,9 @@ Replace the whole of `AdventureWorks/Pages/Shared/_Layout.cshtml` with the follo
 
 The page validates its input with ModelState, checks the product exists in the store, and saves an optional upload under a generated name outside wwwroot.
 
-Create `AdventureWorks/Pages/Orders/Create.cshtml.cs` (65 lines).
+Create `AdventureWorks/Pages/Orders/Create.cshtml.cs` (67 lines). A valid post redirects back to the page, and TempData carries the message across the redirect. A refresh then repeats the GET, not the post, so it cannot store a second upload.
 
-Create.cshtml.cs, part 1 of 2 (40 lines):
+Create.cshtml.cs, part 1 of 3 (22 lines):
 
 ```csharp
 using AdventureWorks.Core;
@@ -293,10 +295,15 @@ public sealed class CreateModel(IProductService products,
     [BindProperty]
     public IFormFile? Upload { get; set; }
 
-    public string? StatusMessage { get; private set; }
+    [TempData]
+    public string? StatusMessage { get; set; }
 
     public void OnGet() { }
+```
 
+Create.cshtml.cs, part 2 of 3 (19 lines):
+
+```csharp
     public async Task<IActionResult> OnPostAsync()
     {
         if (Upload is { Length: 0 or > MaxUploadBytes })
@@ -313,11 +320,12 @@ public sealed class CreateModel(IProductService products,
         StatusMessage = "Input validated for " +
             $"{Input.Quantity} x {product!.Name}. " +
             "No order has been placed.";
-        return Page();
+        // Redirect, so a refresh cannot store a second file.
+        return RedirectToPage();
     }
 ```
 
-Create.cshtml.cs, part 2 of 2 (24 lines):
+Create.cshtml.cs, part 3 of 3 (24 lines):
 
 ```csharp
     async Task SavePrivateCopyAsync(IFormFile upload)
@@ -498,7 +506,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/orders/validate` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Sku":["Sku is unavailable in the catalog."]},"traceId":"00-08bb60641d176ca7d0a0f191d9...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Sku":["Sku is unavailable in the catalog."]},"traceId":"00-33448dd24860421750c401185d...
   ```
 
 - `POST /api/orders/validate` returned **400**
@@ -510,25 +518,25 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /api/orders/validate` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Quantity":["The field Quantity must be between 1 and 20."]},"traceId":"00-3def1aab405...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Quantity":["The field Quantity must be between 1 and 20."]},"traceId":"00-c6b377b2778...
   ```
 
 - `POST /api/orders/validate` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Sku":["The Sku field is required."]},"traceId":"00-6ab75ecd00a3c51dbab3f88b9e933075-e...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Sku":["The Sku field is required."]},"traceId":"00-c595ca8e0d9995e8c19b27ef0fd0dcfd-4...
   ```
 
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Category":["Unknown category."]},"traceId":"00-5444af2103fb4a84f778db02de3e0dfa-8e3bd...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Category":["Unknown category."]},"traceId":"00-6c490f9d96d778bb3435030d48746465-84732...
   ```
 
 - `POST /api/v2/products` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Price":["The field Price must be between 0,01 and 100000."]},"traceId":"00-71a1801688...
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Price":["The field Price must be between 0,01 and 100000."]},"traceId":"00-2b097d5603...
   ```
 
 - `POST /api/v2/products` returned **201** (Location: https://localhost:7001/api/v2/products/5)
@@ -546,7 +554,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `POST /Orders/Create` returned **400**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-12585ffe881a03c491ba20c7dc210355-fa1057ebfef4785b-02","correlationId":"1f1b703b3c3a4d35859dcbd7ddc57c63"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Bad Request","status":400,"traceId":"00-8153e8f6d810753bf5b9d6b1a3d43e38-40aa05ed8c0f0ed8-02","correlationId":"1ae99932f82f488bb88bef7e15fa575f"}
   ```
 
 - `GET /css/site.css` returned **200**
@@ -562,7 +570,7 @@ In Visual Studio 2026, open `AdventureWorks.slnx` and press F5; the https profil
 - `GET /PrivateUploads/example.bin` returned **404**
 
   ```text
-  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-2dca0c6ab037874e117a9026fb76745a-7351bf8a9d83b019-02","correlationId":"7d84af83e2824b1aac45833db7d417f9"}
+  {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-cf0b3f170d938e3b882c3e7cf4b4c323-89aac33fdc31cd52-02","correlationId":"fa61bcb7a10a4f9aa05043fc596e12cd"}
   ```
 
 - `GET /api/catalog/1` returned **200**
@@ -583,7 +591,7 @@ A Python check fetched the real form and its token, with these results:
 
 - Quantity 50 and email "not-an-email" redisplay the page (200) with both field errors.
 - Product 99 gives "No product has that ID."
-- Product 1, quantity 2 and a 17-byte upload named `..\..\evil name.txt` return "Input validated for 2 x Trail Helmet. No order has been placed."; the file is stored as a 32-hex-character `.bin` name in PrivateUploads with the uploaded bytes, and `/PrivateUploads/<that name>` returns 404.
+- Product 1, quantity 2 and a 17-byte upload named `..\..\evil name.txt` answer 302 to /Orders/Create (redirect after post, with the message in TempData), and the page then shows "Input validated for 2 x Trail Helmet. No order has been placed." once; a refresh shows the empty form and stores no second file. The file is stored as a 32-hex-character `.bin` name in PrivateUploads with the uploaded bytes, and `/PrivateUploads/<that name>` returns 404.
 - A 1.5 MiB upload returns 400 (over the 1 MiB multipart limit).
 - A POST without the cookie and token returns 400.
 The check deletes its test upload afterward, as the Activity's last step asks.
@@ -615,6 +623,7 @@ The Activity copy adds a separate seven-line host, `HeaderOnlyForms` (its own pr
 In Visual Studio 2026, set both projects to start: right-click the solution, Configure Startup Projects, Multiple startup projects.
 
 The reader-path check rebuilt `AdventureWorks/Chapter07-Activity` from the Chapter 7 checkpoint: no differences.
+The Activity adds 27 lines of code: 0 in 0 new files and 27 new or changed in existing files, plus 2 command lines. Blank lines in listings are counted; deleted lines and files that a command writes are not.
 
 ### Activity: a header-only form host for the CSRF checks
 
@@ -633,7 +642,7 @@ The template "ASP.NET Core Empty" was created successfully.
 Processing post-creation actions...
 Restoring HeaderOnlyForms\HeaderOnlyForms.csproj:
   Determining projects to restore...
-  Restored HeaderOnlyForms\HeaderOnlyForms.csproj (in 133 ms).
+  Restored HeaderOnlyForms\HeaderOnlyForms.csproj (in 102 ms).
 Restore succeeded.
 ```
 
@@ -725,7 +734,7 @@ Replace the whole of `HeaderOnlyForms/Properties/launchSettings.json` with the f
 | Step 2 AvailableSkuAttribute.cs | Replaced | Same logic; namespace AdventureWorks; CatalogName "the catalog"; lines broken to fit 66 characters. |
 | Step 3 OrderApiInput | Replaced | Adds Chapter 5's SKU RegularExpression ahead of AvailableSku. |
 | Step 3 registration and MapPost excerpt | Replaced | CatalogAvailability is registered in AddCatalog; AddValidation and AddLocalization go in Program.cs after AddAntiforgery; the route is `orders.MapPost("/validate", ...)` inside MapOrderEndpoints. |
-| Step 4 Create.cshtml.cs | Replaced | Takes IProductService and checks the product exists; the upload code moves into a SavePrivateCopyAsync helper; 61 lines, two parts. |
+| Step 4 Create.cshtml.cs | Replaced | Takes IProductService and checks the product exists; the upload code moves into a SavePrivateCopyAsync helper; a valid post redirects, with the message in TempData; 67 lines, two parts. |
 | Step 4 form excerpt | Replaced | Name the file, Pages/Orders/Create.cshtml, and show its @page and @model lines (master finding C07-4). |
 | Full Example Program.cs | Replaced | Adds one using, four registration lines and two pipeline lines to Chapter 6's; 66 lines. The 139-character UseRequestLocalization line becomes `app.UseRequestLocalization("en", "fr");`. |
 | Full Example model and page repeats | Removed | Printed once, in the steps. |

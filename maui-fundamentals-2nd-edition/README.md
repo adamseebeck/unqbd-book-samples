@@ -16,11 +16,11 @@ Companion code for *.NET MAUI Fundamentals, Second Edition* by Adam Seebeck: the
 
 ## Requirements
 
-Install the .NET 11 SDK, version 11.0.100 or later. `global.json` selects it and accepts later .NET 11 feature bands. From `Samples`, install the .NET MAUI workload for your target: `dotnet workload install maui-windows` on Windows, `maui-android` for Android (plus Java and the Android SDK), or `maui-ios` and `maui-maccatalyst` on a Mac with Xcode. The workload supplies the .NET MAUI Controls version, and the Microsoft.Extensions packages use 11.0.0. Chapter 2 covers each target's setup.
+On Windows, the book uses Visual Studio 2026 with the .NET Multi-platform App UI development workload. Without Visual Studio, install the .NET 11 SDK, version 11.0.100 or later. `global.json` selects it and accepts later .NET 11 feature bands. From `Samples`, install the .NET MAUI workload for your target: `dotnet workload install maui-windows` on Windows, `maui-android` for Android (plus Java and the Android SDK), or `maui-ios` and `maui-maccatalyst` on a Mac with Xcode. The workload supplies the .NET MAUI Controls version, and the Microsoft.Extensions packages use 11.0.0. Chapter 2 covers each target's setup.
 
 ## Build and run
 
-Open a terminal in `Samples` and choose the target once for that terminal. In PowerShell:
+In Visual Studio, open `Samples/Inventory.slnx`, choose Windows Machine in the run list and press F5. In a terminal, open it in `Samples` and choose the target once for that terminal. In PowerShell:
 
 ```powershell
 $env:BookTargetFrameworks = "net11.0-windows10.0.19041.0"
@@ -41,19 +41,19 @@ Run the portable tests with `dotnet test Inventory.Tests`. If you prefer one lin
 
 ## Run a checkpoint
 
-From `Samples`, with `BookTargetFrameworks` set, this runs the app as it stands at the end of Chapter 5. Change the chapter number for another checkpoint:
+Every checkpoint has an `Inventory.slnx`: open `Samples/Checkpoints/Chapter05/Inventory.slnx` in Visual Studio and press F5. From `Samples`, with `BookTargetFrameworks` set, this runs the same app, as it stands at the end of Chapter 5. Change the chapter number for another checkpoint:
 
 ```powershell
 dotnet run --project Checkpoints/Chapter05/Inventory.App
 ```
 
-From Chapter 10 on, `dotnet test Checkpoints/Chapter10/Inventory.Tests` runs that checkpoint's tests.
+From Chapter 10 on, Test Explorer or `dotnet test Checkpoints/Chapter10/Inventory.Tests` runs that checkpoint's tests.
 
 The Practice tab has a button for each chapter page the checkpoint contains: Adaptive settings (Chapter 4), Stock dashboard (5), Checkout workflow (7), Categories (8), Offline queue (9), Metric cards (11), Site inspection (12), Token renewal (13), Localized settings and Configuración español (14), and Browsing (15). The finished app has the same buttons plus Open chapter activities.
 
 ## Run an activity
 
-From `Samples`, with `BookTargetFrameworks` set, this runs Chapter 3's activity solution. Change the chapter number for another activity:
+In Visual Studio, open `Samples/Activities/Chapter03/Activity03.csproj` and press F5. From `Samples`, with `BookTargetFrameworks` set, this runs the same activity solution. Change the chapter number for another activity:
 
 ```powershell
 dotnet run --project Activities/Chapter03
@@ -67,7 +67,7 @@ Make your changes in your own copy, not in `Inventory.App` or a checkpoint. Chap
 Copy-Item Checkpoints/Chapter01 MyInventory -Recurse
 ```
 
-In `MyInventory/Inventory.App/Inventory.App.csproj`, change `ApplicationTitle` to `My Inventory` and `ApplicationId` to `com.example.myinventory`, so your copy keeps its saved data apart from the checkpoints. Then run it with `dotnet run --project MyInventory/Inventory.App`. Keep the copy inside `Samples`, so it uses the same SDK and build settings as the checkpoints.
+Open `MyInventory/Inventory.slnx` in Visual Studio. In `MyInventory/Inventory.App/Inventory.App.csproj`, change `ApplicationTitle` to `My Inventory` and `ApplicationId` to `com.example.myinventory`, so your copy keeps its saved data apart from the checkpoints. Then press F5, or run it with `dotnet run --project MyInventory/Inventory.App`. Keep the copy inside `Samples`, so it uses the same SDK and build settings as the checkpoints.
 
 In each chapter, make every step's change in `MyInventory` and run it. If your version misbehaves, compare it with that chapter's checkpoint, or copy the checkpoint again and continue from there. Do each Activity in a separate copy, such as `Copy-Item MyInventory MyActivity03 -Recurse`, so `MyInventory` stays the same as the checkpoints.
 
@@ -83,7 +83,7 @@ On a Windows PC with an Intel or AMD processor:
 
 1. Install the tools. In the Visual Studio Installer, select the .NET Multi-platform App UI development workload; it installs the Android SDK, a JDK and the Android emulator. Without Visual Studio, run `dotnet workload install maui-android` in `Samples`, then follow the Android steps on the Visual Studio Code tab of [learn.microsoft.com/dotnet/maui/get-started/installation](https://learn.microsoft.com/dotnet/maui/get-started/installation).
 2. Turn on acceleration. Search Windows for windows features, open Turn Windows features on or off, select Hyper-V and Windows Hypervisor Platform (Windows Home lists only the second), and restart.
-3. Create an emulator. In Visual Studio, open the Android Device Manager, select New, keep a Pixel base device, choose the x86_64 processor and a recent Android version, select Create, then Start. [learn.microsoft.com/dotnet/maui/android/emulator/device-manager](https://learn.microsoft.com/dotnet/maui/android/emulator/device-manager) shows each screen.
+3. Create an emulator. In Visual Studio, select Tools > Android > Android Device Manager, select New, keep a Pixel base device, choose the x86_64 processor and a recent Android version, select Create, then Start. [learn.microsoft.com/dotnet/maui/android/emulator/device-manager](https://learn.microsoft.com/dotnet/maui/android/emulator/device-manager) shows each screen.
 4. With the emulator running, choose it in Visual Studio's run list and press F5, or run these from `Samples`. The first deployment takes several minutes.
 
    ```powershell

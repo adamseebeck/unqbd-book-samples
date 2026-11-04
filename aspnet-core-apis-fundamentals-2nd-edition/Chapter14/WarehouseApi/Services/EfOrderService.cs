@@ -281,11 +281,17 @@ public class EfOrderService : IOrderService
     private IQueryable<Order> Readable(OrderReadScope scope)
     {
         var orders = _context.Orders.AsNoTracking();
+        var hasCreator = !string.IsNullOrEmpty(scope.CreatedBy);
+        // SQL equality pads trailing spaces, even with a binary collation.
+        var creatorByteCount = scope.CreatedBy is null
+            ? (int?)null
+            : Encoding.Unicode.GetByteCount(scope.CreatedBy);
 
         return scope.AllOrders
             ? orders
             : orders.Where(o => (scope.WarehouseCode != null && o.FulfillmentWarehouseCode == scope.WarehouseCode)
-                || (scope.CreatedBy != null && o.CreatedBy == scope.CreatedBy));
+                || (hasCreator && o.CreatedBy == scope.CreatedBy
+                    && EF.Functions.DataLength(o.CreatedBy) == creatorByteCount));
     }
 
     private async Task<Order> LoadOrderAsync(Guid id, CancellationToken cancellationToken) =>

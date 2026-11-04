@@ -10,7 +10,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
     {
         builder.HasKey(o => o.Id);
         builder.Property(o => o.CustomerReference).HasMaxLength(50).IsRequired();
-        builder.Property(o => o.CreatedBy).HasMaxLength(200);
+        // A token subject is an opaque identifier, not a case-insensitive display name.
+        builder.Property(o => o.CreatedBy).HasMaxLength(200)
+            .UseCollation("Latin1_General_100_BIN2");
 
         // Stored as text, such as "Allocated", rather than a number
         builder.Property(o => o.Status).HasConversion<string>().HasMaxLength(20);

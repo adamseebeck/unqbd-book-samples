@@ -16,7 +16,7 @@ partial class WarehouseDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261027061500_AddOrderCreatedBy";
+    public override string LastMigrationId => "20261104202050_ExactOrderSubject";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -62,7 +62,8 @@ partial class WarehouseDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<string>("CreatedBy")
                     .HasMaxLength(200)
-                    .HasColumnType("nvarchar(200)");
+                    .HasColumnType("nvarchar(200)")
+                    .UseCollation("Latin1_General_100_BIN2");
 
                 b.Property<DateTime>("CreatedDate")
                     .HasColumnType("datetime2");

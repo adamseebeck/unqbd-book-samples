@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using WarehouseApi.Security;
 
@@ -21,8 +22,15 @@ public static class AuthorizationConfiguration
             });
 
             options.AddPolicy(AuthorizationPolicies.RequireIntegrationClientOrSupervisor, policy =>
+                policy.RequireRole(UserRoles.IntegrationClient, UserRoles.Supervisor));
+
+            options.AddPolicy(AuthorizationPolicies.CanCreateOrder, policy =>
             {
                 policy.RequireRole(UserRoles.IntegrationClient, UserRoles.Supervisor);
+                // Client ownership and replay protection need a nonempty subject.
+                policy.RequireAssertion(context =>
+                    context.User.IsInRole(UserRoles.Supervisor)
+                    || !string.IsNullOrEmpty(context.User.FindFirstValue(ClaimTypes.NameIdentifier)));
             });
         });
 

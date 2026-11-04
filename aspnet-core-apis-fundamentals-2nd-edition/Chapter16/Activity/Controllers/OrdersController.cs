@@ -93,7 +93,7 @@ public class OrdersController : ControllerBase
     // No try/catch below: a domain exception reaches the exception handler
 
     [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.RequireIntegrationClientOrSupervisor)]
+    [Authorize(Policy = AuthorizationPolicies.CanCreateOrder)]
     [EnableRateLimiting(RateLimitingConfiguration.OrderCreationPolicy)]
     [ProducesResponseType<OrderResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json", "application/problem+xml")]

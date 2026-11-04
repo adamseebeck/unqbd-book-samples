@@ -57,7 +57,7 @@ public class OrdersController : ControllerBase
     // The actions below contain no try/catch: a domain exception reaches the exception handler
 
     [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.RequireIntegrationClientOrSupervisor)]
+    [Authorize(Policy = AuthorizationPolicies.CanCreateOrder)]
     public async Task<ActionResult<OrderResponse>> Create(
         [FromBody] CreateOrderRequest request,
         [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey,

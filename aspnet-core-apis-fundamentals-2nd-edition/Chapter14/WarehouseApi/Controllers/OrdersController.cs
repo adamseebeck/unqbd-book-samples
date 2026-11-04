@@ -85,7 +85,7 @@ public class OrdersController : ControllerBase
     // No try/catch below: a domain exception reaches the exception handler
 
     [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.RequireIntegrationClientOrSupervisor)]
+    [Authorize(Policy = AuthorizationPolicies.CanCreateOrder)]
     [ProducesResponseType<OrderResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json", "application/problem+xml")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, "application/problem+json", "application/problem+xml")]

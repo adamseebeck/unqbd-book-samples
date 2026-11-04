@@ -6,5 +6,6 @@ public static class AuthorizationPolicies
     public const string RequireSupervisor = "RequireSupervisor";
     public const string CanAdjustStock = "CanAdjustStock";
     public const string RequireIntegrationClientOrSupervisor = "RequireIntegrationClientOrSupervisor";
+    public const string CanCreateOrder = "CanCreateOrder";
     public const string CanViewAuditHistory = "CanViewAuditHistory";
 }

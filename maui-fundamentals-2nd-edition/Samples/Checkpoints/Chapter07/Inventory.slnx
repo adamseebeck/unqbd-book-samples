@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Inventory.App/Inventory.App.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="Inventory.Core/Inventory.Core.csproj" />
+</Solution>

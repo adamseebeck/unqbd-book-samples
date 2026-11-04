@@ -41,7 +41,7 @@ public partial class ProductsPage : ContentPage
 
     private async void OnSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (navigating || e.CurrentSelection.FirstOrDefault()is not Product product)
+        if (navigating || e.CurrentSelection.FirstOrDefault() is not Product product)
             return;
         navigating = true;
         try

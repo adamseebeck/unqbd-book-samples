@@ -315,6 +315,14 @@ static (int Passed, int Failed) ParseTests(string output)
     // VSTest: "Passed!  - Failed:     0, Passed:    11, Skipped: ..."   MTP / terminal logger: "total: 11 failed: 0 succeeded: 11"
     foreach (Match m in Regex.Matches(output, @"Failed:\s*(\d+),\s*Passed:\s*(\d+)"))
     { failed += int.Parse(m.Groups[1].Value); passed += int.Parse(m.Groups[2].Value); }
+    // xUnit v3 run as an executable: "Total: 7, Errors: 0, Failed: 0, Skipped: 0, Not Run: 0"
+    foreach (Match m in Regex.Matches(output, @"Total:\s*(\d+),\s*Errors:\s*(\d+),\s*Failed:\s*(\d+),\s*Skipped:\s*(\d+)(?:,\s*Not Run:\s*(\d+))?"))
+    {
+        var total = int.Parse(m.Groups[1].Value);
+        var bad = int.Parse(m.Groups[2].Value) + int.Parse(m.Groups[3].Value);
+        var notRun = int.Parse(m.Groups[4].Value) + (m.Groups[5].Success ? int.Parse(m.Groups[5].Value) : 0);
+        if (passed + failed == 0) { failed += bad; passed += total - bad - notRun; }
+    }
     if (passed + failed == 0)
     {
         var f = Regex.Matches(output, @"failed:\s*(\d+)", RegexOptions.IgnoreCase);
@@ -328,7 +336,10 @@ static string FirstErrors(string output)
 {
     var lines = output.Split('\n').Select(l => l.Trim()).Where(l => Regex.IsMatch(l, @"\berror\b|\[FAIL\]|failed", RegexOptions.IgnoreCase)).Distinct().Take(2).ToList();
     var s = lines.Count > 0 ? string.Join(" | ", lines) : "non-zero exit code";
-    return s.Length > 300 ? s[..300] + "..." : s;
+    if (s.Length > 300) s = s[..300] + "...";
+    if (output.Contains("LocalDB", StringComparison.OrdinalIgnoreCase) || output.Contains("Local Database Runtime"))
+        s = "needs SQL Server Express LocalDB (Windows): " + s;
+    return s;
 }
 
 IEnumerable<string> Find(string dir, string pattern) =>

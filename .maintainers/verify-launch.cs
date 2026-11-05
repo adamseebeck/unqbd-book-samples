@@ -227,6 +227,13 @@ async Task<Result> Step(string kind, string path, string[] dotnetArgs, TimeSpan?
         status = run.ExitCode != 0 ? Status.ExpectedFail : Status.Fail;
         detail = run.ExitCode != 0 ? "deliberate 11.0.999 SDK pin (reader activity start)" : "expected the deliberate 11.0.999 pin to fail, but it built";
     }
+    else if (kind == "test" && run.ExitCode != 0 && !run.TimedOut && Rel(path).Contains("/ActivityStarts/") && failedTests > 0)
+    {
+        // Blazor's prepared starts are unsolved on purpose: their exercise tests fail until the
+        // reader makes the change the activity asks for.
+        status = Status.ExpectedFail;
+        detail = "unsolved activity start: its exercise tests fail until the reader completes the activity";
+    }
     else
     {
         status = run.ExitCode == 0 ? Status.Pass : Status.Fail;

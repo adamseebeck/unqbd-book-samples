@@ -75,7 +75,7 @@ The `AI` configuration section selects the provider:
 | `AI:ApiKey` | Not used | Required unless `AI:UseEntraId` is `true` | Required |
 | `AI:UseEntraId` | Not used | `true` for keyless access | Not used |
 
-`AI:TimeoutSeconds` (default 120) limits each network attempt. In Chapters 2 and 3 the OpenAI SDK retries failed requests on its own; from Chapter 4 on, the resilience pipeline is the only retry layer, and the SDK sends each request once. Keep keys out of files: on a development machine, use user secrets, which every chapter shares through the user secrets id `contoso-support-copilot`; in CI pipelines and containers, use environment variables such as `AI__Provider` and `AI__ApiKey`.
+`AI:TimeoutSeconds` (default 120) limits each network attempt. In Chapters 2 and 3 the OpenAI SDK retries failed requests on its own; from Chapter 4 on, the resilience pipeline is the only retry layer, and the SDK sends each request once. Keep keys out of files: on a development machine, use user secrets, which every chapter from Chapter 2 on shares through the user secrets id `contoso-support-copilot`; in CI pipelines and containers, use environment variables such as `AI__Provider` and `AI__ApiKey`.
 
 **Ollama.** Install Ollama and pull a chat model and an embedding model, for example `ollama pull llama3.2` and `ollama pull nomic-embed-text` (good choices at the time of writing). Then, from a chapter folder:
 
@@ -107,7 +107,7 @@ From Chapter 4 on, the `KernelResilience` section sets the timeouts, retries, an
 
 ## Vector Store
 
-From Chapter 7 on, the `VectorStore` section selects where knowledge chunks are stored and searched. The default `InMemory` store needs nothing: the app fills it from the database at startup. `VectorStore:MinScore` (default 0.2) is the cosine similarity floor for search results. It suits the offline embeddings; every embedding model has its own range, so calibrate it for yours, as Chapter 9 shows. `VectorStore:TopK` (default 5) limits the results.
+From Chapter 7 on, the `VectorStore` section selects where knowledge chunks are stored and searched. The default `InMemory` store needs nothing: the app fills it from the database at startup. Filling it embeds every article through the configured AI provider, so that provider must be reachable when the app starts; if it is not, the app stops at startup with the connection error. `VectorStore:MinScore` (default 0.2) is the cosine similarity floor for search results. It suits the offline embeddings; every embedding model has its own range, so calibrate it for yours, as Chapter 9 shows. `VectorStore:TopK` (default 5) limits the results.
 
 **Azure AI Search.** Create a search service, then, from a chapter folder:
 
@@ -131,6 +131,8 @@ dotnet tool install --create-manifest-if-needed Microsoft.Extensions.AI.Evaluati
 dotnet tool run aieval report --path ContosoSupportCopilot.Api/evaluation-results --output report.html
 ```
 
+The 10.11.0 tool runs on .NET 8, 9 or 10. With only .NET 11 installed it stops and asks for .NET 10; install the .NET 10 runtime, or set `DOTNET_ROLL_FORWARD` to `Major` in that terminal first (`$env:DOTNET_ROLL_FORWARD = "Major"` in PowerShell). Chapter 9's `--check` run already writes `report.html` into the evaluation-results folder.
+
 ## Agents, Workflows, and Operations
 
 From Chapter 10 on, the agents use Microsoft Agent Framework (`Microsoft.Agents.AI`). With a real provider, use a chat deployment that supports tool calling, such as a GPT-5-series deployment in Microsoft Foundry at the time of writing; see the Ollama note above for local models. Agents keep one session per conversation, agent, and engineer, with a version check: a run that saves after another run adds its turn to the stored session. Every run writes a record with its model and token counts.
@@ -150,7 +152,7 @@ Chapter 12 adds these sections:
 | `Database:SeedSampleData` | `true` in Development, `false` elsewhere | Adds the sample tickets and articles to an empty support database; a production database never needs them |
 | `Authentication:Schemes:Bearer` | not set | Authority, v2.0 issuer, and audience (the API's client ID) of the Microsoft Entra ID access tokens; the deployment sets them |
 
-Outside the Development environment, Chapter 12 takes the engineer from the `oid` claim of a validated access token that grants the API's `Copilot.Use` scope, and ignores `X-Engineer-Id`; a request without a valid token gets 401, and a token without the scope, such as an app-only token, gets 403. `Rag:ProductAreasByEngineer` then maps object IDs to product areas. Readiness reports an unreachable AI provider as `Degraded` (status 200), and a database or the vector store as `Unhealthy` (503).
+Outside the Development environment, Chapter 12 takes the engineer from the `oid` claim of a validated access token that grants the API's `Copilot.Use` scope, and ignores `X-Engineer-Id`; a request without a valid token gets 401, and a token without the scope, such as an app-only token, gets 403. `Rag:ProductAreasByEngineer` then maps object IDs to product areas. Readiness reports an AI provider that becomes unreachable after startup as `Degraded` (status 200), and a database or the vector store as `Unhealthy` (503).
 
 With a real provider, the checks of Chapters 10 to 12 make a few dozen chat requests each; Chapter 12's benchmark alone runs the workflow five times, with seven chat requests and one embedding request per run. While the Chapter 12 API runs, its AI provider monitor sends one short chat request every five minutes.
 

@@ -12,6 +12,8 @@ From this folder:
 
 The request file is Api/requests.http.
 
+BenchmarkDotNet 0.15.8 does not recognize .NET 11 yet, so the Benchmarks command above stops with "GetRuntimeVersion not implemented for NotRecognized". Add `--inProcess` to run the benchmarks inside the current process: `dotnet run -c Release --project Benchmarks -- --filter *CsvParsingBenchmarks* --job short --inProcess`
+
 ## Sending requests
 
 `requests.http` holds every request this chapter checks, in order, each with the status you should see. Visual Studio 2026 runs it directly (open the file and select Send Request above a request); VS Code needs the REST Client extension.

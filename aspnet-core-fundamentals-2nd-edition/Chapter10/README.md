@@ -25,7 +25,7 @@ dotnet ef database update
 dotnet run
 ```
 
-The app starts in Development at https://localhost:42110, and its log says "DevSeed added 2 products, 2 inventory positions and 26 orders." If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. To start over, delete orders-training.db, run `dotnet ef database update` again and restart the app. The SQL Server variant (Database__Provider=SqlServer) needs its own migration and a disposable database, as the chapter explains; it was not run for this companion.
+The app starts in Development at https://localhost:42110, and its log says "DevSeed added 2 products, 2 inventory positions and 26 orders." If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. To start over, delete orders-training.db, run `dotnet ef database update` again and restart the app. The SQL Server variant (Database__Provider=SqlServer) needs its own migration and a disposable database, as the chapter explains.
 
 ## Sending requests
 

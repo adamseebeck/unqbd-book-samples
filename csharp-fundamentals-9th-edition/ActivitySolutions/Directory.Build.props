@@ -1,0 +1,7 @@
+<Project>
+  <!-- dotnet run ChapterNN.cs uses native AOT defaults, which turn off the reflection-based
+       System.Text.Json serialization in Chapter20.cs. Keep the normal project behavior. -->
+  <PropertyGroup>
+    <PublishAot>false</PublishAot>
+  </PropertyGroup>
+</Project>

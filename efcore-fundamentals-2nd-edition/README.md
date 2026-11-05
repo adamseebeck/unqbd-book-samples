@@ -61,7 +61,7 @@ dotnet test Retail.Tests
 
 ## The database
 
-Every checkpoint uses one LocalDB database, `EfCoreBook_Retail`, named in `Retail/appsettings.Development.json`. From Chapter 3, labs other than Chapter 4 drop and rebuild that database (using migrations from Chapter 4 onward); Chapter 4 applies migrations to the database as it stands, so every run starts from the same data. The database stays after a run so you can open it in Visual Studio's SQL Server Object Explorer. The reset refuses any server other than LocalDB and any database whose name does not start with `EfCoreBook_`. Reserve all EfCoreBook_ names for disposable book data: the prefix guard cannot tell whether a database contains valuable work. Tests create their own `EfCoreBook_Test_...` database per test and drop it.
+Every checkpoint uses one LocalDB database, `EfCoreBook_Retail`, named in `Retail/appsettings.Development.json`. From Chapter 3, labs other than Chapter 4 drop and rebuild that database (using migrations from Chapter 4 onward), so every run starts from the same data; Chapter 4 applies migrations to the database as it stands. Chapter 15's lab also drops and recreates a second database, `EfCoreBook_Deploy`, to test its deployment script. The database stays after a run so you can open it in Visual Studio's SQL Server Object Explorer. The reset refuses any server other than LocalDB and any database whose name does not start with `EfCoreBook_`. Reserve all EfCoreBook_ names for disposable book data: the prefix guard cannot tell whether a database contains valuable work. Tests create their own `EfCoreBook_Test_...` database per test and drop it.
 
 The migration history grows with the project: `InitialRetail` (Chapter 4), `AddPlacementsAndProfiles` (Chapter 7), `AddProductRowVersion` (Chapter 8) and `AddAddressPaymentsAndAudit` (Chapter 14). Chapter 15 deploys that history with an idempotent script.
 
@@ -71,7 +71,8 @@ Re-running an earlier lab preserves that chapter's demonstration. In particular,
 
 - **"Unable to retrieve project metadata"** from a `dotnet ef` command: the project has not been restored yet. Run `dotnet build`, then the command again.
 - **"Set ConnectionStrings:DefaultConnection."**: the app did not start in the Development environment, so `appsettings.Development.json` was not read. Use the Retail launch profile in Visual Studio, or `dotnet run` from Retail. From Chapter10, keep both DOTNET_ENVIRONMENT and ASPNETCORE_ENVIRONMENT set to Development for local work.
-- **A connection error naming the Local Database Runtime**: LocalDB is not installed or not started. Check `SqlLocalDB info`.
+- **A connection error naming the Local Database Runtime**: LocalDB is not installed or not started. Check `SqlLocalDB info`. On macOS and Linux the error is "LocalDB is not supported on this platform": LocalDB runs only on Windows.
+- **"There is already an object named 'Categories' in the database"** in Chapter 4: an earlier checkpoint created `EfCoreBook_Retail` with `EnsureCreated`, which records no migration history. In Chapter04/Retail run `dotnet ef database drop --force`, or `dotnet run -- --lab 3` to rebuild it with migrations, then run Chapter 4 again.
 - **Warnings NU1902 or NU1903 about System.Security.Cryptography.Pkcs**: the SQL Server package brings in version 9.0.18, which has known vulnerabilities. Chapters 1 to 9 and the test project add version 9.0.21 to replace it. The web SDK used from Chapter 10 already includes a patched copy.
 
 ## Notes

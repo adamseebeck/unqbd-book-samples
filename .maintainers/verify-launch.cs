@@ -38,6 +38,13 @@ var logRoot = Path.GetFullPath(Opt("--logs") ?? Path.Combine(Path.GetTempPath(),
 var imagesOnly = Flag("--images-only");
 Directory.CreateDirectory(logRoot);
 
+// Projects that only build after a step the reader performs, as their own README explains.
+var NeedsReaderStep = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+{
+    ["aspnet-core-fundamentals-2nd-edition/Chapter14/Consumer/Consumer.csproj"] =
+        "needs the Kiota clients the reader generates into GeneratedV1/GeneratedV2 (Chapter14/Consumer/README.md)",
+};
+
 Console.WriteLine($"Repository: {root}");
 Console.WriteLine($"Logs:       {logRoot}");
 
@@ -71,6 +78,7 @@ if (!imagesOnly)
     // 1. Projects
     await RunGroups("build", projects, async proj =>
     {
+        if (NeedsReaderStep.TryGetValue(Rel(proj), out var step)) return Skip("build", proj, step);
         if (IsFragment(proj)) return Skip("build", proj, "overlay fragment: its ProjectReference only exists after create_copy.py copies it into a checkpoint");
         if (mauiHeads.Contains(proj) && !hasMaui) return Skip("build", proj, "MAUI platform head, maui workload not installed");
         // The MAUI README's own Windows command, or Android elsewhere.
@@ -83,6 +91,7 @@ if (!imagesOnly)
     await RunGroups("solution", solutions, async sln =>
     {
         if (!hasMaui && SolutionProjects(sln).Any(mauiHeads.Contains)) return Skip("solution", sln, "contains a MAUI platform head, maui workload not installed");
+        if (SolutionProjects(sln).Any(p => NeedsReaderStep.ContainsKey(Rel(p)))) return Skip("solution", sln, "contains a project that needs a reader step first");
         return await Step("solution", sln, ["build", sln, "-nologo", "-v:q", "-clp:ErrorsOnly"]);
     });
 

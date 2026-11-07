@@ -234,6 +234,12 @@ async Task<Result> Step(string kind, string path, string[] dotnetArgs, TimeSpan?
         status = Status.ExpectedFail;
         detail = "unsolved activity start: its exercise tests fail until the reader completes the activity";
     }
+    else if (kind == "test" && run.ExitCode != 0 && !run.TimedOut && Rel(path).Contains("-DebugLab/") && failedTests == 1)
+    {
+        // ASP.NET Core's Chapter 15 debugging lab ships with one failing test for the reader to debug.
+        status = Status.ExpectedFail;
+        detail = "debugging lab: one test fails on purpose (see the lab's README)";
+    }
     else
     {
         status = run.ExitCode == 0 ? Status.Pass : Status.Fail;

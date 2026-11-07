@@ -1,0 +1,72 @@
+# Chapter 18: the store (two replicas) and the warehouse service,
+# from the image the Dockerfile builds (adventureworks:ch18). Each
+# store pod applies the migrations to its own database first.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: inventory }
+  template:
+    metadata:
+      labels: { app: inventory }
+    spec:
+      containers:
+        - name: inventory
+          image: adventureworks:ch18
+          workingDir: /app/inventory
+          args: ["InventoryService.dll"]
+          ports: [{ containerPort: 8080 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory
+spec:
+  selector: { app: inventory }
+  ports: [{ port: 8080 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: store }
+  template:
+    metadata:
+      labels: { app: store }
+    spec:
+      # SIGTERM first; the app's 15-second shutdown fits in 30.
+      terminationGracePeriodSeconds: 30
+      volumes: [{ name: data, emptyDir: {} }]
+      initContainers:
+        - name: migrate
+          image: adventureworks:ch18
+          command: ["/app/efbundle"]
+          volumeMounts: [{ name: data, mountPath: /app/data }]
+      containers:
+        - name: store
+          image: adventureworks:ch18
+          ports: [{ containerPort: 8080 }]
+          env:
+            - name: Inventory__BaseUrl
+              value: http://inventory:8080/
+          volumeMounts: [{ name: data, mountPath: /app/data }]
+          livenessProbe:
+            httpGet: { path: /health/live, port: 8080 }
+          readinessProbe:
+            httpGet: { path: /health/ready, port: 8080 }
+            periodSeconds: 5
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store
+spec:
+  selector: { app: store }
+  ports: [{ port: 80, targetPort: 8080 }]

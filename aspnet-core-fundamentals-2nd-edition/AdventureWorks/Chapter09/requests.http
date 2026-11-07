@@ -1,0 +1,180 @@
+# Chapter 9 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development,
+# with Chapter 8's Training:Password User Secret set).
+# Each "Expect" line is the status you should see. Send them in
+# order: each persona signs in with the test sign-in, and writes
+# send the antiforgery token that persona fetched.
+
+@host = https://localhost:7001
+
+###
+# Public endpoints stay public under the fallback policy.
+# Expect 200
+GET {{host}}/api/catalog
+
+###
+# Expect 200
+GET {{host}}/api/v1/products
+
+###
+# Expect 200
+GET {{host}}/Products
+
+###
+# Expect 200
+GET {{host}}/health
+
+###
+# Everything else needs a signed-in user: an order. Expect 401
+GET {{host}}/api/orders/1
+
+###
+# A product write needs the Admin role. Expect 401
+POST {{host}}/api/v1/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+
+###
+# A page redirects to sign in instead. Expect 302
+# @no-redirect
+GET {{host}}/Admin
+
+###
+# Anonymous archive. Expect 401
+POST {{host}}/api/orders/1/archive
+
+###
+# casey: a customer who owns orders 1 and 3. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# The owner reads her order.
+# Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/1
+
+###
+# Order 2 is jordan's. Expect 403
+GET {{host}}/api/orders/2
+
+###
+# casey's antiforgery token for API writes. Expect 200
+# @name caseyToken
+GET {{host}}/api/csrf
+
+###
+# Owner, but not in Finance: the endpoint policy refuses.
+# Expect 403
+POST {{host}}/api/orders/1/archive
+X-CSRF-TOKEN: {{caseyToken.response.body.$.token}}
+
+###
+# Born 1990: the age policy allows the restricted page. Expect 200
+GET {{host}}/Products/Restricted
+
+###
+# Not an Admin: no product writes. Expect 403
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+
+###
+# A page sends a signed-in user who fails its policy to the
+# access-denied page. Expect 302
+# @no-redirect
+GET {{host}}/Products/Edit/1
+
+###
+# morgan: Finance staff who owns no orders. Expect 200
+POST {{host}}/dev/sign-in/morgan
+
+###
+# Finance staff may read any order. Expect 200
+GET {{host}}/api/orders/1
+
+###
+# Expect 200
+# @name morganToken
+GET {{host}}/api/csrf
+
+###
+# In Finance, but not the owner: the resource rule refuses.
+# Expect 403
+POST {{host}}/api/orders/1/archive
+X-CSRF-TOKEN: {{morganToken.response.body.$.token}}
+
+###
+# jordan: a business buyer in Finance who owns order 2.
+# Expect 200
+POST {{host}}/dev/sign-in/jordan
+
+###
+# Expect 200
+# @name jordanToken
+GET {{host}}/api/csrf
+
+###
+# Both rules pass, but the write has no antiforgery token.
+# Expect 400
+POST {{host}}/api/orders/2/archive
+
+###
+# Finance and owner, with the token. Expect 204
+POST {{host}}/api/orders/2/archive
+X-CSRF-TOKEN: {{jordanToken.response.body.$.token}}
+
+###
+# The flag changed only on the allowed request.
+# Expect 200 with "archived": true
+GET {{host}}/api/orders/2
+
+###
+# riley: born 2010. Expect 200
+POST {{host}}/dev/sign-in/riley
+
+###
+# Under 21: sent to the access-denied page. Expect 302
+# @no-redirect
+GET {{host}}/Products/Restricted
+
+###
+# avery: the Admin. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 200
+# @name averyToken
+GET {{host}}/api/csrf
+
+###
+# Only the Admin role may delete an order. Expect 204
+DELETE {{host}}/api/orders/3
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+###
+# Gone. Expect 404
+GET {{host}}/api/orders/3
+
+###
+# The Admin may write products. Expect 201
+POST {{host}}/api/v2/products
+Content-Type: application/json
+
+{ "name": "Trail Bottle", "sku": "BTL-5001",
+  "price": 24.99, "category": "accessories" }
+
+###
+# And open the Admin area and the product editor. Expect 200
+GET {{host}}/Admin
+
+###
+# Expect 200
+GET {{host}}/Products/Edit/1
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out

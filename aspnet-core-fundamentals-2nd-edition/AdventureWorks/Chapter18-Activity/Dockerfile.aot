@@ -1,0 +1,16 @@
+# Chapter 18 Activity: Native AOT needs the native toolchain the
+# -aot SDK image carries. The result runs on runtime-deps, an
+# image with no .NET runtime at all.
+FROM mcr.microsoft.com/dotnet/sdk:11.0-resolute-aot AS build
+WORKDIR /src
+COPY global.json .
+COPY AdventureWorks.CatalogFeed/ AdventureWorks.CatalogFeed/
+RUN dotnet publish AdventureWorks.CatalogFeed -c Release -o /app
+
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled
+WORKDIR /app
+# The native executable only; its .dbg symbol file stays behind.
+COPY --from=build /app/AdventureWorks.CatalogFeed .
+EXPOSE 8080
+USER $APP_UID
+ENTRYPOINT ["./AdventureWorks.CatalogFeed"]

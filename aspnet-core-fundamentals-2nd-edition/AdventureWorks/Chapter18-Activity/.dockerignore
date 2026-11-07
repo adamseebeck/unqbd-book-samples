@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+**/*.db*
+**/BenchmarkDotNet.Artifacts/
+.vs/
+publish/

@@ -1,0 +1,112 @@
+# Chapter 8 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Set the test password once first (Chapter 8, Step 3), from the
+# working folder, typed as one line:
+#   dotnet user-secrets set Training:Password
+#     "Practice-Pass-2026!" --project AdventureWorks
+# Each "Expect" line is the status you should see. Send them in
+# order: later requests use earlier tokens and the cookie.
+
+@host = https://localhost:7001
+@password = Practice-Pass-2026!
+
+###
+# The token API checks the password and returns an access token
+# and a refresh token. Expect 200
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "casey@adventure-works.test",
+  "password": "{{password}}" }
+
+###
+# A wrong password. Expect 401
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "casey@adventure-works.test",
+  "password": "not-the-password-1A!" }
+
+###
+# The Bearer-only API with the access token. The claims
+# transformation adds the stored loyalty number.
+# Expect 200 with "AW-001"
+GET {{host}}/api/account/loyalty
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# The same API without a token. Expect 401
+GET {{host}}/api/account/loyalty
+
+###
+# Rotate the refresh token: the old one is consumed. Expect 200
+# @name rotated
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{ "token": "{{login.response.body.$.refreshToken}}" }
+
+###
+# Replaying the consumed refresh token fails. Expect 401
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{ "token": "{{login.response.body.$.refreshToken}}" }
+
+###
+# The replacement works once. Expect 200
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{ "token": "{{rotated.response.body.$.refreshToken}}" }
+
+###
+# An API that uses the cookie scheme answers 401 without a
+# cookie; it does not redirect. Expect 401
+GET {{host}}/api/account/me
+
+###
+# A page redirects to the sign-in page instead. Expect 302
+# @no-redirect
+GET {{host}}/Account/Profile
+
+###
+# The sign-in page. Expect 200
+GET {{host}}/Account/Login
+
+###
+# Development only: sign in casey with the real Identity cookie.
+# Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# The cookie now reaches the profile page. Expect 200
+GET {{host}}/Account/Profile
+
+###
+# And the cookie API, with the loyalty number listed once.
+# Expect 200 with "scheme": "Identity.Application"
+GET {{host}}/api/account/me
+
+###
+# The Bearer-only API names its scheme, so the cookie alone is not
+# enough. Expect 401
+GET {{host}}/api/account/loyalty
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out
+
+###
+# Signed out again. Expect 401
+GET {{host}}/api/account/me
+
+###
+# Earlier chapters' routes still answer. Expect 200
+GET {{host}}/api/catalog
+
+###
+# Expect 200
+GET {{host}}/Products

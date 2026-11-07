@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AdventureWorks.Core/AdventureWorks.Core.csproj" />
+  <Project Path="AdventureWorks.Infrastructure/AdventureWorks.Infrastructure.csproj" />
+  <Project Path="AdventureWorks/AdventureWorks.csproj" />
+  <Project Path="InventoryService/InventoryService.csproj" />
+</Solution>

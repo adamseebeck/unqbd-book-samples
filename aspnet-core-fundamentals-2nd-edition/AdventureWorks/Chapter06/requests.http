@@ -1,0 +1,55 @@
+# Chapter 6 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Each "Expect" line is the status you should see. A form POST
+# needs the antiforgery cookie and token from a rendered page, so
+# the saving, conflict and delete steps are in the browser and in
+# the README's PowerShell section, not here.
+
+@host = https://localhost:7001
+
+###
+# The product list page. Expect 200
+GET {{host}}/Products
+
+###
+# The edit form for product 1. Expect 200
+GET {{host}}/Products/Edit/1
+
+###
+# The route template needs an integer. Expect 404
+GET {{host}}/Products/Edit/not-an-int
+
+###
+# An integer with no product: the handler returns NotFound.
+# Expect 404
+GET {{host}}/Products/Edit/999
+
+###
+# The Admin area page (not yet protected). Expect 200
+GET {{host}}/Admin
+
+###
+# A POST without the antiforgery token is rejected before the
+# handler runs. Expect 400
+POST {{host}}/Products/Edit/1
+Content-Type: application/x-www-form-urlencoded
+
+Input.Name=Trail+Helmet&Input.Price=29.99&Input.Version=1
+
+###
+# The pages and the APIs share one store.
+# Expect 200 with "sku": "HLM-1001"
+GET {{host}}/api/v2/products/1
+
+###
+# Earlier chapters' routes still answer. Expect 200
+GET {{host}}/api/catalog
+
+###
+# Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/1
+
+###
+# Expect 200
+GET {{host}}/ping

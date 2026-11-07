@@ -1,0 +1,8 @@
+@page
+@attribute [Authorize(Policy = StorePolicies.AtLeast21)]
+@{
+    ViewData["Title"] = "Age-restricted products";
+}
+<h1>Age-restricted products</h1>
+<p>Camp stove fuel and fixed-blade knives ship only to customers
+aged 21 or over.</p>

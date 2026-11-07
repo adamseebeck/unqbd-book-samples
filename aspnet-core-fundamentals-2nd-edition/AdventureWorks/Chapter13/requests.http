@@ -1,0 +1,140 @@
+# Chapter 13 checkpoint. Run the app from this folder:
+#   dotnet run --project AdventureWorks
+# InventoryService may stay stopped: none of these requests
+# reads stock (in Visual Studio, AdventureWorks alone as the
+# startup project is enough). Each "Expect" line is the status
+# you should see. Send them in order. The order the file places
+# is cancelled and then deleted, so it can run again.
+
+@host = https://localhost:7001
+
+###
+# The orders collection belongs to a signed-in customer.
+# Expect 401
+GET {{host}}/api/orders
+
+###
+# casey. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# Expect 200
+# @name token
+GET {{host}}/api/csrf
+
+###
+# Page 1 of casey's eleven orders, five per page. The Link
+# header points to the next page.
+# Expect 200 with "totalPages": 3, and it has a Link header
+GET {{host}}/api/orders?page=1&pageSize=5
+
+###
+# The last page links back only.
+# Expect 200 with "page": 3, and it has a Link header
+GET {{host}}/api/orders?page=3&pageSize=5
+
+###
+# Pages hold 1 to 50 orders. Expect 400
+GET {{host}}/api/orders?pageSize=500
+
+###
+# One order: an OrderDto with no owner ID, and its version as
+# the ETag. Expect 200 with "orderNumber": "AW-0001", and it has
+# an ETag header, and the body lacks "ownerId"
+# @name order
+GET {{host}}/api/orders/1
+
+###
+# A change without If-Match. Expect 428
+PATCH {{host}}/api/orders/1
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "notes": "Leave it at the side door." }
+
+###
+# With the ETag just read.
+# Expect 200 with "notes": "Leave it at the side door."
+# @name patched
+PATCH {{host}}/api/orders/1
+Content-Type: application/json
+If-Match: {{order.response.headers.ETag}}
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "notes": "Leave it at the side door." }
+
+###
+# The same ETag again is stale now. Expect 412
+PATCH {{host}}/api/orders/1
+Content-Type: application/json
+If-Match: {{order.response.headers.ETag}}
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "notes": "Ring the bell." }
+
+###
+# With the new ETag, clear the notes again.
+# Expect 200 with "notes": null
+PATCH {{host}}/api/orders/1
+Content-Type: application/json
+If-Match: {{patched.response.headers.ETag}}
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "notes": null }
+
+###
+# Create: 201 with a Location and an ETag.
+# Expect 201, and it has a Location header
+# @name created
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [ { "productId": 2, "quantity": 1 } ] }
+
+###
+# DELETE cancels. Expect 204
+DELETE {{host}}/api/orders/{{created.response.body.$.id}}
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+###
+# A second DELETE meets a cancelled order. Expect 409
+DELETE {{host}}/api/orders/{{created.response.body.$.id}}
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+###
+# The order is still there. Expect 200 with
+# "status": "Cancelled"
+GET {{host}}/api/orders/{{created.response.body.$.id}}
+
+###
+# No such route: status-code pages fill the empty 404 with
+# Problem Details for a JSON client.
+# Expect 404, and it carries Content-Type:
+# application/problem+json
+GET {{host}}/api/nope
+Accept: application/json
+
+###
+# A browser gets plain text instead.
+# Expect 404, and it carries Content-Type: text/plain
+GET {{host}}/api/nope
+Accept: text/html
+
+###
+# The Admin removes the cancelled order for good. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 200
+# @name averyToken
+GET {{host}}/api/csrf
+
+###
+# Expect 204
+DELETE {{host}}/api/admin/orders/{{created.response.body.$.id}}
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out

@@ -1,0 +1,108 @@
+# Chapter 4 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Each "Expect" line is the status you should see. The console
+# logs a "Selected endpoint" line for each request.
+
+@host = https://localhost:7001
+@reviewId = 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+
+###
+# The catalog group lists products and links the featured one.
+# Expect 200 with "featured": "/api/catalog/3"
+GET {{host}}/api/catalog
+
+###
+# One product with a generated ReviewsLink to follow next.
+# Expect 200 with "sku": "HLM-1001"
+GET {{host}}/api/catalog/1
+
+###
+# Following ReviewsLink. Expect 200 with "productId": 1
+GET {{host}}/api/catalog/1/reviews
+
+###
+# A matched integer that fails the handler's rule. Expect 400
+GET {{host}}/api/catalog/0
+
+###
+# A matched integer with no product. Expect 404
+GET {{host}}/api/catalog/99
+
+###
+# Not an integer: no route matches. Expect 404
+GET {{host}}/api/catalog/abc
+
+###
+# The literal search route, not {id:int}. Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# The custom constraint accepts a known category.
+# Expect 200 with "sku": "BIK-3001"
+GET {{host}}/api/catalog/category/bikes
+
+###
+# The constraint ignores case. Expect 200
+GET {{host}}/api/catalog/category/BIKES
+
+###
+# An unknown category selects no route. Expect 404
+GET {{host}}/api/catalog/category/toys
+
+###
+# Optional segment absent. Expect 200 with {"page":1}
+GET {{host}}/examples/orders
+
+###
+# Optional segment present. Expect 200 with {"page":3}
+GET {{host}}/examples/orders/3
+
+###
+# The default value. Expect 200 with {"status":"active"}
+GET {{host}}/examples/status
+
+###
+# The alpha constraint rejects digits. Expect 404
+GET {{host}}/examples/status/123
+
+###
+# The catch-all keeps the slash.
+# Expect 200 with {"path":"manuals/tent.pdf"}
+GET {{host}}/examples/files/manuals/tent.pdf
+
+###
+# No constraint: text reaches binding and fails there. Expect 400
+GET {{host}}/examples/unconstrained/abc
+
+###
+# min(1) rejects 0 during route selection. Expect 404
+GET {{host}}/examples/reviews/0/{{reviewId}}
+
+###
+# Stacked constraints match. Expect 200
+GET {{host}}/examples/reviews/1/{{reviewId}}
+
+###
+# The OpenAPI document (Development only). Expect 200
+GET {{host}}/openapi/v1.json
+
+###
+# Earlier chapters' routes still answer. Expect 200
+GET {{host}}/ping
+
+###
+# Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/1
+
+###
+# Expect 400 with "title": "Invalid request"
+GET {{host}}/api/orders/0
+
+###
+# Expect 200
+GET {{host}}/health
+
+###
+# Expect 200 with "maxCartItems": 30
+GET {{host}}/api/config

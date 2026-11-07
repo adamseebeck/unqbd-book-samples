@@ -1,0 +1,38 @@
+# Chapter 14 Activity. Run the app from this folder:
+#   dotnet run --project AdventureWorks
+# InventoryService may stay stopped: none of these requests
+# reads stock (in Visual Studio, AdventureWorks alone as the
+# startup project is enough). Each "Expect" line is the status
+# you should see. The documents exist in Development only.
+
+@host = https://localhost:7001
+
+###
+# The unversioned store routes, in OpenAPI 3.2.
+# Expect 200 with "openapi": "3.2.0", and the body lacks
+# "/api/v1/products"
+GET {{host}}/openapi/store.json
+
+###
+# Version 1 of the product API: the controllers, marked
+# deprecated. Expect 200 with "deprecated": true, and the body
+# lacks "/api/v2/products"
+GET {{host}}/openapi/v1.json
+
+###
+# Version 2: the Minimal APIs. Expect 200 with "version": "2.0",
+# and the body lacks "deprecated"
+GET {{host}}/openapi/v2.json
+
+###
+# No such document. Expect 404
+GET {{host}}/openapi/v3.json
+
+###
+# Both versions still answer. Expect 200 with
+# "sku": "HLM-1001"
+GET {{host}}/api/v1/products/1
+
+###
+# Expect 200 with "sku": "HLM-1001"
+GET {{host}}/api/v2/products/1

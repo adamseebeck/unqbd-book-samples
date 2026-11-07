@@ -1,0 +1,96 @@
+# Chapter 3 Activity. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Chapter 2's User Secret FeatureFlags:MaxCartItems is 30.
+# Each "Expect" line is the status you should see.
+
+@host = https://localhost:7001
+
+###
+# The terminal MapWhen branch answers before the correlation
+# middleware, so the response has no X-Correlation-ID header.
+# Expect 200
+GET {{host}}/ping
+
+###
+# A valid correlation ID is echoed, and the UseWhen branch marks
+# /api responses. The response carries
+# X-Correlation-ID: checkout-42 and carries X-API-Pipeline: true.
+# Expect 200
+GET {{host}}/api/status
+X-Correlation-ID: checkout-42
+
+###
+# Order 1. Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/1
+
+###
+# DomainValidationException becomes Problem Details.
+# Expect 400 with "title": "Invalid request"
+GET {{host}}/api/orders/0
+
+###
+# ResourceNotFoundException becomes Problem Details with the
+# correlation ID. Expect 404 with "title": "Resource not found"
+GET {{host}}/api/orders/7
+
+###
+# The repository's simulated storage failure. Development shows
+# the developer exception page. Expect 500
+GET {{host}}/api/orders/500
+
+###
+# Status-code pages fill an empty 404. Expect 404
+GET {{host}}/missing
+
+###
+# Chapter 1 and 2 routes still answer. Expect 302
+# @no-redirect
+GET {{host}}/
+
+###
+# Expect 200
+GET {{host}}/health
+
+###
+# Expect 200 with "maxCartItems": 30
+GET {{host}}/api/config
+
+###
+# Expect 200 with "isValid": true
+GET {{host}}/api/email-check?address=ada@example.com
+
+###
+# The Activity's main path without the exercise identity. The
+# response carries X-Content-Type-Options: nosniff. Expect 401
+POST {{host}}/api/payments
+Idempotency-Key: order-1001
+
+###
+# The main path with the local test identity.
+# Expect 200 with {"key":"order-1001"}
+POST {{host}}/api/payments
+Idempotency-Key: order-1001
+X-Exercise-Identity: developer
+
+###
+# The webhook branch needs no exercise identity, and it also
+# carries X-Frame-Options: DENY.
+# Expect 200 with {"key":"hook-2001"}
+POST {{host}}/webhooks/demo
+Idempotency-Key: hook-2001
+
+###
+# A missing key fails before any route runs. Expect 400
+POST {{host}}/api/payments
+X-Exercise-Identity: developer
+
+###
+# A space and "!" are not allowed in a key. Expect 400
+POST {{host}}/api/payments
+Idempotency-Key: bad key!
+X-Exercise-Identity: developer
+
+###
+# The branch accepts only POST /webhooks/demo. Expect 404
+GET {{host}}/webhooks/demo

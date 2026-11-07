@@ -1,0 +1,51 @@
+# Chapter 2 checkpoint. Start the app first:
+#   dotnet run --project AdventureWorks
+# (https://localhost:7001 and http://localhost:5001, Development).
+# Step 5 sets the User Secret FeatureFlags:MaxCartItems to 30.
+# Each "Expect" line is the status you should see.
+
+@host = https://localhost:7001
+
+###
+# Chapter 1's routes still answer. Expect 302
+# @no-redirect
+GET {{host}}/
+
+###
+# Expect 200 with "status": "Operational"
+GET {{host}}/api/status
+
+###
+# Expect 200
+GET {{host}}/health
+
+###
+# Order 1 from the repository.
+# Expect 200 with "orderNumber": "AW-0001"
+GET {{host}}/api/orders/1
+
+###
+# The repository has no order 2. Expect 404
+GET {{host}}/api/orders/2
+
+###
+# Not an integer, so the {id:int} route does not match. Expect 404
+GET {{host}}/api/orders/abc
+
+###
+# The bound options (Development only). The User Secret overrides
+# appsettings.json. Expect 200 with "maxCartItems": 30
+GET {{host}}/api/config
+
+###
+# A plain address is valid. Expect 200 with "isValid": true
+GET {{host}}/api/email-check?address=ada@example.com
+
+###
+# A display-name form, A<a@b.co>, is rejected.
+# Expect 200 with "isValid": false
+GET {{host}}/api/email-check?address=A%3Ca@b.co%3E
+
+###
+# The address query value is required. Expect 400
+GET {{host}}/api/email-check

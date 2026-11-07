@@ -1,0 +1,195 @@
+# Chapter 12 Activity. Start InventoryService, then the app:
+#   dotnet run --project InventoryService
+#   dotnet run --project AdventureWorks
+# (two terminals, both from this folder; in Visual Studio, set
+# both as startup projects). The app listens on
+# https://localhost:7001, InventoryService on 127.0.0.1:42132.
+# Each "Expect" line is the status you should see. Send them in
+# order: the eighteen resilience requests within about 30
+# seconds, and the six searches within ten. The resilience
+# requests count attempts and depend on the breaker's history.
+
+@host = https://localhost:7001
+@inventory = http://127.0.0.1:42132
+
+###
+# Start signed out, whatever an earlier run left. Expect 204
+POST {{host}}/dev/sign-out
+
+###
+# Start the warehouse stand-in clean. Expect 204
+POST {{inventory}}/control/reset
+
+###
+# Output caching. The first read runs the endpoint.
+# Expect 200, and it has no Age header
+GET {{host}}/api/catalog/1
+
+###
+# The second comes from the output cache. Expect 200, and it
+# has an Age header
+GET {{host}}/api/catalog/1
+
+###
+# The public catalog is compressed.
+# Expect 200, and it carries Content-Encoding: br
+GET {{host}}/api/catalog
+Accept-Encoding: br
+
+###
+# Other routes are not. Expect 200, and it has no
+# Content-Encoding header
+GET {{host}}/api/status
+Accept-Encoding: br
+
+###
+# Warehouse stock through the distributed cache: a miss, so one
+# call to InventoryService. Expect 200 with "available": 42
+GET {{host}}/api/catalog/1/availability
+
+###
+# Expect 200 with {"attempts":1}
+GET {{inventory}}/control/attempts
+
+###
+# A hit: no call. Expect 200 with "available": 42
+GET {{host}}/api/catalog/1/availability
+
+###
+# Still one attempt. Expect 200 with {"attempts":1}
+GET {{inventory}}/control/attempts
+
+###
+# The next two stock calls fail with 503. Expect 204
+POST {{inventory}}/control/fail/2
+
+###
+# Two retries absorb both failures. Expect 200 with
+# "available": 17
+GET {{host}}/api/catalog/2/availability
+
+###
+# One plus three attempts. Expect 200 with {"attempts":4}
+GET {{inventory}}/control/attempts
+
+###
+# A 400 is permanent. Expect 204
+POST {{inventory}}/control/status/400
+
+###
+# Expect 204
+POST {{inventory}}/control/fail/1
+
+###
+# No retry for a 400. Expect 503
+GET {{host}}/api/catalog/3/availability
+
+###
+# One more attempt only. Expect 200 with {"attempts":5}
+GET {{inventory}}/control/attempts
+
+###
+# Now every call fails with 503. Expect 204
+POST {{inventory}}/control/reset
+
+###
+# Expect 204
+POST {{inventory}}/control/fail/100
+
+###
+# This failure makes three of the last six attempts (half) fail,
+# so the circuit breaker opens, and the retries fail fast.
+# Expect 503
+GET {{host}}/api/catalog/4/availability
+
+###
+# One attempt reached the service. Expect 200 with
+# {"attempts":1}
+GET {{inventory}}/control/attempts
+
+###
+# While the breaker is open, no call reaches the service.
+# Expect 503
+GET {{host}}/api/catalog/4/availability
+
+###
+# Expect 200 with {"attempts":1}
+GET {{inventory}}/control/attempts
+
+###
+# Expect 204
+POST {{inventory}}/control/reset
+
+###
+# Rate limiting: five searches per ten seconds for each client.
+# Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# The sixth is refused. Expect 429, and it has a Retry-After
+# header
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# A signed-in user has a partition of her own. Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# Expect 200
+GET {{host}}/api/catalog/search?q=trail
+
+###
+# Eviction: the Admin changes a price. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 204
+PUT {{host}}/api/v2/products/1
+Content-Type: application/json
+
+{ "name": "Trail Helmet", "price": 31.99 }
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out
+
+###
+# The write evicted the "catalog" tag, so this read runs the
+# endpoint again. Expect 200 with "price": 31.99, and it has no
+# Age header
+GET {{host}}/api/catalog/1
+
+###
+# Put the price back. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 204
+PUT {{host}}/api/v2/products/1
+Content-Type: application/json
+
+{ "name": "Trail Helmet", "price": 29.99 }
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out
+
+###
+# Expect 200 with "price": 29.99
+GET {{host}}/api/catalog/1

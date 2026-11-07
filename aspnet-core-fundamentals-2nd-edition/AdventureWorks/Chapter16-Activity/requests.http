@@ -1,0 +1,100 @@
+# Chapter 16 Activity. Start InventoryService, then the app:
+#   dotnet run --project InventoryService
+#   dotnet run --project AdventureWorks
+# (two terminals, both from this folder; in Visual Studio, set
+# both as startup projects). Each "Expect" line is the status
+# you should see. Send them in order. The order the file places
+# is cancelled and then deleted, so it can run again.
+@host = https://localhost:7001
+
+###
+# Live: the process answers; no checks run. Expect 200 with
+# "Healthy"
+GET {{host}}/health/live
+
+###
+# Ready: the database and the warehouse both answer.
+# Expect 200 with "Healthy"
+GET {{host}}/health/ready
+
+###
+# No X-Correlation-ID: the response carries the request's
+# trace ID instead. Expect 200, and it has an X-Correlation-ID
+# header
+GET {{host}}/api/catalog
+
+###
+# A usable ID comes back unchanged. Expect 200, and it carries
+# X-Correlation-ID: order-lab-1
+GET {{host}}/api/catalog
+X-Correlation-ID: order-lab-1
+
+###
+# A space makes the value unusable: replaced by the trace ID.
+# Expect 200, and it has an X-Correlation-ID header
+GET {{host}}/api/catalog
+X-Correlation-ID: bad value
+
+###
+# Slow the warehouse down: 1.5 seconds for every call, its
+# /health too. Expect 204
+POST http://127.0.0.1:42132/control/delay/1500
+
+###
+# Ready gives up after one second: Degraded, which this app
+# maps to 503. Expect 503
+GET {{host}}/health/ready
+
+###
+# Live runs no checks, so it still answers. Expect 200
+GET {{host}}/health/live
+
+###
+# Back to normal. Expect 204
+POST http://127.0.0.1:42132/control/reset
+
+###
+# Expect 200
+GET {{host}}/health/ready
+
+###
+# An order, so orders.created and the duration have data.
+# Expect 200
+POST {{host}}/dev/sign-in/casey
+
+###
+# Expect 200
+# @name token
+GET {{host}}/api/csrf
+
+###
+# Expect 201
+# @name created
+POST {{host}}/api/orders
+Content-Type: application/json
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+{ "items": [ { "productId": 2, "quantity": 1 } ] }
+
+###
+# Cancel it. Expect 204
+DELETE {{host}}/api/orders/{{created.response.body.$.id}}
+X-CSRF-TOKEN: {{token.response.body.$.token}}
+
+###
+# The Admin removes it, so the file can run again. Expect 200
+POST {{host}}/dev/sign-in/avery
+
+###
+# Expect 200
+# @name averyToken
+GET {{host}}/api/csrf
+
+###
+# Expect 204
+DELETE {{host}}/api/admin/orders/{{created.response.body.$.id}}
+X-CSRF-TOKEN: {{averyToken.response.body.$.token}}
+
+###
+# Expect 204
+POST {{host}}/dev/sign-out

@@ -11,4 +11,4 @@ python create_copy.py --chapter 6 --output C:/BookExercises/Chapter06
 
 The script checks each changed file's normalized hash, copies the checkpoint, applies the exercise changes, adds any exercise test project to LibraryDesk.slnx and writes an investigation-manifest.json receipt. It does not solve the task. Open the output's solution in Visual Studio and read its README. Chapter 1 is a text activity; Chapter 4's prepared start is a copy of its unchanged checkpoint.
 
-All reader global.json files request released SDK 11.0.100 with latestFeature. Chapter 2's activity deliberately starts with 11.0.999, the broken SDK selection the reader must repair. Do not change the other pins to a release candidate.
+Every global.json in this download requests SDK 11.0.100 with latestFeature, except Chapter 2's activity start, which deliberately asks for 11.0.999 so you can repair the SDK selection.

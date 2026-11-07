@@ -22,4 +22,4 @@ Instead of copying the prepared start, open PowerShell in Samples/ActivityInvest
 python create_copy.py --chapter 15 --output C:/BookExercises/Chapter15
 ```
 
-Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds the exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.
+Choose an output path that does not exist. The script copies the checkpoint, verifies and applies its checked activity changes, adds any exercise tests and includes them in LibraryDesk.slnx. It never edits the download. Open that generated solution and follow the same task. Python is optional for preparing exercises because ActivityStarts are already supplied.

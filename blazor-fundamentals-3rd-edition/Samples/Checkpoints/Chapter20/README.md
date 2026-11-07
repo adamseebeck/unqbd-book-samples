@@ -11,7 +11,7 @@ This is the cumulative project at the end of Chapter 20. To continue with the ne
 
 ## What Chapter 20 added
 
-Chapter 20 added LibraryDesk.Pwa beside the solution folder: a standalone WebAssembly progressive web app with an offline reading list. The LibraryDesk solution folder is the same as in Chapter 19.
+Chapter 20 added LibraryDesk.Pwa beside the solution folder: a standalone WebAssembly progressive web app with an offline reading list. The LibraryDesk solution folder is the same as in Chapter 19, except that its solution files now also list LibraryDesk.Pwa and LibraryDesk.Pwa.Tests.
 
 BookRequests.http under the server project contains the applicable HTTP checks. Start the server first, then click Send request above the request you want. Its @host defaults to the development address.
 

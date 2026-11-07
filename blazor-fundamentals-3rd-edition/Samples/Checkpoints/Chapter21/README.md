@@ -11,7 +11,7 @@ This is the cumulative project at the end of Chapter 21. To continue with the ne
 
 ## What Chapter 21 added
 
-Chapter 21 added http://127.0.0.1:58631/accessibility (Accessibility in the menu), a static page with the interactive feedback form, and the Skip to content link at the top of every page. LibraryDesk.Tests also holds AccessibilityTests.cs.
+Chapter 21 added http://127.0.0.1:58631/accessibility (Accessibility in the menu), a static page with the interactive feedback form, and the Skip to content link at the top of every page. It also replaced the template rules in the server's wwwroot/app.css with layout, navigation and focus styles. LibraryDesk.Tests also holds AccessibilityTests.cs.
 
 BookRequests.http under the server project contains the applicable HTTP checks. Start the server first, then click Send request above the request you want. Its @host defaults to the development address.
 

@@ -6,6 +6,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryDesk", "LibraryDesk\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryDesk.Client", "LibraryDesk.Client\LibraryDesk.Client.csproj", "{C6D67F9C-1FC8-4BF5-B57B-D53177514170}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter16.Tests", "..\Tests\Chapter16.Tests.csproj", "{EE5FF480-78F8-4842-9E16-836346126F92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,18 @@ Global
 		{B413127C-03D1-42A0-AC1C-E06F5233B2EB}.Release|x64.Build.0 = Release|Any CPU
 		{B413127C-03D1-42A0-AC1C-E06F5233B2EB}.Release|x86.ActiveCfg = Release|Any CPU
 		{B413127C-03D1-42A0-AC1C-E06F5233B2EB}.Release|x86.Build.0 = Release|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Debug|x64.Build.0 = Debug|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Debug|x86.Build.0 = Debug|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Release|x64.ActiveCfg = Release|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Release|x64.Build.0 = Release|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Release|x86.ActiveCfg = Release|Any CPU
+		{EE5FF480-78F8-4842-9E16-836346126F92}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

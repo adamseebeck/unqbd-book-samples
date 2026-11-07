@@ -54,7 +54,7 @@ public partial class ProductDetailViewModel(IProductRepository repository) : Obs
             if (result is null)
                 ErrorMessage = "Product not found.";
         }
-        catch (OperationCanceledException)when (token.IsCancellationRequested)
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
             if (request == Volatile.Read(ref generation))
                 ErrorMessage = "Loading canceled.";

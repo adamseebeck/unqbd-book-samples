@@ -24,8 +24,7 @@ public partial class ProductListViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanLoad), IncludeCancelCommand = true)]
     public async Task LoadAsync(CancellationToken cancellationToken)
     {
-        // Protect direct domain calls too. Programmatic command ExecuteAsync can cancel
-        // the previous command token; UI command callers should honor CanExecute.
+        // Also guards direct calls, such as the tests', which don't check CanExecute.
         if (Interlocked.Exchange(ref running, 1) != 0)
             return;
         try
@@ -39,7 +38,7 @@ public partial class ProductListViewModel : ObservableObject
             foreach (var product in selected)
                 Products.Add(product);
         }
-        catch (OperationCanceledException)when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             ErrorMessage = "Loading canceled.";
         }
@@ -53,16 +52,4 @@ public partial class ProductListViewModel : ObservableObject
             Volatile.Write(ref running, 0);
         }
     }
-}
-
-public static class ProductRoute
-{
-    public static string Detail(int id)
-    {
-        if (id <= 0)
-            throw new ArgumentOutOfRangeException(nameof(id));
-        return $"details?id={id}";
-    }
-
-    public static bool TryRead(object? value, out int id) => int.TryParse(Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out id) && id > 0;
 }

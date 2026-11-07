@@ -50,7 +50,7 @@ public sealed class ResilientCatalogHandler(TimeProvider clock, Func<TimeSpan, C
                         return response; // CatalogClient owns/disposes this final response.
                     }
                 }
-                catch (HttpRequestException)when (!token.IsCancellationRequested)
+                catch (HttpRequestException) when (!token.IsCancellationRequested)
                 {
                     if (attempt == 2)
                     {

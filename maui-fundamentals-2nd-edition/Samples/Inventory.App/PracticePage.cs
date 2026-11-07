@@ -32,12 +32,23 @@ public sealed class PracticePage : ContentPage
                     heading,
                     new Label
                     {
-                        Text = $"Platform: {DeviceInfo.Platform}. SDK/runtime: {Environment.Version}"},
+                        Text = $"{new PlatformGreeting().Describe()}. Runtime: {Environment.Version}"},
                     new BorderlessEntry
                     {
                         Placeholder = "Borderless entry exercise"
                     },
                     new QuantityPicker(),
+                    PageButton("Adaptive settings", () => new AdaptiveSettingsPage()),
+                    PageButton("Stock dashboard", () => new InventoryDashboardPage()),
+                    PageButton("Checkout workflow", () => services.GetRequiredService<CartPage>()),
+                    PageButton("Categories", () => services.GetRequiredService<CategoriesPage>()),
+                    PageButton("Offline queue", () => services.GetRequiredService<QueueActivityPage>()),
+                    PageButton("Metric cards", () => new DashboardPage()),
+                    PageButton("Site inspection", () => new InspectionPage()),
+                    PageButton("Token renewal", () => new RenewalPracticePage()),
+                    PageButton("Localized settings", () => new LocalizedSettingsPage()),
+                    PageButton("Configuración español", () => new LocalizedSettingsPage(true)),
+                    PageButton("Browsing", () => new BrowsingPage(services.GetRequiredService<WeakMessageService>())),
                     ActivityButton(),
                     Button("Save and reload SQLite", DatabaseAsync),
                     Button("Read the demonstration API", NetworkAsync),
@@ -53,6 +64,31 @@ public sealed class PracticePage : ContentPage
                 }
             }
         };
+    }
+
+    private Button PageButton(string text, Func<Page> page)
+    {
+        var button = new Button
+        {
+            Text = text
+        };
+        button.Clicked += async (_, _) =>
+        {
+            button.IsEnabled = false;
+            try
+            {
+                await Navigation.PushAsync(page());
+            }
+            catch (Exception)
+            {
+                result.Text = $"Could not open {text}.";
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        };
+        return button;
     }
 
     private Button ActivityButton()
@@ -93,7 +129,7 @@ public sealed class PracticePage : ContentPage
                 if (!token.IsCancellationRequested)
                     result.Text = message;
             }
-            catch (OperationCanceledException)when (token.IsCancellationRequested)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
             }
             catch (PermissionException)

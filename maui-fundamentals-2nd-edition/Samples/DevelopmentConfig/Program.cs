@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 var watch = args.Contains("--watch", StringComparer.Ordinal);
 var providerArgs = args.Where(value => value != "--watch").ToArray();
 var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = providerArgs, ContentRootPath = AppContext.BaseDirectory, EnvironmentName = Environments.Development });
-builder.Configuration.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
 builder.Services.AddOptions<DisplayOptions>().Bind(builder.Configuration.GetSection("Display")).Validate(value => value.PageSize is >= 1 and <= 100, "PageSize must be 1 through 100.");
 using var host = builder.Build();
 var options = host.Services.GetRequiredService<IOptionsMonitor<DisplayOptions>>();

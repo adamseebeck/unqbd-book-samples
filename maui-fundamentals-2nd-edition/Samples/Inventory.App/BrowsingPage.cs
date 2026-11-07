@@ -14,6 +14,7 @@ public sealed class BrowsingPage : InventoryDashboardPage
     private readonly WeakMessageService messages;
     private readonly ActiveMessageSubscription subscription;
     private int callbacks;
+    private readonly ThumbnailCache thumbnails = new(2_000_000);
     public BrowsingPage(WeakMessageService messages)
     {
         this.messages = messages;
@@ -33,7 +34,7 @@ public sealed class BrowsingPage : InventoryDashboardPage
             thumbnail.IsEnabled = false;
             try
             {
-                var bytes = await new ThumbnailCache(2_000_000).GetAsync(new("sample-thumbnail", 128, 128), ThumbnailDecoder.DecodePublicAssetAsync);
+                var bytes = await thumbnails.GetAsync(new("sample-thumbnail", 128, 128), ThumbnailDecoder.DecodePublicAssetAsync);
                 await DisplayAlertAsync("Thumbnail", $"Resized local PNG: {bytes.Length} encoded bytes. This is not a startup benchmark.", "OK");
             }
             catch (Exception)

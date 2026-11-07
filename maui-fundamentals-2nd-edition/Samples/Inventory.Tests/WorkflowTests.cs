@@ -157,7 +157,7 @@ public sealed class WorkflowTests
                 await Release.Task; // Model a native call that cannot be interrupted mid-operation.
             }
 
-            return[new Category
+            return [new Category
             {
                 Name = "Current"
             }
@@ -216,7 +216,7 @@ public sealed class WorkflowTests
             Started.TrySetResult(true);
             if (Pause)
                 await Task.Delay(Timeout.Infinite, token);
-            return[new Product
+            return [new Product
             {
                 Id = 1,
                 Sku = "A",

@@ -6,7 +6,7 @@ public sealed class Product
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
 
-    [Indexed(Unique = true)]
+    [Indexed(Name = "UX_Product_Sku", Unique = true)]
     public string Sku { get; set; } = "";
     public string Name { get; set; } = "";
     public int Quantity { get; set; }
@@ -33,6 +33,9 @@ public sealed class Product
         UnitPriceCents = UnitPriceCents,
         UpdatedUtc = UpdatedUtc
     };
+
+    // A screen reader on Windows announces a list row by its item's text, so give a row its product's name.
+    public override string ToString() => Name;
 }
 
 public interface IProductRepository

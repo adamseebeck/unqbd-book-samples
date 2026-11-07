@@ -43,7 +43,7 @@ public sealed class DetailsPage : ContentPage, IQueryAttributable
             if (!current.IsCancellationRequested)
                 name.Text = product?.Name ?? "Product not found.";
         }
-        catch (OperationCanceledException)when (current.IsCancellationRequested)
+        catch (OperationCanceledException) when (current.IsCancellationRequested)
         {
         }
         catch (Exception)

@@ -1,98 +1,199 @@
 [
   {
     "chapter": 1,
-    "checkpoint": "Samples/Checkpoints/Chapter01/Chapter01.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter01",
+    "project": "Samples/Checkpoints/Chapter01/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App"
+    ],
+    "applicationTitle": "Inventory chapter 1",
+    "kind": "chapter snapshot: the starting app",
+    "adds": "The starting app: the Practice tab, the BorderlessEntry and GradientButton handlers, and PlatformGreeting."
   },
   {
     "chapter": 2,
-    "checkpoint": "Samples/Checkpoints/Chapter02/Chapter02.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter02",
+    "project": "Samples/Checkpoints/Chapter02/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App"
+    ],
+    "applicationTitle": "Inventory chapter 2",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "No code change: Chapter 1's app under its own name."
   },
   {
     "chapter": 3,
-    "checkpoint": "Samples/Checkpoints/Chapter03/Chapter03.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter03",
+    "project": "Samples/Checkpoints/Chapter03/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 3",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "Inventory.Core with Product and the in-memory repository, ProductRoute, the Products and Details pages, and the Catalog tab."
   },
   {
     "chapter": 4,
-    "checkpoint": "Samples/Checkpoints/Chapter04/Chapter04.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter04",
+    "project": "Samples/Checkpoints/Chapter04/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 4",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The Products page's Grid layout and search, the adaptive settings page, and the resource practice page with its theme colors."
   },
   {
     "chapter": 5,
-    "checkpoint": "Samples/Checkpoints/Chapter05/Chapter05.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter05",
+    "project": "Samples/Checkpoints/Chapter05/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 5",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The Products page's EmptyView, the stock dashboard with paging, the stock converters and the template selector."
   },
   {
     "chapter": 6,
-    "checkpoint": "Samples/Checkpoints/Chapter06/Chapter06.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter06",
+    "project": "Samples/Checkpoints/Chapter06/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 6",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "ProductListViewModel and its commands, bound to the Products page."
   },
   {
     "chapter": 7,
-    "checkpoint": "Samples/Checkpoints/Chapter07/Chapter07.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter07",
+    "project": "Samples/Checkpoints/Chapter07/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 7",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The checkout workflow with its route guard, the lifecycle stop timestamp, and the Settings page."
   },
   {
     "chapter": 8,
-    "checkpoint": "Samples/Checkpoints/Chapter08/Chapter08.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter08",
+    "project": "Samples/Checkpoints/Chapter08/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 8",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The SQLite product repository, and the categories page with CSV export."
   },
   {
     "chapter": 9,
-    "checkpoint": "Samples/Checkpoints/Chapter09/Chapter09.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter09",
+    "project": "Samples/Checkpoints/Chapter09/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core"
+    ],
+    "applicationTitle": "Inventory chapter 9",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The catalog client, the resilient handler, connectivity status, and the offline sync queue page."
   },
   {
     "chapter": 10,
-    "checkpoint": "Samples/Checkpoints/Chapter10/Chapter10.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter10",
+    "project": "Samples/Checkpoints/Chapter10/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 10",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "Inventory.Tests, the portable test project."
   },
   {
     "chapter": 11,
-    "checkpoint": "Samples/Checkpoints/Chapter11/Chapter11.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter11",
+    "project": "Samples/Checkpoints/Chapter11/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 11",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "QuantityPicker, MetricCard and TemplatedNotice."
   },
   {
     "chapter": 12,
-    "checkpoint": "Samples/Checkpoints/Chapter12/Chapter12.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter12",
+    "project": "Samples/Checkpoints/Chapter12/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 12",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "Location, photo picking and shake detection, and the site inspection page."
   },
   {
     "chapter": 13,
-    "checkpoint": "Samples/Checkpoints/Chapter13/Chapter13.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter13",
+    "project": "Samples/Checkpoints/Chapter13/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 13",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "MSAL sign-in, the session service and token vault, the token renewal coordinator and page, and the security exercises."
   },
   {
     "chapter": 14,
-    "checkpoint": "Samples/Checkpoints/Chapter14/Chapter14.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter14",
+    "project": "Samples/Checkpoints/Chapter14/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 14",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The localized settings page with English and Spanish resources, and the public configuration file."
   },
   {
     "chapter": 15,
-    "checkpoint": "Samples/Checkpoints/Chapter15/Chapter15.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter15",
+    "project": "Samples/Checkpoints/Chapter15/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 15",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "The thumbnail cache, the browsing page, weak messages, and the local metric buffer."
   },
   {
     "chapter": 16,
-    "checkpoint": "Samples/Checkpoints/Chapter16/Chapter16.csproj",
-    "sharedSource": "Samples/Inventory.App",
-    "kind": "shared-source entry configuration, not a historical snapshot"
+    "checkpoint": "Samples/Checkpoints/Chapter16",
+    "project": "Samples/Checkpoints/Chapter16/Inventory.App/Inventory.App.csproj",
+    "projects": [
+      "Inventory.App",
+      "Inventory.Core",
+      "Inventory.Tests"
+    ],
+    "applicationTitle": "Inventory chapter 16",
+    "kind": "chapter snapshot: the previous checkpoint plus this chapter's changes",
+    "adds": "No new feature: Chapter 15's app under its own name, used for release preparation."
   }
 ]

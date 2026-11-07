@@ -26,7 +26,7 @@
   {
     "chapter": 4,
     "title": "Adaptive settings",
-    "source": "Inventory.App/AdaptiveSettingsPage.cs",
+    "source": "Inventory.App/AdaptiveSettingsPage.xaml.cs",
     "nativeProject": "Activities/Chapter04/Activity04.csproj",
     "manual": "Adaptive settings; widths 599/600, safe area, keyboard and large text",
     "checks": "Native width/assistive checks; no portable visual pass"
@@ -66,7 +66,7 @@
   {
     "chapter": 9,
     "title": "Durable synchronization queue",
-    "source": "Inventory.Core/Activities.cs",
+    "source": "Inventory.Core/SyncQueue.cs",
     "nativeProject": "Activities/Chapter09/Activity09.csproj",
     "manual": "Offline queue; controlled failure, due-time/backoff, pending count, newer-revision acknowledgment",
     "checks": "Queue real SQLite persistence/backoff/revision tests"
@@ -124,7 +124,7 @@
     "title": "Version/pipeline/release preparation",
     "source": "Tools/update-version.ps1",
     "nativeProject": "Activities/Chapter16/Activity16.csproj",
-    "manual": "Disposable XML helper tests and ordinary Release build; signing/publish/store/calendar actions remain separate",
-    "checks": "Version-helper positive/negative tests and target build receipt"
+    "manual": "The update-version.ps1 commands in the README and an ordinary Release build; signing, publishing and store actions remain separate",
+    "checks": "The update-version.ps1 commands in the README and an ordinary Release build"
   }
 ]

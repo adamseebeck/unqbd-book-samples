@@ -21,15 +21,17 @@ if ($displayNodes.Count -ne 1 -or $buildNodes.Count -ne 1) { throw 'Expected exa
 $oldNumber=0L
 if (-not [long]::TryParse($buildNodes[0].InnerText,[ref]$oldNumber)) { throw 'Existing build number is not an integer.' }
 if ($BuildNumber -lt $oldNumber) { throw 'Build number must not decrease.' }
-$displayNodes[0].InnerText=$DisplayVersion
-$buildNodes[0].InnerText=$BuildNumber.ToString([Globalization.CultureInfo]::InvariantCulture)
-$settings=[Xml.XmlWriterSettings]::new()
-$settings.Encoding=[Text.UTF8Encoding]::new($false)
-$settings.Indent=$false
+# Change only the two values: every other character of the project file stays as it was.
+$text=[IO.File]::ReadAllText($resolvedProject)
+$hasBom=[IO.File]::ReadAllBytes($resolvedProject)[0] -eq 0xEF
+$displayPattern='(?<=<ApplicationDisplayVersion>)[^<]*(?=</ApplicationDisplayVersion>)'
+$buildPattern='(?<=<ApplicationVersion>)[^<]*(?=</ApplicationVersion>)'
+if ([regex]::Matches($text,$displayPattern).Count -ne 1 -or [regex]::Matches($text,$buildPattern).Count -ne 1) { throw 'Expected exactly one display version and build version.' }
+$text=[regex]::Replace($text,$displayPattern,$DisplayVersion)
+$text=[regex]::Replace($text,$buildPattern,$BuildNumber.ToString([Globalization.CultureInfo]::InvariantCulture))
 $temporary=Join-Path ([IO.Path]::GetDirectoryName($resolvedProject)) ([IO.Path]::GetRandomFileName())
 try {
-    $writer=[Xml.XmlWriter]::Create($temporary,$settings)
-    try { $document.Save($writer) } finally { $writer.Dispose() }
+    [IO.File]::WriteAllText($temporary,$text,[Text.UTF8Encoding]::new($hasBom))
     [IO.File]::Move($temporary,$resolvedProject,$true)
 } finally {
     if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) }

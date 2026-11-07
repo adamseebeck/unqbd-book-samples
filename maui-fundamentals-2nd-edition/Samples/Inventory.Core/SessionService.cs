@@ -49,37 +49,3 @@ public sealed class SessionService(IIdentityClient identity, ITokenVault vault)
         }
     }
 }
-
-public enum PermissionDecision
-{
-    Granted,
-    Denied,
-    Disabled,
-    Unavailable
-}
-
-public readonly record struct Position(double Latitude, double Longitude);
-public interface ILocationDevice
-{
-    Task<PermissionDecision> RequestPermissionAsync();
-    Task<Position?> LocateAsync(CancellationToken cancellationToken);
-}
-
-public sealed class LocationCoordinator(ILocationDevice device)
-{
-    public async Task<Position?> FindAsync(CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var permission = await device.RequestPermissionAsync();
-        cancellationToken.ThrowIfCancellationRequested();
-        if (permission != PermissionDecision.Granted)
-            return null;
-        return await device.LocateAsync(cancellationToken);
-    }
-}
-
-public static class InventoryMetrics
-{
-    public static long StockValueCents(IEnumerable<Product> products) => products.Aggregate(0L, (total, p) => checked(total + checked(p.UnitPriceCents * p.Quantity)));
-    public static bool IsShake(double x, double y, double z, double threshold = 2.0) => Math.Sqrt(x * x + y * y + z * z) > threshold;
-}

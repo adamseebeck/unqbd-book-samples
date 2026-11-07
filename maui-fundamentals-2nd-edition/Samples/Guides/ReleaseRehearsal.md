@@ -4,7 +4,7 @@ The Release templates are inert examples, not activated workflows or signing con
 
 ## Establish identity and version inputs
 
-Record the stable application ID, display version, increasing build number, target TFM/RID, source revision and SDK/workload/native-tool identities. update-version.ps1 deliberately accepts only three numeric components without leading zeroes, each 0 through 65535. That is a constrained demonstration contract, not full SemVer and not a guarantee that every store accepts the value. Keep logical prerelease/build labels in source/release records when a target requires a different numeric display string. Test the helper on a disposable copy before changing release inputs.
+Record the stable application ID, display version, increasing build number, target TFM/RID, source revision and SDK/workload/native-tool identities. update-version.ps1 deliberately accepts only three numeric components without leading zeroes, each 0 through 65535. That is a constrained demonstration contract, not full SemVer and not a guarantee that every store accepts the value. Keep logical prerelease/build labels in source/release records when a target requires a different numeric display string. Test the helper on a disposable copy before changing release inputs. With PowerShell 7 installed, copy your project from Samples with `Copy-Item MyInventory ReleaseCopy -Recurse`, then run `pwsh Tools/update-version.ps1 -ProjectPath ReleaseCopy/Inventory.App/Inventory.App.csproj -DisplayVersion 1.0.1 -BuildNumber 2`.
 
 ## Source validation first
 

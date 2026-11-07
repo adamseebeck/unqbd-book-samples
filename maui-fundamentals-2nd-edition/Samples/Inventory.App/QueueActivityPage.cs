@@ -27,6 +27,15 @@ public sealed class QueueActivityPage : ContentPage
         {
             await queue.EnqueueNextAsync(1, "Fictional inventory edit", token);
         });
+        // Activity 9 solution: Product 2's revisions queue beside Product 1's.
+        var enqueueSecond = new Button
+        {
+            Text = "Enqueue a revision for Product 2"
+        };
+        enqueueSecond.Clicked += async (_, _) => await RunAsync(async token =>
+        {
+            await queue.EnqueueNextAsync(2, "Fictional inventory edit", token);
+        });
         var failure = new Switch
         {
             IsToggled = true
@@ -58,6 +67,7 @@ public sealed class QueueActivityPage : ContentPage
                     Text = "All synchronization is simulated in this process. No API write occurs."
                 },
                 enqueue,
+                enqueueSecond,
                 new Label
                 {
                     Text = "Simulate transient failures"
@@ -102,7 +112,7 @@ public sealed class QueueActivityPage : ContentPage
             var count = rows.Count;
             if (token.IsCancellationRequested)
                 return;
-            status.Text = $"Network permits attempt: {connectivity.CanAttempt}. Pending: {count}. Simulated sends: {transport.Calls}.\n" + string.Join("\n", rows.Select(row => $"Product {row.ProductId}, revision {row.Revision}: failures {row.RetryCount}/3; {(row.RetryCount >= 3 ? "exhausted" : "due " + row.NextAttempt.ToString("O"))}; {row.ErrorMessage}"));
+            status.Text = $"Network permits attempt: {connectivity.CanAttempt}. Pending: {count}. Simulated sends: {transport.Calls}.\n" + string.Join("\n", rows.Select(row => $"Product {row.ProductId}, revision {row.Revision}: failures {row.RetryCount}/3; {(row.RetryCount >= 3 ? "exhausted" : row.NextAttempt == default ? "due now" : "due " + row.NextAttempt.ToLocalTime().ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture))}{(string.IsNullOrEmpty(row.ErrorMessage) ? "" : "; " + row.ErrorMessage)}"));
             process.Text = $"Sync ({count})";
             process.IsEnabled = connectivity.CanAttempt;
             if (count > 0 && !ToolbarItems.Contains(process))
@@ -110,7 +120,7 @@ public sealed class QueueActivityPage : ContentPage
             else if (count == 0)
                 ToolbarItems.Remove(process);
         }
-        catch (OperationCanceledException)when (token.IsCancellationRequested)
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
         }
         catch (Exception)

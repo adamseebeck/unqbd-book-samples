@@ -457,7 +457,7 @@ public sealed class InventoryTests
                 await Release.Task.WaitAsync(token);
                 if (Failure is not null)
                     throw Failure;
-                return[Item()];
+                return [Item()];
             }
             finally
             {

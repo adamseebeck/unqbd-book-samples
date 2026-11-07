@@ -66,7 +66,7 @@ public partial class InventoryDashboardPage : ContentPage
         {
             await viewModel.LoadMoreCommand.ExecuteAsync(null);
         }
-        catch (OperationCanceledException)when (!active || viewModel.LoadMoreCommand.IsCancellationRequested)
+        catch (OperationCanceledException) when (!active || viewModel.LoadMoreCommand.IsCancellationRequested)
         {
         }
         catch (Exception)

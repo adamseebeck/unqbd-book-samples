@@ -31,10 +31,10 @@ public sealed class LocalizedSettingsPage : ContentPage
         AutomationProperties.SetIsInAccessibleTree(decoration, false);
         var compact = new Switch
         {
-            IsToggled = Preferences.Default.Get("CompactView", false)
+            IsToggled = Preferences.Default.Get("compact_view", false)
         };
         SemanticProperties.SetDescription(compact, AppResources.Get("CompactLabel", culture));
-        compact.Toggled += (_, e) => Preferences.Default.Set("CompactView", e.Value);
+        compact.Toggled += (_, e) => Preferences.Default.Set("compact_view", e.Value);
         Content = new ScrollView
         {
             Content = new VerticalStackLayout
@@ -58,6 +58,11 @@ public sealed class LocalizedSettingsPage : ContentPage
                     new Label
                     {
                         Text = AppResources.Get("ContrastInstruction", culture)
+                    },
+                    // Activity 14 solution: one more resource key, read in the page's culture.
+                    new Label
+                    {
+                        Text = AppResources.Get("Footer", culture)
                     }
                 }
             }

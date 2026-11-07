@@ -96,9 +96,12 @@ From Chapter 10 on, the Warehouse API stores its data in SQL Server through Enti
 
 ```shell
 dotnet tool restore
+dotnet build
 dotnet ef database update
 dotnet run --launch-profile http
 ```
+
+`dotnet build` restores the project first; on a fresh copy opened outside Visual Studio, `dotnet ef` otherwise stops with "Unable to retrieve project metadata".
 
 In the Development environment, the application also applies missing migrations at startup and adds the sample warehouses, products and stock when the tables are empty. To use another SQL Server, set its connection string in the `ConnectionStrings__WarehouseDb` environment variable. Outside Development, the application stops at startup when no connection string is configured. For SQL Server 2019 or an older LocalDB, Chapter 10 shows the one-line change that targets it.
 

@@ -111,6 +111,7 @@ The API applies migrations at startup only in Development. Before a release, cre
 
 ```bash
 dotnet tool restore
+dotnet restore Chapter16/WarehouseApi
 dotnet ef migrations script --idempotent --project Chapter16/WarehouseApi --output migrate.sql
 ```
 

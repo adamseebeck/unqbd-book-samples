@@ -269,7 +269,9 @@ static async Task<RunResult> Run(string file, string[] arguments, string cwd, Ti
     var timedOut = false;
     try { await proc.WaitForExitAsync(cts.Token); }
     catch (OperationCanceledException) { timedOut = true; try { proc.Kill(entireProcessTree: true); } catch { } }
-    proc.WaitForExit();
+    // A failed kill must not hang the whole run, so a timed-out process gets a bounded wait.
+    if (timedOut) proc.WaitForExit(TimeSpan.FromSeconds(10));
+    else proc.WaitForExit();
     lock (sb) return new RunResult(timedOut ? 124 : proc.ExitCode, sb.ToString(), timedOut);
 }
 

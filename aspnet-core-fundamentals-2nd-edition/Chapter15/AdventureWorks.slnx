@@ -1,5 +1,0 @@
-<Solution>
-    <Project Path="Domain/AdventureWorks.Domain.csproj" />
-    <Project Path="Api/AdventureWorks.Api.csproj" />
-    <Project Path="Tests/AdventureWorks.Tests.csproj" />
-</Solution>

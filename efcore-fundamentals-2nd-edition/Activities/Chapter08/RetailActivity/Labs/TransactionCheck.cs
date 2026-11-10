@@ -78,7 +78,8 @@ public static class TransactionCheck
             if (fail)
                 throw new InvalidOperationException(
                     "Simulated failure after the first save.");
-            target.StockQuantity += quantity;
+            var stock = checked(target.StockQuantity + quantity);
+            target.StockQuantity = stock;
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
         });

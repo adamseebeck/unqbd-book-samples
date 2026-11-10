@@ -27,7 +27,7 @@ public sealed class ProductSearch(InventoryDbContext db)
         if (threshold < 0)
             throw new ArgumentOutOfRangeException(
                 nameof(threshold));
-        if (page < 1)
+        if (page is < 1 or > 10_000)
             throw new ArgumentOutOfRangeException(nameof(page));
         if (pageSize is < 1 or > 50)
             throw new ArgumentOutOfRangeException(

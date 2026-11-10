@@ -73,7 +73,7 @@ Re-running an earlier lab preserves that chapter's demonstration. In particular,
 - **"Set ConnectionStrings:DefaultConnection."**: the app did not start in the Development environment, so `appsettings.Development.json` was not read. Use the Retail launch profile in Visual Studio, or `dotnet run` from Retail. From Chapter10, keep both DOTNET_ENVIRONMENT and ASPNETCORE_ENVIRONMENT set to Development for local work.
 - **A connection error naming the Local Database Runtime**: LocalDB is not installed or not started. Check `SqlLocalDB info`. On macOS and Linux the error is "LocalDB is not supported on this platform": LocalDB runs only on Windows.
 - **"There is already an object named 'Categories' in the database"** in Chapter 4: an earlier checkpoint created `EfCoreBook_Retail` with `EnsureCreated`, which records no migration history. In Chapter04/Retail run `dotnet ef database drop --force`, or `dotnet run -- --lab 3` to rebuild it with migrations, then run Chapter 4 again.
-- **Warnings NU1902 or NU1903 about System.Security.Cryptography.Pkcs**: the SQL Server package brings in version 9.0.18, which has known vulnerabilities. Chapters 1 to 9 and the test project add version 9.0.21 to replace it. The web SDK used from Chapter 10 already includes a patched copy.
+- **Warning NU1605 about System.Security.Cryptography.Pkcs**: use the included project files. The released EF Core 11 provider requires version 10.0.13 or later; an older explicit reference can cause a package downgrade. Console and test projects pin 10.0.13. The web SDK used from Chapter 10 supplies this dependency, so the web projects need no direct reference. Keep NuGet vulnerability auditing enabled.
 
 ## Notes
 

@@ -1,7 +1,8 @@
 Console.Write("Temperature in degrees Fahrenheit: ");
-if (!double.TryParse(Console.ReadLine(), out double temperature))
+if (!double.TryParse(Console.ReadLine(), out double temperature)
+    || !double.IsFinite(temperature))
 {
-    Console.WriteLine("Enter a numeric temperature.");
+    Console.WriteLine("Enter a finite numeric temperature.");
     return;
 }
 

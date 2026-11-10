@@ -48,9 +48,25 @@ public class Roster
             return;
         }
         string json = File.ReadAllText(path);
-        List<Student> saved =
-            JsonSerializer.Deserialize<List<Student>>(json)
-            ?? throw new JsonException("No student list found.");
+        List<Student> saved;
+        try
+        {
+            saved = JsonSerializer.Deserialize<List<Student>>(json)
+                ?? throw new JsonException("No student list found.");
+        }
+        catch (InvalidScoreException ex)
+        {
+            throw new JsonException("A saved score is invalid.", ex);
+        }
+        foreach (Student student in saved)
+        {
+            if (student is null
+                || string.IsNullOrWhiteSpace(student.Name))
+            {
+                throw new JsonException(
+                    "Every saved student needs a name.");
+            }
+        }
         foreach (Student student in saved)
         {
             Add(student);

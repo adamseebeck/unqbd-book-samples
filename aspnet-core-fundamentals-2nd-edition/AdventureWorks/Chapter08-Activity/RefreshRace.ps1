@@ -23,8 +23,12 @@ function Send([string]$path, [string]$json) {
 
 $email = "casey@adventure-works.test"
 foreach ($round in 1..$Rounds) {
-    $login = (Send "login" ('{"email":"' + $email +
-        '","password":"' + $Password + '"}')).Result
+    $loginBody = @{ email = $email; password = $Password } |
+        ConvertTo-Json -Compress
+    $login = (Send "login" $loginBody).Result
+    if (-not $login.IsSuccessStatusCode) {
+        throw "Login failed: HTTP $([int]$login.StatusCode). Check -Password and the seeded account."
+    }
     $tokens = $login.Content.ReadAsStringAsync().Result |
         ConvertFrom-Json
     $body = '{"token":"' + $tokens.refreshToken + '"}'

@@ -1,5 +1,7 @@
 # AdventureWorks: Chapter 2 Activity solution
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 This is a worked solution to the chapter's Activity, built in a copy of the Chapter 2 checkpoint. Try the Activity yourself first. The next chapter starts from `../Chapter02`, not from this folder.
 
 It adds validated `PaymentOptions` (Core), their appsettings.json section, and a Development-only `/api/payment/config` route. The endpoint URL is reserved example data; nothing sends requests to it.
@@ -16,7 +18,7 @@ dotnet user-secrets set PaymentOptions:TimeoutSeconds 45 `
 dotnet run --project AdventureWorks
 ```
 
-In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+In Visual Studio, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
 Then check precedence and validation, from this folder too:
 
@@ -35,7 +37,7 @@ The first run reports 50. With 100 stored, startup stops with an OptionsValidati
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 

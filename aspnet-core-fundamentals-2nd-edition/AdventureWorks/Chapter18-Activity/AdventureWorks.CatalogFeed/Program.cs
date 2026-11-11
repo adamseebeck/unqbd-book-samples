@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using AdventureWorks.CatalogFeed;
 
 // Chapter 18 Activity: a read-only catalog feed small enough for
 // Native AOT. The slim builder, a source-generated JSON context
@@ -17,9 +17,3 @@ FeedItem[] feed =
 app.MapGet("/feed", () => feed);
 app.MapGet("/health/live", () => "Healthy");
 app.Run();
-
-public sealed record FeedItem(string Sku, decimal Price);
-
-[JsonSerializable(typeof(FeedItem[]))]
-internal sealed partial class FeedJsonContext
-    : JsonSerializerContext;

@@ -1,8 +1,10 @@
 # AdventureWorks: Chapter 10 Activity solution
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 This is a worked solution to the chapter's Activity, built in a copy of the Chapter 10 checkpoint. Try the Activity yourself first. The next chapter starts from `../Chapter10`, not from this folder.
 
-It runs the same store on SQL Server LocalDB, which Visual Studio 2026 installs, and keeps SQLite as the default. `AdventureWorks.SqlServerMigrations` holds the SQL Server migrations, because migrations are provider-specific; `Database:Provider` set to SqlServer (the `sqlserver` launch profile sets it) selects that provider and that migrations assembly. The database is `AdventureWorksStore` on `(localdb)\MSSQLLocalDB`, unless ConnectionStrings:SqlServer names another. `StoreErrors` maps the constraint errors of both providers, and the seed turns on IDENTITY_INSERT on SQL Server for its fixed IDs.
+It runs the same store on SQL Server LocalDB, which Visual Studio installs, and keeps SQLite as the default. `AdventureWorks.SqlServerMigrations` holds the SQL Server migrations, because migrations are provider-specific; `Database:Provider` set to SqlServer (the `sqlserver` launch profile sets it) selects that provider and that migrations assembly. The database is `AdventureWorksStore` on `(localdb)\MSSQLLocalDB`, unless ConnectionStrings:SqlServer names another. `StoreErrors` maps the constraint errors of both providers, and the seed turns on IDENTITY_INSERT on SQL Server for its fixed IDs.
 
 ## Run it
 
@@ -16,11 +18,11 @@ dotnet user-secrets set Training:Password "Practice-Pass-2026!" `
 dotnet run --project AdventureWorks --launch-profile sqlserver
 ```
 
-The first run in Development creates AdventureWorksStore, applies the SQL Server migration and seeds it. To use the dotnet ef tools against SQL Server, run `dotnet tool restore` once, set `$env:Database__Provider = "SqlServer"` in the PowerShell session, and run them from the AdventureWorks.SqlServerMigrations folder with `-s ..\AdventureWorks`. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+The first run in Development creates AdventureWorksStore, applies the SQL Server migration and seeds it. To use the dotnet ef tools against SQL Server, run `dotnet tool restore` once, set `$env:Database__Provider = "SqlServer"` in the PowerShell session, and run them from the AdventureWorks.SqlServerMigrations folder with `-s ..\AdventureWorks`. In Visual Studio, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 

@@ -1,5 +1,7 @@
 # AdventureWorks: Chapter 2 checkpoint
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 The AdventureWorks store app at the end of Chapter 2: the Chapter 1 host split into three projects, with typed and validated FeatureFlags options, three service lifetimes, an order route and two Development-only diagnostics. Chapter 3 starts from this folder.
 
 | Folder | Project |
@@ -20,7 +22,7 @@ dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
 dotnet run --project AdventureWorks
 ```
 
-The first command stores Chapter 2's harmless User Secret outside the project (Step 5); run it once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+The first command stores Chapter 2's harmless User Secret outside the project (Step 5); run it once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
 To see the 503 branch, start with checkout switched off; to see startup validation stop the host, start with an invalid value. Run these from this folder too:
 
@@ -35,7 +37,7 @@ The second command ends with an OptionsValidationException that names MaxCartIte
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 

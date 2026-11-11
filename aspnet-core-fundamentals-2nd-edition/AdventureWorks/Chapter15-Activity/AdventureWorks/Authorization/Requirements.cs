@@ -22,7 +22,9 @@ public sealed class MinimumAgeHandler(TimeProvider clock)
         {
             var today = DateOnly.FromDateTime(
                 clock.GetUtcNow().UtcDateTime);
-            if (born.AddYears(requirement.MinimumAge) <= today)
+            if (born <= today && requirement.MinimumAge >= 0 &&
+                requirement.MinimumAge <= DateOnly.MaxValue.Year - born.Year &&
+                born.AddYears(requirement.MinimumAge) <= today)
                 context.Succeed(requirement);
         }
         return Task.CompletedTask;

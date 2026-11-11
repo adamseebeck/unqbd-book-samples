@@ -1,5 +1,7 @@
 # AdventureWorks: Chapter 8 checkpoint
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 The AdventureWorks store app at the end of Chapter 8. It adds ASP.NET Core Identity on a SQLite database (`AdventureWorksDbContext`, the app's one context, in Infrastructure), sign-in pages at `/Account/Login` and `/Account/Profile`, a token API for a mobile client (`POST /api/auth/login` and `POST /api/auth/refresh`, with hashed, single-use refresh tokens), a Bearer-only loyalty API, a claims transformation that adds each customer's stored loyalty number, and Development-only test accounts with a test sign-in (`DevSignIn.cs`). Chapter 9 starts from this folder.
 
 Identity's cookie is the only cookie scheme. Pages redirect to the sign-in page; every `/api` route answers 401 or 403 instead.
@@ -24,11 +26,11 @@ dotnet user-secrets set Training:Password "Practice-Pass-2026!" `
 dotnet run --project AdventureWorks
 ```
 
-The two secrets are Chapter 2's harmless setting and Chapter 8's test-account password; set them once, because every later checkpoint keeps the same UserSecretsId. Any password with 12 or more characters, upper and lower case letters, a digit and a symbol works; requests.http uses this one. The first run creates adventureworks.db in the AdventureWorks folder and five test accounts: casey, jordan, morgan, riley and avery, each at @adventure-works.test. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+The two secrets are Chapter 2's harmless setting and Chapter 8's test-account password; set them once, because every later checkpoint keeps the same UserSecretsId. Any password with 12 or more characters, upper and lower case letters, a digit and a symbol works; requests.http uses this one. The first run creates adventureworks.db in the AdventureWorks folder and five test accounts: casey, jordan, morgan, riley and avery, each at @adventure-works.test. In Visual Studio, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 

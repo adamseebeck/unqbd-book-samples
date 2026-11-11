@@ -10,6 +10,9 @@ public sealed class OrderService(IOrderRepository orders,
         CreateOrderRequest request,
         CancellationToken ct = default)
     {
+        // JSON can contain null even with a nonnullable item type.
+        if (request.Items.Any(item => item is null))
+            return Invalid("Each order line is required.");
         int[] ids = [.. request.Items.Select(i => i.ProductId)
             .Distinct()];
         if (ids.Length != request.Items.Count)

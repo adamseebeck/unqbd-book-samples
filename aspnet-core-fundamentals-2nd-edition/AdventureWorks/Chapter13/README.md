@@ -1,5 +1,7 @@
 # AdventureWorks: Chapter 13 checkpoint
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 The AdventureWorks store app at the end of Chapter 13. The order API is a REST collection of the signed-in customer's orders on Chapter 11's service: `GET /api/orders` (one bounded page, Link header to the neighbors), `GET /api/orders/{id}` (an OrderDto without the owner's ID, its version as the ETag), `POST /api/orders` (201 with Location and ETag), `PATCH /api/orders/{id}` (the notes, with If-Match: 428 without it, 412 when stale) and `DELETE /api/orders/{id}` (cancels). The Admin's permanent delete is `DELETE /api/admin/orders/{id}`. The order API's JSON types are serialized by generated code (StoreJsonContext). Chapter 14 starts from this folder.
 
 | Folder | Project |
@@ -22,11 +24,11 @@ dotnet user-secrets set Training:Password "Practice-Pass-2026!" `
 dotnet run --project InventoryService
 ```
 
-Then, in a second terminal in this folder, run `dotnet run --project AdventureWorks`. InventoryService is the warehouse stand-in on http://127.0.0.1:42132; the app calls it for stock. In Visual Studio 2026, open AdventureWorks.slnx, choose Configure Startup Projects, select Multiple startup projects, set AdventureWorks and InventoryService to Start, and press F5. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. The two secrets are Chapter 2's harmless setting and Chapter 8's test-account password; set them once, because every later checkpoint keeps the same UserSecretsId. Any password with 12 or more characters, upper and lower case letters, a digit and a symbol works; requests.http uses this one. The first run creates adventureworks.db in the AdventureWorks folder and five test accounts: casey, jordan, morgan, riley and avery, each at @adventure-works.test. From Chapter 10 the app keeps its catalog, orders and stock in adventureworks.db (with SQLite's -wal and -shm files beside it while it runs). In Development the first run applies the migrations and seeds the data; each later run keeps every change. To start over, stop the app and run `dotnet ef database drop --force -s ..\AdventureWorks` from the AdventureWorks.Infrastructure folder. The dotnet-ef tool is pinned in dotnet-tools.json; run `dotnet tool restore` once in this folder before using it.
+Then, in a second terminal in this folder, run `dotnet run --project AdventureWorks`. InventoryService is the warehouse stand-in on http://127.0.0.1:42132; the app calls it for stock. In Visual Studio, open AdventureWorks.slnx, choose Configure Startup Projects, select Multiple startup projects, set AdventureWorks and InventoryService to Start, and press F5. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. The two secrets are Chapter 2's harmless setting and Chapter 8's test-account password; set them once, because every later checkpoint keeps the same UserSecretsId. Any password with 12 or more characters, upper and lower case letters, a digit and a symbol works; requests.http uses this one. The first run creates adventureworks.db in the AdventureWorks folder and five test accounts: casey, jordan, morgan, riley and avery, each at @adventure-works.test. From Chapter 10 the app keeps its catalog, orders and stock in adventureworks.db (with SQLite's -wal and -shm files beside it while it runs). In Development the first run applies the migrations and seeds the data; each later run keeps every change. To start over, stop the app and run `dotnet ef database drop --force -s ..\AdventureWorks` from the AdventureWorks.Infrastructure folder. The dotnet-ef tool is pinned in dotnet-tools.json; run `dotnet tool restore` once in this folder before using it.
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 
@@ -70,6 +72,10 @@ curl.exe -s -D order.txt -o order.json -b cookies.txt `
 Get-Content order.txt
 $orderETag = (Get-Content order.txt) -match '^ETag:'
 $orderETag = $orderETag -replace '^ETag: '
+# A header file keeps ETag quotes intact in Windows PowerShell
+# 5.1.
+"If-Match: $orderETag" | Set-Content `
+    -Encoding ascii order-etag.txt
 $order = Get-Content order.json | ConvertFrom-Json
 
 # A change without If-Match. Expect 428
@@ -89,20 +95,24 @@ curl.exe -i -w "\n" -X PATCH -b cookies.txt -c cookies.txt `
 '@ | Set-Content body.json
 curl.exe -s -D patched.txt -o patched.json -X PATCH `
     -b cookies.txt -c cookies.txt `
-    -H "Content-Type: application/json" `
-    -H "If-Match: $orderETag" -H "X-CSRF-TOKEN: $($token.token)" `
+    -H "Content-Type: application/json" -H "@order-etag.txt" `
+    -H "X-CSRF-TOKEN: $($token.token)" `
     --data-binary "@body.json" `
     https://localhost:7001/api/orders/1
 Get-Content patched.txt
 $patchedETag = (Get-Content patched.txt) -match '^ETag:'
 $patchedETag = $patchedETag -replace '^ETag: '
+# A header file keeps ETag quotes intact in Windows PowerShell
+# 5.1.
+"If-Match: $patchedETag" | Set-Content `
+    -Encoding ascii patched-etag.txt
 $patched = Get-Content patched.json | ConvertFrom-Json
 
 # The same ETag again is stale now. Expect 412
 '{ "notes": "Ring the bell." }' | Set-Content body.json
 curl.exe -i -w "\n" -X PATCH -b cookies.txt -c cookies.txt `
-    -H "Content-Type: application/json" `
-    -H "If-Match: $orderETag" -H "X-CSRF-TOKEN: $($token.token)" `
+    -H "Content-Type: application/json" -H "@order-etag.txt" `
+    -H "X-CSRF-TOKEN: $($token.token)" `
     --data-binary "@body.json" `
     https://localhost:7001/api/orders/1
 
@@ -110,8 +120,7 @@ curl.exe -i -w "\n" -X PATCH -b cookies.txt -c cookies.txt `
 # "notes": null
 '{ "notes": null }' | Set-Content body.json
 curl.exe -i -w "\n" -X PATCH -b cookies.txt -c cookies.txt `
-    -H "Content-Type: application/json" `
-    -H "If-Match: $patchedETag" `
+    -H "Content-Type: application/json" -H "@patched-etag.txt" `
     -H "X-CSRF-TOKEN: $($token.token)" `
     --data-binary "@body.json" `
     https://localhost:7001/api/orders/1

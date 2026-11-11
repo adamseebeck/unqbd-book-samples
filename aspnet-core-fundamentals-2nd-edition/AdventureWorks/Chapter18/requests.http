@@ -16,5 +16,5 @@ GET {{host}}/health/live
 GET {{host}}/health/ready
 
 ###
-# The public catalog. Expect 200 with "sku": "HLM-1001"
+# Expect 200. Development includes "sku": "HLM-1001"; Production starts with "items": [].
 GET {{host}}/api/catalog

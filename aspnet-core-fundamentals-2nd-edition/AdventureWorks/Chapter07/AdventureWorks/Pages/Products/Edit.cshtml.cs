@@ -13,7 +13,7 @@ public sealed class EditModel(IProductService products)
     [TempData]
     public string? StatusMessage { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id)
+    public async Task<IActionResult> OnGetAsync([FromRoute] int id)
     {
         var product = await products.GetByIdAsync(id);
         if (product is null) return NotFound();
@@ -26,7 +26,7 @@ public sealed class EditModel(IProductService products)
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(int id)
+    public async Task<IActionResult> OnPostAsync([FromRoute] int id)
     {
         if (await products.GetByIdAsync(id) is null)
             return NotFound();
@@ -49,7 +49,7 @@ public sealed class EditModel(IProductService products)
         return RedirectToPage(new { id });
     }
 
-    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    public async Task<IActionResult> OnPostDeleteAsync([FromRoute] int id)
     {
         if (!await products.DeleteAsync(id)) return NotFound();
         StatusMessage = "Product deleted.";

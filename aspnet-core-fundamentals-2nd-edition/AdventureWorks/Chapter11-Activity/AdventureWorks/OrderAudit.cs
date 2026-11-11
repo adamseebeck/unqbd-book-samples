@@ -13,16 +13,24 @@ public sealed class OrderAudit(TimeProvider clock)
 {
     private readonly ConcurrentQueue<OrderAuditEntry> _entries
         = new();
+    private readonly object _gate = new();
 
     public void Record(string operation, OrderResult result)
     {
-        _entries.Enqueue(new(clock.GetUtcNow(), operation,
-            result.Outcome.ToString(),
-            result.Order?.OrderNumber));
-        while (_entries.Count > 20) _entries.TryDequeue(out _);
+        lock (_gate)
+        {
+            _entries.Enqueue(new(clock.GetUtcNow(), operation,
+                result.Outcome.ToString(),
+                result.Order?.OrderNumber));
+            while (_entries.Count > 20) _entries.TryDequeue(out _);
+        }
     }
 
-    public OrderAuditEntry[] Recent() => [.. _entries.Reverse()];
+    public OrderAuditEntry[] Recent()
+    {
+        lock (_gate)
+            return [.. _entries.Reverse()];
+    }
 }
 
 // A second decorator. It wraps a scoped service, so it is scoped;

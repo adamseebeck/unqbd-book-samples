@@ -1,5 +1,7 @@
 # AdventureWorks: Chapter 4 checkpoint
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 The AdventureWorks store app at the end of Chapter 4. It adds the storefront catalog: a `Product` type, a category list and `IProductService` in Core, an in-memory store in Infrastructure, and an `/api/catalog` route group with a custom `productCategory` constraint and named endpoints that generate links. The route-template demonstrations live under `/examples` in Development only, with Chapter 2's diagnostics, and the OpenAPI document is served at `/openapi/v1.json` in Development. Chapter 5 starts from this folder.
 
 Program.cs now keeps the pipeline and one line per feature. Each feature file has an `AddX` method for its services and a `MapX` method for its routes:
@@ -29,11 +31,11 @@ dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
 dotnet run --project AdventureWorks
 ```
 
-The first command stores Chapter 2's harmless User Secret outside the project (Step 5); run it once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio 2026, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C. Each request logs a "Selected endpoint" line at the Information level.
+The first command stores Chapter 2's harmless User Secret outside the project (Step 5); run it once, because every later checkpoint keeps the same UserSecretsId. In Visual Studio, open AdventureWorks.slnx and press F5 instead. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C. Each request logs a "Selected endpoint" line at the Information level.
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 

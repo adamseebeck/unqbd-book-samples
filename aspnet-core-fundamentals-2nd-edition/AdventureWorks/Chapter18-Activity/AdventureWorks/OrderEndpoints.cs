@@ -158,7 +158,8 @@ public static class OrderEndpoints
             return Results.Problem("Send If-Match with the ETag.",
                 statusCode:
                     StatusCodes.Status428PreconditionRequired);
-        if (!Guid.TryParse(ifMatch.Trim('"'), out var version))
+        if (!Guid.TryParse(ifMatch.Trim('"'), out var version)
+            || ifMatch != $"\"{version}\"")
             return Results.Problem("If-Match is not an ETag.",
                 statusCode:
                     StatusCodes.Status412PreconditionFailed);

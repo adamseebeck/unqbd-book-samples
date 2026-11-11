@@ -2,13 +2,13 @@
 
 One AdventureWorks outdoor-gear store app grows through the book. You create it in Chapter 1, and every chapter starts where the previous one ended. Each `ChapterNN` folder is a full snapshot of the app at the end of that chapter: the previous chapter's snapshot plus that chapter's change. It builds and runs on its own, so you can start any chapter from the folder before it.
 
-This folder holds all 18 chapters. The `Chapter01` to `Chapter18` folders beside it belong to the current printing of the book and are unchanged.
+This folder holds all 18 chapters.
 
 ## What you need
 
 - The .NET 11 SDK, version 11.0.100 or later. Each checkpoint's `global.json` selects it.
-- Visual Studio 2026, or VS Code with the C# Dev Kit extension. Every step also works from a terminal with the `dotnet` command.
-- Chapter 10's Activity only: SQL Server LocalDB, which Visual Studio 2026 installs on Windows.
+- Visual Studio with support for the .NET 11 SDK and `.slnx` solutions, or VS Code with the C# Dev Kit extension. The build and run commands also work from a terminal with the `dotnet` command.
+- Chapter 10's Activity only: SQL Server LocalDB, which Visual Studio installs on Windows.
 - Chapter 18 only: Docker, or another engine that runs Linux containers. Its Activity compiles the Native AOT image inside Docker, so your PC needs no native compiler.
 
 ## Folders
@@ -18,9 +18,8 @@ This folder holds all 18 chapters. The `Chapter01` to `Chapter18` folders beside
 | `ChapterNN` | The checkpoint at the end of Chapter NN. The next chapter starts here. |
 | `ChapterNN-Activity` | A copy of that checkpoint plus a worked solution to the chapter's Activity. Try the Activity yourself first. The next chapter does not start from it. |
 | `Chapter15-DebugLab` | A copy of the Chapter 15 checkpoint with one deliberate bug and the test that fails because of it, for the chapter's Visual Studio debugging lab. The chapter shows how to find the bug; the folder keeps it. |
-| `notes/ChapterNN-delta.md` | Notes for the book's writers: every file and line the chapter adds or changes, in order, with the commands, their output and the responses. |
 
-Each checkpoint folder is your working folder: it holds `global.json` and, from Chapter 2, `AdventureWorks.slnx`. The solution grows with the book:
+Each checkpoint folder is your working folder: it holds `global.json` and `AdventureWorks.slnx`, starting with Chapter 1. The solution grows with the book:
 
 | Project | Holds | From |
 | --- | --- | --- |
@@ -42,7 +41,7 @@ dotnet user-secrets set FeatureFlags:MaxCartItems 30 `
 dotnet run --project AdventureWorks
 ```
 
-The app listens on https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. In Visual Studio 2026, open `AdventureWorks.slnx` and press F5. In VS Code, open the folder, let C# Dev Kit load the solution, and press F5 or use the terminal commands.
+The app listens on https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. In Visual Studio, open `AdventureWorks.slnx` and press F5. In VS Code, open the folder, let C# Dev Kit load the solution, and press F5 or use the terminal commands.
 
 Some chapters need one more step. Each checkpoint's README lists its own.
 
@@ -58,7 +57,7 @@ Some chapters need one more step. Each checkpoint's README lists its own.
 
 ## Sending requests
 
-Every checkpoint has a `requests.http` file with each request in order and the status you should see. In Visual Studio 2026, open it and select **Send Request** above a request; in VS Code, install the REST Client extension first. Each README has the same requests as curl.exe commands for Windows PowerShell 5.1. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command.
+Every checkpoint has a `requests.http` file with each request in order and the status you should see. In Visual Studio, open it and select **Send Request** above a request; in VS Code, install the REST Client extension first. Each README has the same requests as curl.exe commands for Windows PowerShell 5.1. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command.
 
 ## What each chapter adds
 

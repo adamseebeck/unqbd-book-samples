@@ -1,5 +1,7 @@
 # AdventureWorks: Chapter 7 Activity solution
 
+For the Visual Studio steps, use Visual Studio with support for the .NET 11 SDK and `.slnx` solutions.
+
 This is a worked solution to the chapter's Activity, built in a copy of the Chapter 7 checkpoint. Try the Activity yourself first. The next chapter starts from `../Chapter07`, not from this folder.
 
 It adds `HeaderOnlyForms`, a separate seven-line host on http://localhost:5107 with one form-bound endpoint, `POST /newsletter`, and no token antiforgery, so you can watch .NET 11's Sec-Fetch-Site and Origin check on its own. Its CORS policy trusts the store's origin, https://localhost:7001, with credentials.
@@ -15,11 +17,11 @@ dotnet run --project AdventureWorks
 dotnet run --project HeaderOnlyForms
 ```
 
-Run the last two commands in two terminals. In Visual Studio 2026, open AdventureWorks.slnx, right-click the solution, choose Configure Startup Projects, select Multiple startup projects and start both, then press F5. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
+Run the last two commands in two terminals. In Visual Studio, open AdventureWorks.slnx, right-click the solution, choose Configure Startup Projects, select Multiple startup projects and start both, then press F5. The launch profile in AdventureWorks/Properties/launchSettings.json starts the app in Development at https://localhost:7001 and http://localhost:5001. If the browser or curl.exe rejects the local certificate, run `dotnet dev-certs https --trust` once. Stop the app with Ctrl+C.
 
 ## Sending requests
 
-`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio 2026 runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
+`requests.http` lists every request this checkpoint answers, in order, with the status you should see. Visual Studio runs it directly: open the file and select **Send Request** above a request. VS Code needs the REST Client extension.
 
 The same requests as curl.exe commands for Windows PowerShell 5.1 follow. Type `curl.exe`, not `curl`: in Windows PowerShell 5.1, `curl` is a different command. A line that ends in a backtick (`` ` ``) continues on the next line. JSON bodies go to body.json first, because Windows PowerShell removes double quotes from the arguments it passes to curl.exe. Run the commands in order, from any folder, while the app is running.
 

@@ -31,6 +31,11 @@ public partial class ProductsPage : ContentPage
             if (!current.IsCancellationRequested)
                 await DisplayAlertAsync("Products unavailable", "Could not load products. Try again.", "OK");
         }
+        finally
+        {
+            if (ReferenceEquals(loading, current)) loading = null;
+            current.Dispose();
+        }
     }
 
     protected override void OnDisappearing()

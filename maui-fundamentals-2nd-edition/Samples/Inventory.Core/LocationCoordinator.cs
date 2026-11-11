@@ -1,6 +1,5 @@
 namespace MauiInventory.Core;
-public enum PermissionDecision
-{
+public enum PermissionDecision {
     Granted,
     Denied,
     Disabled,
@@ -8,8 +7,7 @@ public enum PermissionDecision
 }
 
 public readonly record struct Position(double Latitude, double Longitude);
-public interface ILocationDevice
-{
+public interface ILocationDevice {
     Task<PermissionDecision> RequestPermissionAsync();
     Task<Position?> LocateAsync(CancellationToken cancellationToken);
 }

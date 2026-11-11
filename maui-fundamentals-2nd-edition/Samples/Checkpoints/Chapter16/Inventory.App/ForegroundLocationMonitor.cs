@@ -31,7 +31,14 @@ public sealed class ForegroundLocationMonitor
             Geolocation.Default.ListeningFailed += failed;
             try
             {
-                ownsListening = await Geolocation.Default.StartListeningForegroundAsync(new GeolocationListeningRequest(GeolocationAccuracy.Medium) { MinimumTime = TimeSpan.FromSeconds(10), MinimumDistance = 25 });
+                ownsListening = await Geolocation.Default
+                    .StartListeningForegroundAsync(
+                        new GeolocationListeningRequest(
+                            GeolocationAccuracy.Medium)
+                        {
+                            MinimumTime = TimeSpan.FromSeconds(10),
+                            MinimumDistance = 25
+                        });
                 if (!ownsListening)
                     Detach();
                 token.ThrowIfCancellationRequested();

@@ -112,7 +112,24 @@ public sealed class QueueActivityPage : ContentPage
             var count = rows.Count;
             if (token.IsCancellationRequested)
                 return;
-            status.Text = $"Network permits attempt: {connectivity.CanAttempt}. Pending: {count}. Simulated sends: {transport.Calls}.\n" + string.Join("\n", rows.Select(row => $"Product {row.ProductId}, revision {row.Revision}: failures {row.RetryCount}/3; {(row.RetryCount >= 3 ? "exhausted" : row.NextAttempt == default ? "due now" : "due " + row.NextAttempt.ToLocalTime().ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture))}{(string.IsNullOrEmpty(row.ErrorMessage) ? "" : "; " + row.ErrorMessage)}"));
+            var culture =
+                System.Globalization.CultureInfo.InvariantCulture;
+            var details = rows.Select(row =>
+            {
+                var state = row.RetryCount >= 3 ? "exhausted" :
+                    row.NextAttempt == default ? "due now" :
+                    "due " + row.NextAttempt.ToLocalTime().ToString(
+                        "HH:mm:ss", culture);
+                var error = string.IsNullOrEmpty(row.ErrorMessage) ?
+                    "" : "; " + row.ErrorMessage;
+                return $"Product {row.ProductId}, " +
+                    $"revision {row.Revision}: " +
+                    $"failures {row.RetryCount}/3; {state}{error}";
+            });
+            status.Text =
+                $"Network permits attempt: {connectivity.CanAttempt}. " +
+                $"Pending: {count}. Simulated sends: {transport.Calls}.\n" +
+                string.Join("\n", details);
             process.Text = $"Sync ({count})";
             process.IsEnabled = connectivity.CanAttempt;
             if (count > 0 && !ToolbarItems.Contains(process))

@@ -4,7 +4,9 @@
              x:Class="MauiInventory.App.ResourcePracticePage" Title="Resources and tags" SafeAreaEdges="All" BackgroundColor="{AppThemeBinding Light=White, Dark=#121212}">
  <ContentPage.Resources>
   <ResourceDictionary>
-   <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="ThemeColors.xaml"/></ResourceDictionary.MergedDictionaries>
+   <ResourceDictionary.MergedDictionaries>
+       <ResourceDictionary Source="ThemeColors.xaml"/>
+   </ResourceDictionary.MergedDictionaries>
    <Style TargetType="Label"><Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PracticeAccent}, Dark={StaticResource PracticeAccentDark}}"/></Style>
    <Style x:Key="Tag" TargetType="Border">
     <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PracticeAccent}, Dark={StaticResource PracticeAccentDark}}"/>

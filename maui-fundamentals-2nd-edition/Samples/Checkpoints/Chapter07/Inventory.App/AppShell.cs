@@ -44,7 +44,9 @@ public sealed class AppShell : Shell
     protected override void OnNavigating(ShellNavigatingEventArgs args)
     {
         base.OnNavigating(args);
-        var fromConfirmation = args.Current?.Location?.OriginalString.TrimEnd('/').EndsWith("/confirmation", StringComparison.Ordinal) == true;
+        var fromConfirmation = args.Current?.Location?.OriginalString
+            .TrimEnd('/')
+            .EndsWith("/confirmation", StringComparison.Ordinal) == true;
         if (workflow.Completed && !workflow.Resetting && fromConfirmation && args.CanCancel && (args.Source is ShellNavigationSource.Pop or ShellNavigationSource.PopToRoot))
             args.Cancel();
     }

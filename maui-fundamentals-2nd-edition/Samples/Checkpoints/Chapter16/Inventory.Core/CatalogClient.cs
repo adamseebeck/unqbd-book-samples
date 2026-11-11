@@ -15,14 +15,19 @@ public sealed class CatalogClient(HttpClient httpClient, Uri endpoint)
     {
         if (endpoint.Scheme != Uri.UriSchemeHttps)
             throw new InvalidOperationException("Catalog endpoint must use HTTPS.");
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var deadline = CancellationTokenSource
+            .CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(TimeSpan.FromSeconds(15));
         using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false);
+        using var response = await httpClient.SendAsync(
+            request, HttpCompletionOption.ResponseHeadersRead,
+            deadline.Token).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         if (response.Content.Headers.ContentLength > MaxBodyBytes)
             throw new InvalidDataException("Catalog response is too large.");
-        await using var body = await response.Content.ReadAsStreamAsync(deadline.Token).ConfigureAwait(false);
+        await using var body = await response.Content
+            .ReadAsStreamAsync(deadline.Token)
+            .ConfigureAwait(false);
         using var buffer = new MemoryStream();
         byte[] chunk = new byte[8192];
         int read;

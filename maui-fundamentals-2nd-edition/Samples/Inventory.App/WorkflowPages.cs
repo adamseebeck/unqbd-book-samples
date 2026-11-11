@@ -10,7 +10,10 @@ public sealed class WorkflowNavigationService(WorkflowState state) : IWorkflowNa
         if (Shell.Current.CurrentPage is not CartPage)
             throw new InvalidOperationException("The reset did not reach its cart.");
     }, () => Preferences.Default.Set("workflow_screen", "cart"));
-    public Task CheckoutAsync(decimal total) => Shell.Current.GoToAsync("checkout?total=" + Uri.EscapeDataString(total.ToString(CultureInfo.InvariantCulture)));
+    public Task CheckoutAsync(decimal total) =>
+        Shell.Current.GoToAsync("checkout?total=" +
+            Uri.EscapeDataString(
+                total.ToString(CultureInfo.InvariantCulture)));
     public async Task ConfirmAsync()
     {
         await Shell.Current.GoToAsync("confirmation");

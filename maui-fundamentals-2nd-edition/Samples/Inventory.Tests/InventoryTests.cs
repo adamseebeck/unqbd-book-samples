@@ -59,7 +59,7 @@ public sealed class InventoryTests
     }
 
     [Fact]
-    public async Task Busy_state_is_visible_and_duplicate_execution_does_not_start_second_load()
+    public async Task Busy_guard_blocks_duplicate_load()
     {
         var repo = new ControlledRepository();
         var vm = new ProductListViewModel(repo);
@@ -307,7 +307,7 @@ public sealed class InventoryTests
     }
 
     [Fact]
-    public async Task Queue_acknowledgment_does_not_remove_newer_revision_and_survives_restart()
+    public async Task Queue_ack_keeps_newer_data_after_restart()
     {
         using var folder = new TestFolder();
         var path = Path.Combine(folder.Path, "queue.db3");

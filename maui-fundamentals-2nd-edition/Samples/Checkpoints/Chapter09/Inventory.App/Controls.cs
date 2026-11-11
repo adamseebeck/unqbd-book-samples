@@ -1,3 +1,4 @@
+using Microsoft.Maui;
 using Microsoft.Maui.Handlers;
 
 namespace MauiInventory.App;
@@ -35,6 +36,18 @@ public sealed class GradientButton : Button
 public sealed class GradientButtonHandler : ButtonHandler
 {
 #if ANDROID
+    private static readonly IPropertyMapper<IButton, GradientButtonHandler>
+        GradientMapper = new PropertyMapper<IButton, GradientButtonHandler>(
+            ButtonHandler.Mapper)
+        {
+            [nameof(IButton.Background)] =
+                (handler, button) => handler.ApplyBackground()
+        };
+
+    public GradientButtonHandler() : base(GradientMapper)
+    {
+    }
+
     private Android.Graphics.Drawables.GradientDrawable? background;
 
     protected override void ConnectHandler(Google.Android.Material.Button.MaterialButton view)
@@ -43,7 +56,12 @@ public sealed class GradientButtonHandler : ButtonHandler
         background = new Android.Graphics.Drawables.GradientDrawable(
             Android.Graphics.Drawables.GradientDrawable.Orientation.LeftRight,
             [Android.Graphics.Color.Rgb(20, 93, 128).ToArgb(), Android.Graphics.Color.Rgb(29, 122, 83).ToArgb()]);
-        view.Background = background;
+    }
+
+    private void ApplyBackground()
+    {
+        PlatformView.BackgroundTintList = null;
+        PlatformView.Background = background;
     }
 
     protected override void DisconnectHandler(Google.Android.Material.Button.MaterialButton view)

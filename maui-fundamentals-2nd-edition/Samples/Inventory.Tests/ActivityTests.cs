@@ -342,7 +342,7 @@ public sealed class ActivityTests
     }
 
     [Fact]
-    public void Active_message_subscription_attaches_once_detaches_and_can_return()
+    public void Active_subscription_can_reattach()
     {
         var publisher = new Messages();
         int calls = 0;

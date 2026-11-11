@@ -1,0 +1,17 @@
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MauiInventory.App;
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder().UseMauiApp<App>();
+        builder.ConfigureMauiHandlers(handlers =>
+        {
+            handlers.AddHandler(typeof(BorderlessEntry), typeof(BorderlessEntryHandler));
+            handlers.AddHandler(typeof(GradientButton), typeof(GradientButtonHandler));
+        });
+        builder.Services.AddSingleton<AppShell>();
+        return builder.Build();
+    }
+}

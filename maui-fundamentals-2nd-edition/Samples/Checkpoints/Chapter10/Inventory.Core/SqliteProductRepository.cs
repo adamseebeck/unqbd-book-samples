@@ -7,8 +7,7 @@ public sealed class SqliteProductRepository : IProductRepository, IAsyncDisposab
     private readonly SemaphoreSlim gate = new(1, 1);
     private bool initialized;
     private bool disposed;
-    public SqliteProductRepository(string databasePath)
-    {
+    public SqliteProductRepository(string databasePath) {
         if (!Path.IsPathFullyQualified(databasePath))
             throw new ArgumentException("Use an absolute app-data path.", nameof(databasePath));
         database = new SQLiteAsyncConnection(databasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.FullMutex);

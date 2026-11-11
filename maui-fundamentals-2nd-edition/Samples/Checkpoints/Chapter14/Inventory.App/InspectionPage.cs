@@ -63,10 +63,15 @@ public sealed class InspectionPage : ContentPage
     private readonly ForegroundLocationMonitor location = new();
     private CancellationTokenSource? appearance;
     private bool active, confirming;
+    private Window? ownerWindow;
     private int generation;
     public InspectionPage()
     {
         Title = "Site inspection";
+        Loaded += (_, _) =>
+        {
+            if (active) AttachWindow();
+        };
         var choose = new Button
         {
             Text = "Choose an exercise photo"
@@ -157,6 +162,7 @@ public sealed class InspectionPage : ContentPage
         generation++;
         sensor.ShakeDetected += OnShake;
         location.Updated += LocationUpdated;
+        AttachWindow();
     }
 
     protected override async void OnDisappearing()
@@ -166,16 +172,56 @@ public sealed class InspectionPage : ContentPage
         appearance?.Cancel();
         sensor.ShakeDetected -= OnShake;
         location.Updated -= LocationUpdated;
+        if (ownerWindow is not null)
+            ownerWindow.Stopped -= WindowStopped;
+        ownerWindow = null;
         try
         {
-            sensor.Stop();
-            await location.StopAsync();
+            await StopMonitoringAsync();
         }
         catch (Exception)
         { /* The feature has already left its active lifetime. */
         }
 
         base.OnDisappearing();
+    }
+
+    private void AttachWindow()
+    {
+        if (ownerWindow == Window)
+            return;
+        if (ownerWindow is not null)
+            ownerWindow.Stopped -= WindowStopped;
+        ownerWindow = Window;
+        if (ownerWindow is not null)
+            ownerWindow.Stopped += WindowStopped;
+    }
+
+    private async void WindowStopped(object? sender, EventArgs args)
+    {
+        try
+        {
+            await StopMonitoringAsync();
+            if (active)
+                status.Text = "Monitoring stopped. Select Start to resume.";
+        }
+        catch (Exception)
+        {
+            if (active)
+                status.Text = "Monitoring stopped after a device error.";
+        }
+    }
+
+    private async Task StopMonitoringAsync()
+    {
+        try
+        {
+            sensor.Stop();
+        }
+        finally
+        {
+            await location.StopAsync();
+        }
     }
 
     private void LocationUpdated(object? sender, EventArgs args) => MainThread.BeginInvokeOnMainThread(() =>

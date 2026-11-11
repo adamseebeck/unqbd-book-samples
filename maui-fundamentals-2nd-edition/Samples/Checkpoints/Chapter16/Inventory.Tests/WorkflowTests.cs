@@ -82,7 +82,7 @@ public sealed class WorkflowTests
     }
 
     [Fact]
-    public async Task Paging_command_cancellation_retains_rows_and_a_new_visit_can_load()
+    public async Task Paging_cancel_allows_return()
     {
         var source = new PageSource();
         var vm = new PagedProductsViewModel(source);

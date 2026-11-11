@@ -8,12 +8,13 @@ public static class SpkiPinPolicy
 {
     public static bool Accept(X509Certificate2? certificate, SslPolicyErrors errors, IReadOnlyList<string> base64Pins)
     {
-        if (certificate is null || errors != SslPolicyErrors.None || base64Pins.Count < 2)
+        if (certificate is null || errors != SslPolicyErrors.None)
             return false;
-        byte[] publicKey = certificate.PublicKey.ExportSubjectPublicKeyInfo();
-        var digest = SHA256.HashData(publicKey);
+        List<byte[]> pins = [];
         foreach (var pin in base64Pins)
         {
+            if (string.IsNullOrWhiteSpace(pin))
+                return false;
             byte[] expected;
             try
             {
@@ -21,14 +22,21 @@ public static class SpkiPinPolicy
             }
             catch (FormatException)
             {
-                continue;
+                return false;
             }
 
-            if (expected.Length == 32 && CryptographicOperations.FixedTimeEquals(digest, expected))
-                return true;
+            if (expected.Length != 32)
+                return false;
+            if (!pins.Any(value => value.SequenceEqual(expected)))
+                pins.Add(expected);
         }
 
-        return false;
+        if (pins.Count < 2)
+            return false;
+        var digest = SHA256.HashData(
+            certificate.PublicKey
+                .ExportSubjectPublicKeyInfo());
+        return pins.Any(pin => CryptographicOperations.FixedTimeEquals(digest, pin));
     }
 }
 

@@ -71,11 +71,19 @@ public static class ShadowExtensions
             if (view is not MetricBorder)
                 return;
 #if ANDROID
-            handler.PlatformView.Elevation=8*(handler.PlatformView.Context?.Resources?.DisplayMetrics?.Density??1);
+            handler.PlatformView.Elevation =
+                8 * (handler.PlatformView.Context
+                    ?.Resources
+                    ?.DisplayMetrics
+                    ?.Density ?? 1);
 #elif IOS || MACCATALYST
-            handler.PlatformView.Layer.ShadowColor=UIKit.UIColor.Black.CGColor;
-            handler.PlatformView.Layer.ShadowOpacity=0.2f;handler.PlatformView.Layer.ShadowRadius=6;
-            handler.PlatformView.Layer.ShadowOffset=new CoreGraphics.CGSize(0,3);handler.PlatformView.Layer.MasksToBounds=false;
+            handler.PlatformView.Layer.ShadowColor =
+                UIKit.UIColor.Black.CGColor;
+            handler.PlatformView.Layer.ShadowOpacity = 0.2f;
+            handler.PlatformView.Layer.ShadowRadius = 6;
+            handler.PlatformView.Layer.ShadowOffset =
+                new CoreGraphics.CGSize(0, 3);
+            handler.PlatformView.Layer.MasksToBounds = false;
 #endif
         });
     }

@@ -5,7 +5,17 @@
     "source": "Inventory.App/Controls.cs",
     "nativeProject": "Activities/Chapter01/Activity01.csproj",
     "manual": "Controls and platform; Android/Apple gradient and reconnect checks",
-    "checks": "InventoryTests.Route_round_trip (portable prerequisite only; no native handler claim)"
+    "checks": "InventoryTests.Route_round_trip (portable prerequisite only; no native handler claim)",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter01/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter01/README.md",
+    "completedSolutionChecks": [
+      "Practice has two named gradient buttons. Android/Apple both use the changed colors, retain readable pressed text and correct resizing/cleanup. Windows retains ordinary buttons as documented. No portable assertion claims native rendering."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.App/PracticePage.cs",
+      "Inventory.App/Controls.cs"
+    ]
   },
   {
     "chapter": 2,
@@ -13,7 +23,16 @@
     "source": "Inventory.App/ActivityPages.cs",
     "nativeProject": "Activities/Chapter02/Activity02.csproj",
     "manual": "Controls and platform; background, platform/runtime labels and explicit target builds",
-    "checks": "SDK/workload/native build receipts"
+    "checks": "SDK/workload/native build receipts",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter02/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter02/README.md",
+    "completedSolutionChecks": [
+      "Open prepared Inventory.slnx, choose Inventory.App/target and F5. Practice heading is Inventory device check; the platform/runtime line is still present. Repeat only on available targets and record unknowns."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.App/PracticePage.cs"
+    ]
   },
   {
     "chapter": 3,
@@ -29,7 +48,16 @@
     "source": "Inventory.App/AdaptiveSettingsPage.xaml.cs",
     "nativeProject": "Activities/Chapter04/Activity04.csproj",
     "manual": "Adaptive settings; widths 599/600, safe area, keyboard and large text",
-    "checks": "Native width/assistive checks; no portable visual pass"
+    "checks": "Native width/assistive checks; no portable visual pass",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter04/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter04/README.md",
+    "completedSolutionChecks": [
+      "In the prepared solution, Adaptive settings shows Narrow at 699 units and Wide at 700 units. Resize in both directions. Check 150% text, keyboard navigation and the safe area on the targets you can run. The comparison project Activities/Chapter04 still changes at 600 units: Narrow at 599, Wide at 600."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.App/AdaptiveSettingsPage.xaml.cs"
+    ]
   },
   {
     "chapter": 5,
@@ -37,7 +65,17 @@
     "source": "Inventory.App/InventoryDashboardPage.xaml",
     "nativeProject": "Activities/Chapter05/Activity05.csproj",
     "manual": "Stock dashboard; 9/10/50/51 stock boundaries, threshold 8 and failed-page retry",
-    "checks": "Failed_page_retry_does_not_skip_the_page_and_final_page_stops_requests"
+    "checks": "Failed_page_retry_does_not_skip_the_page_and_final_page_stops_requests",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter05/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter05/README.md",
+    "completedSolutionChecks": [
+      "On Stock dashboard, product 1 has quantity 10 and shows Low with the orange border. Product 2 has quantity 50 and remains Moderate. Check the 19/20 boundary, failed-page retry, cancellation and spoken text on the targets you can run."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.App/StockIndicators.cs",
+      "Inventory.App/StockTemplateSelector.cs"
+    ]
   },
   {
     "chapter": 6,
@@ -53,7 +91,16 @@
     "source": "Inventory.App/WorkflowPages.cs",
     "nativeProject": "Activities/Chapter07/Activity07.csproj",
     "manual": "Real Shell Cart/Checkout/Confirmation; invalid totals, own confirmation/back guard, explicit reset and safe Cart restart from a non-sensitive hint",
-    "checks": "Portable parameter/dialog tests where available; actual Shell/lifecycle behavior requires its native check"
+    "checks": "Portable parameter/dialog tests where available; actual Shell/lifecycle behavior requires its native check",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter07/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter07/README.md",
+    "completedSolutionChecks": [
+      "In the ordinary prepared AppShell, open Settings. A fresh store says No stop recorded. Background/restore, revisit Settings and observe the saved timestamp. Revisit after another stop refreshes it. Termination need not invoke Stopped. Existing Activity07 launcher remains the Cart workflow baseline and has no Settings flyout."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.App/SettingsPage.cs"
+    ]
   },
   {
     "chapter": 8,
@@ -61,7 +108,18 @@
     "source": "Inventory.Core/CategoryRepository.cs",
     "nativeProject": "Activities/Chapter08/Activity08.csproj",
     "manual": "Categories; add/reload/reopen, escaped CSV, safe timestamp after successful export",
-    "checks": "Category/CSV tests and real SQLite reopen"
+    "checks": "Category/CSV tests and real SQLite reopen",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter08/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter08/README.md",
+    "completedSolutionChecks": [
+      "The prepared Categories export has four columns. For row 1 with name A and description D, expect `1,\"A\",\"D\",1` followed by CRLF. Keep the existing quote, formula and multiline protections. Run `NameLength_column_retains_exact_CSV_and_escaping` in Test Explorer; it should pass. The complete test project is already included."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.Core/Category.cs",
+      "Inventory.slnx",
+      "Inventory.Tests/Activity08CsvTests.cs"
+    ]
   },
   {
     "chapter": 9,
@@ -93,7 +151,17 @@
     "source": "Inventory.App/InspectionPage.cs",
     "nativeProject": "Activities/Chapter12/Activity12.csproj",
     "manual": "Site inspection; permission/capability, cancel, 2.5g peaks/500ms, 2s debounce, confirm-only list clear",
-    "checks": "ShakeDetector and LocationCoordinator portable tests plus unavailable/actual device scope"
+    "checks": "ShakeDetector and LocationCoordinator portable tests plus unavailable/actual device scope",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter12/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter12/README.md",
+    "completedSolutionChecks": [
+      "Run `Shake_requires_two_peaks_and_obeys_window_debounce_and_reset`; it should pass with the three-second debounce and the same 500 ms window for two peaks. Run the other portable tests too. On a native target, check consent and the visible button for clearing the list. The comparison project Activity12 keeps its two-second debounce."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.Core/ShakeDetector.cs",
+      "Inventory.Tests/ActivityTests.cs"
+    ]
   },
   {
     "chapter": 13,
@@ -101,7 +169,18 @@
     "source": "Inventory.App/RenewalPracticePage.cs",
     "nativeProject": "Activities/Chapter13/Activity13.csproj",
     "manual": "Controlled expiry/renewal clock and failure UI plus portable session tests; real sign-in requires your own registration and native setup",
-    "checks": "Token/vault/cooldown/cancel tests and identity guide; no provider/account result"
+    "checks": "Token/vault/cooldown/cancel tests and identity guide; no provider/account result",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter13/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter13/README.md",
+    "completedSolutionChecks": [
+      "Run both theory rows: a 59-second advance reuses the session with 121 seconds remaining; a 60-second advance renews it at 120 seconds. Each row starts a new coordinator and exceeds the 30-second cooldown. The existing failure, expiry and cancellation tests should still pass. The prepared renewal page advances one minute and uses a two-minute window. The comparison page keeps its six-minute advance and five-minute window. No real identity provider is used."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.Core/AccessTokenCoordinator.cs",
+      "Inventory.App/RenewalPracticePage.cs",
+      "Inventory.Tests/Activity13RenewalWindowTests.cs"
+    ]
   },
   {
     "chapter": 14,
@@ -117,7 +196,16 @@
     "source": "Inventory.App/BrowsingPage.cs",
     "nativeProject": "Activities/Chapter15/Activity15.csproj",
     "manual": "Browser lifetimes; 20-row pages, departure cancellation, return visit, one active message callback",
-    "checks": "Paging/cancel tests plus native lifetime/profiler limits"
+    "checks": "Paging/cancel tests plus native lifetime/profiler limits",
+    "sourceRole": "Existing feature comparison; complete modified solution is named separately.",
+    "completedSolutionProject": "ActivitySolutions/Chapter15/Inventory.slnx",
+    "completedSolutionReadme": "ActivitySolutions/Chapter15/README.md",
+    "completedSolutionChecks": [
+      "Run the cache test. Two 5-byte results exceed the 8-byte limit, so requesting the first key again must decode it again. Changing a returned array must not change a retained cache hit. Run the existing portable suite and the native Browser lifetime checks too."
+    ],
+    "completedSolutionSourceFiles": [
+      "Inventory.Tests/Activity15CacheTests.cs"
+    ]
   },
   {
     "chapter": 16,

@@ -22,7 +22,9 @@ public sealed class MsalIdentityClient : IIdentityClient
         if (!IsConfigured)
             throw new InvalidOperationException("Register and configure an Entra public client before signing in.");
         var redirect = DeviceInfo.Platform == DevicePlatform.WinUI ? "http://localhost" : $"msal{ClientId}://auth";
-        return PublicClientApplicationBuilder.Create(ClientId).WithAuthority(AzureCloudInstance.AzurePublic, TenantId).WithRedirectUri(redirect).Build();
+        return PublicClientApplicationBuilder.Create(ClientId)
+            .WithAuthority(AzureCloudInstance.AzurePublic, TenantId)
+            .WithRedirectUri(redirect).Build();
 #endif
     }
 
@@ -32,16 +34,36 @@ public sealed class MsalIdentityClient : IIdentityClient
         try
         {
             var silent = await Client.AcquireTokenSilent(Scopes, account).ExecuteAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             return new AccessSession(silent.AccessToken, silent.ExpiresOn);
         }
         catch (MsalUiRequiredException)
         {
-            var interactive = Client.AcquireTokenInteractive(Scopes).WithUseEmbeddedWebView(false);
+            var interactive = Client.AcquireTokenInteractive(Scopes)
+                .WithUseEmbeddedWebView(false);
 #if ANDROID
-            interactive = interactive.WithParentActivityOrWindow(() => Platform.CurrentActivity!);
+            interactive = interactive.WithParentActivityOrWindow(
+                Platform.CurrentActivity ?? throw new InvalidOperationException(
+                    "No foreground Activity is available for sign-in."));
 #endif
-            var result = await interactive.ExecuteAsync(cancellationToken);
-            return new AccessSession(result.AccessToken, result.ExpiresOn);
+#if WINDOWS
+            using var interaction = CancellationTokenSource
+                .CreateLinkedTokenSource(cancellationToken);
+            interaction.CancelAfter(TimeSpan.FromMinutes(3));
+            var effectiveToken = interaction.Token;
+#else
+            var effectiveToken = cancellationToken;
+#endif
+            try
+            {
+                var result = await interactive.ExecuteAsync(effectiveToken);
+                effectiveToken.ThrowIfCancellationRequested();
+                return new AccessSession(result.AccessToken, result.ExpiresOn);
+            }
+            catch (OperationCanceledException ex) when (effectiveToken.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException("Windows interactive sign-in did not finish within three minutes.", ex);
+            }
         }
     }
 

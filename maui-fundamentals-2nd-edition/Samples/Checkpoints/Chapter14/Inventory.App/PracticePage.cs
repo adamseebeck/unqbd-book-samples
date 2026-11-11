@@ -169,7 +169,8 @@ public sealed class PracticePage : ContentPage
 
     private async Task<string> LocationAsync(CancellationToken token)
     {
-        var position = await services.GetRequiredService<LocationCoordinator>().FindAsync(token);
+        var position = await services.GetRequiredService<LocationCoordinator>()
+            .FindAsync(token);
         return position is null ? "No location was returned. Permission may be denied or a fix unavailable." : "A location was obtained. It is not logged or uploaded.";
     }
 
@@ -178,7 +179,7 @@ public sealed class PracticePage : ContentPage
         token.ThrowIfCancellationRequested();
         var photo = (await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions { SelectionLimit = 1 })).FirstOrDefault();
         token.ThrowIfCancellationRequested();
-        return photo is null ? "Photo selection canceled." : "Photo selected. No copy or upload was made.";
+        return photo is null ? "Photo selection canceled." : "Photo selected. Nothing was uploaded.";
     }
 
     private async Task<string> SignInAsync(CancellationToken token)
@@ -189,7 +190,8 @@ public sealed class PracticePage : ContentPage
 
     private async Task<string> SignOutAsync(CancellationToken token)
     {
-        await services.GetRequiredService<SessionService>().SignOutAsync(token);
+        await services.GetRequiredService<SessionService>()
+            .SignOutAsync(token);
         return "The app token and MSAL account cache entries were removed.";
     }
 }

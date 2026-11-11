@@ -8,9 +8,11 @@ public sealed class MauiLocationDevice : ILocationDevice
     {
         try
         {
-            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            var status = await Permissions.CheckStatusAsync<
+                Permissions.LocationWhenInUse>();
             if (status != PermissionStatus.Granted)
-                status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                status = await Permissions.RequestAsync<
+                    Permissions.LocationWhenInUse>();
             return status == PermissionStatus.Granted ? PermissionDecision.Granted : PermissionDecision.Denied;
         }
         catch (FeatureNotSupportedException)

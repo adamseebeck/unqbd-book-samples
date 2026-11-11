@@ -7,7 +7,9 @@ public sealed class AppTextFileStore : ITextFileStore
     {
         if (name != "categories.csv")
             throw new ArgumentException("Unsupported export file.", nameof(name));
-        return File.WriteAllTextAsync(Path.Combine(FileSystem.AppDataDirectory, name), contents, new System.Text.UTF8Encoding(false), token);
+        return File.WriteAllTextAsync(
+            Path.Combine(FileSystem.AppDataDirectory, name),
+            contents, new System.Text.UTF8Encoding(false), token);
     }
 }
 

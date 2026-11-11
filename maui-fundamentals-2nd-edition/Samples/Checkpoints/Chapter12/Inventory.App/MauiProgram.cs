@@ -14,7 +14,8 @@ public static class MauiProgram
             handlers.AddHandler(typeof(GradientButton), typeof(GradientButtonHandler));
         });
         builder.Services.AddSingleton<IProductRepository, MemoryProductRepository>();
-        builder.Services.AddSingleton(_ => new SqliteProductRepository(Path.Combine(FileSystem.AppDataDirectory, "inventory-learning.db3")));
+        builder.Services.AddSingleton(_ => new SqliteProductRepository(
+            Path.Combine(FileSystem.AppDataDirectory, "inventory-learning.db3")));
         builder.Services.AddTransient<ProductListViewModel>();
         builder.Services.AddTransient<ProductsPage>();
         builder.Services.AddTransient<DetailsPage>();

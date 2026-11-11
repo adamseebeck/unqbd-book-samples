@@ -22,6 +22,11 @@ public sealed class SecurityExerciseTests
         Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.RemoteCertificateNameMismatch, [current, backup]));
         Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [backup, backup]));
         Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [current]));
+        Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [current, current]));
+        Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [current, "not-base64"]));
+        Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [current, Convert.ToBase64String(new byte[31])]));
+        Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [current, " " + current]));
+        Assert.False(SpkiPinPolicy.Accept(certificate, SslPolicyErrors.None, [current, null!]));
     // Passing None above isolates pin policy; it does not establish trust in this test certificate.
     }
 

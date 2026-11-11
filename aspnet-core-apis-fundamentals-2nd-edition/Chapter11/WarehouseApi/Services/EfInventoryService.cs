@@ -104,7 +104,7 @@ public class EfInventoryService : IInventoryService
         item.OnHand += quantityChange;
         RecordHistory(item, reasonCode, quantityChange, reservedChange: 0, reference: idempotencyKey);
 
-        // A new key gets a row; an expired key's row is reused
+        // For an expired key, EF checks the original CreatedAt when it updates the row.
         var response = item.ToResponse();
         record ??= _context.IdempotencyRecords.Add(new IdempotencyRecord { Key = idempotencyKey }).Entity;
         record.RequestHash = requestHash;

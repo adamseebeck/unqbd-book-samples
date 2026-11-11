@@ -9,11 +9,12 @@ public class InventoryService : IInventoryService
     private readonly ConcurrentDictionary<(string WarehouseCode, string ProductSku), StockItem> _stockItems = new();
 
     // Every write takes this lock, so a check and the change it guards run as one step
-    private readonly Lock _writeLock = new();
+    private readonly Lock _writeLock;
 
     public InventoryService(IdempotencyContext idempotencyContext)
     {
         _idempotencyContext = idempotencyContext;
+        _writeLock = idempotencyContext.WriteLock;
 
         // Seed sample data: the Chapter 5 products in the Chapter 5 warehouses
         _stockItems[("WH-001", "SKU-001")] = new StockItem("SKU-001", "WH-001", 150, 20, 40);

@@ -15,7 +15,7 @@ public class Shipment
     public int Attempts { get; set; }
     public string? LastError { get; set; }
 
-    // The request that allocated the order; the background job logs it with every entry
+    // Carried into the job's correlation context and structured logging scope
     public string CorrelationId { get; set; } = string.Empty;
 
     public DateTime RequestedAt { get; set; }

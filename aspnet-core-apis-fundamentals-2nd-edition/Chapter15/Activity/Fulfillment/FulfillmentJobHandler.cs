@@ -105,7 +105,8 @@ public class FulfillmentJobHandler
     private static bool IsTransient(Exception exception) => exception is
         HttpRequestException { StatusCode: null or HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests or >= HttpStatusCode.InternalServerError }
         or BrokenCircuitException
-        or TimeoutRejectedException;
+        or TimeoutRejectedException
+        or TimeoutException;
 
     private static string Truncate(string message) =>
         message.Length <= Shipment.MaxErrorLength ? message : message[..Shipment.MaxErrorLength];

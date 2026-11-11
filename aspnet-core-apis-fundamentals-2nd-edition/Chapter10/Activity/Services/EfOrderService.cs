@@ -95,7 +95,7 @@ public class EfOrderService : IOrderService
         // Add assigns the Guid keys; EF Core generates sequential values, so lines sort in the order added
         _context.Orders.Add(order);
 
-        // A new key gets a row; an expired key's row is reused
+        // For an expired key, EF checks the original CreatedAt when it updates the row.
         var response = order.ToResponse();
         record ??= _context.IdempotencyRecords.Add(new IdempotencyRecord { Key = idempotencyKey }).Entity;
         record.RequestHash = requestHash;
@@ -109,9 +109,9 @@ public class EfOrderService : IOrderService
             await _context.SaveChangesAsync(cancellationToken);
             return response;
         }
-        catch (DbUpdateException ex) when (SqlServerErrors.IsDuplicateKey(ex))
+        catch (DbUpdateException ex) when (ex is DbUpdateConcurrencyException || SqlServerErrors.IsDuplicateKey(ex))
         {
-            // Another request with this key stored its order first; nothing from this attempt was saved
+            // Another request stored the result first; this order and its lines were rolled back.
             _context.ChangeTracker.Clear();
 
             var winner = await _context.IdempotencyRecords

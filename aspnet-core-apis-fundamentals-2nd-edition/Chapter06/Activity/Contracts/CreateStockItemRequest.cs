@@ -1,7 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace WarehouseApi.Contracts;
 
 public record CreateStockItemRequest(
     string ProductSku,
-    int OnHand,
-    int Reserved,
-    int ReorderThreshold);
+    [property: JsonRequired] int OnHand,
+    [property: JsonRequired] int Reserved,
+    [property: JsonRequired] int ReorderThreshold);

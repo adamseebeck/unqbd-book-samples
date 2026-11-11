@@ -36,8 +36,8 @@ public static class FulfillmentConfiguration
             // header makes a repeated request harmless
             .AddStandardResilienceHandler(configuration.GetSection("ExternalShipmentService:Resilience"));
 
-        // The default is 30 seconds. One ERP call may take TotalRequestTimeout (30 seconds) by itself,
-        // so give the job in progress that long plus time to record the result
+        // Allow the full ERP call (CompleteResponseTimeoutSeconds, 30 seconds by default)
+        // plus time to record the result.
         services.Configure<HostOptions>(host => host.ShutdownTimeout = TimeSpan.FromSeconds(45));
 
         return services;

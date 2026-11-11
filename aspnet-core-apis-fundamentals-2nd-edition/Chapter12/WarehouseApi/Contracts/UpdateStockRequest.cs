@@ -1,8 +1,9 @@
+using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
 
 namespace WarehouseApi.Contracts;
 
 public record UpdateStockRequest(
-    [Range(0, int.MaxValue)] int OnHand,
-    [Range(0, int.MaxValue)] int Reserved,
-    [Range(0, int.MaxValue)] int ReorderThreshold);
+    [Range(0, int.MaxValue)] [property: JsonRequired] int OnHand,
+    [Range(0, int.MaxValue)] [property: JsonRequired] int Reserved,
+    [Range(0, int.MaxValue)] [property: JsonRequired] int ReorderThreshold);

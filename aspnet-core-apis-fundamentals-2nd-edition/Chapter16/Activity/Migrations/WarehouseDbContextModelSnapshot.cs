@@ -35,6 +35,7 @@ partial class WarehouseDbContextModelSnapshot : ModelSnapshot
                     .UseCollation("Latin1_General_100_BIN2");
 
                 b.Property<DateTime>("CreatedAt")
+                    .IsConcurrencyToken()
                     .HasColumnType("datetime2");
 
                 b.Property<string>("RequestHash")

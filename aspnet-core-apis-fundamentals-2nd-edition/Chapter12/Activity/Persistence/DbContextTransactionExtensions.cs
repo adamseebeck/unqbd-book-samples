@@ -15,15 +15,15 @@ public static class DbContextTransactionExtensions
     {
         var strategy = context.Database.CreateExecutionStrategy();
 
-        return strategy.ExecuteAsync(async () =>
+        return strategy.ExecuteAsync(async ct =>
         {
             // Every attempt starts with an empty change tracker and reads current values
             context.ChangeTracker.Clear();
 
-            await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
-            var result = await operation(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
+            await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, ct);
+            var result = await operation(ct);
+            await transaction.CommitAsync(ct);
             return result;
-        });
+        }, cancellationToken);
     }
 }

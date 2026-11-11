@@ -18,6 +18,9 @@ public class IdempotencyRecordConfiguration : IEntityTypeConfiguration<Idempoten
             .HasMaxLength(IdempotencyKeyRules.MaxLength)
             .UseCollation("Latin1_General_100_BIN2");
 
+        // Reusing an expired key updates only the timestamp this request read.
+        builder.Property(r => r.CreatedAt).IsConcurrencyToken();
+
         // A Base64 SHA-256 hash is 44 characters long
         builder.Property(r => r.RequestHash).HasMaxLength(44).IsRequired();
         builder.Property(r => r.ResponseBody).IsRequired();

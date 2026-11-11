@@ -40,7 +40,7 @@ public class OrdersControllerTests(WarehouseApiFactory factory) : IClassFixture<
     }
 
     [Fact]
-    public async Task RequestShipment_ReservesStockBeforeTheResponse_AndRegistersTheShipmentAfterIt()
+    public async Task RequestShipment_ReservesBeforeResponse_RegistersAfter()
     {
         var order = await CreateOrderAsync("ERP-T-101", 4);
         var supervisor = factory.CreateClientAs(UserRoles.Supervisor);

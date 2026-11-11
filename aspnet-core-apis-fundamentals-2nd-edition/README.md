@@ -7,7 +7,7 @@ You can read and copy any file here in your browser. To run the projects, clone 
 ## What you need
 
 - The .NET 11 SDK, version 11.0.100 or later, from the [.NET 11 download page](https://dotnet.microsoft.com/download/dotnet/11.0). The `global.json` file in this folder selects it for every project below it and accepts later .NET 11 SDKs.
-- On Windows, Visual Studio 2026 with the ASP.NET and web development workload, which the book's steps use. On Windows, macOS or Linux, Visual Studio Code with C# Dev Kit and the .NET CLI work as well; the book gives that way next to each Visual Studio step.
+- On Windows, Visual Studio with the ASP.NET and web development workload, which the book's steps use. On Windows, macOS or Linux, Visual Studio Code with C# Dev Kit and the .NET CLI work as well; the book gives that way next to each Visual Studio step.
 - Projects target `net11.0` and list exact package versions. Packages that ship with each .NET release, such as ASP.NET Core and Entity Framework Core, use 11.0.0; other libraries follow their own version numbers, including Microsoft ones such as Microsoft.Extensions.Http.Resilience, the test SDK and the Azure libraries.
 - Some later chapters need more: SQL Server Express LocalDB 2022 on Windows, or a reachable SQL Server 2022-or-later instance, for the data chapters. SQL Server containers require an Intel/AMD x64 Linux host; Apple silicon readers should use a server on another machine instead of emulation. The deployment chapter needs Docker with Linux containers, and the security chapters use `dotnet user-jwts`, which ships with the SDK. The chapter tells you when.
 

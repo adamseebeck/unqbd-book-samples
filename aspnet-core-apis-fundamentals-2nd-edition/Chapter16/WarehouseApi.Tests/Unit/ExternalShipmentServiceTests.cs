@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using WarehouseApi.Integration;
 using WarehouseApi.Services;
 
@@ -45,7 +46,13 @@ public class ExternalShipmentServiceTests
         correlation.SetCorrelationId("allocation-7");
 
         return new(new HttpClient(handler) { BaseAddress = new Uri("https://erp.example.com/") },
-            correlation, NullLogger<ExternalShipmentService>.Instance);
+            correlation,
+            Options.Create(new ExternalShipmentServiceOptions
+            {
+                BaseUrl = "https://erp.example.com/",
+                ApiKey = "test-key"
+            }),
+            NullLogger<ExternalShipmentService>.Instance);
     }
 
     private sealed class RecordingHandler(HttpStatusCode status, object? body) : HttpMessageHandler

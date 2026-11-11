@@ -7,6 +7,8 @@ namespace WarehouseApi.Services;
 
 public class IdempotencyContext
 {
+    // Every in-memory writer shares this gate through the singleton context.
+    internal Lock WriteLock { get; } = new();
     private readonly ConcurrentDictionary<string, IdempotencyEntry> _entries = new();
     private readonly TimeSpan _expiration = TimeSpan.FromHours(24);
 

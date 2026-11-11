@@ -13,4 +13,8 @@ public class ExternalShipmentServiceOptions
     // A secret: user secrets in Development, an environment variable or a key vault elsewhere
     [Required(ErrorMessage = "Set ExternalShipmentService:ApiKey in user secrets or in the ExternalShipmentService__ApiKey environment variable.")]
     public string ApiKey { get; set; } = string.Empty;
+
+    // Includes handler retries, reading the entire response body and JSON decoding.
+    [Range(1, 300)]
+    public int CompleteResponseTimeoutSeconds { get; set; } = 30;
 }

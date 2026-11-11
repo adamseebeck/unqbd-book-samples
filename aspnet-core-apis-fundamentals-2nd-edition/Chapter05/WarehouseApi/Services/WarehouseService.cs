@@ -20,6 +20,7 @@ public class WarehouseService : IWarehouseService
 
     public Task<IReadOnlyList<WarehouseResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<IReadOnlyList<WarehouseResponse>>(_warehouses.Values.OrderBy(w => w.Id).ToList());
+        return Task.FromResult<IReadOnlyList<WarehouseResponse>>(
+            _warehouses.Values.OrderBy(w => w.Id).ToList());
     }
 }

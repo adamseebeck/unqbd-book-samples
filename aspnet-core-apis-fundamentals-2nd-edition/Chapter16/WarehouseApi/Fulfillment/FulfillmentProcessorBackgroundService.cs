@@ -169,7 +169,7 @@ public class FulfillmentProcessorBackgroundService : BackgroundService
         await using var scope = _scopeFactory.CreateAsyncScope();
         scope.ServiceProvider.GetRequiredService<ICorrelationContext>().SetCorrelationId(job.CorrelationId);
 
-        // Every entry written while the job runs carries the correlation ID of the request that queued it
+        // Add the job's correlation ID and order ID to the structured logging scope
         using var logScope = _logger.BeginScope(new Dictionary<string, object>
         {
             ["CorrelationId"] = job.CorrelationId,

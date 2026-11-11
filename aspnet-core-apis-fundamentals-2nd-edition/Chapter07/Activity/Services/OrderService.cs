@@ -6,8 +6,8 @@ namespace WarehouseApi.Services;
 
 public class OrderService : IOrderService
 {
-    // The service is Scoped, so each request has its own instance; a lock shared by all of them is static
-    private static readonly Lock CreateLock = new();
+    // The singleton context coordinates order and stock writers with the same gate.
+    private readonly Lock _createLock;
 
     private readonly IOrderRepository _repository;
     private readonly IdempotencyContext _idempotencyContext;
@@ -16,6 +16,7 @@ public class OrderService : IOrderService
     {
         _repository = repository;
         _idempotencyContext = idempotencyContext;
+        _createLock = idempotencyContext.WriteLock;
     }
 
     public Task<OrderResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -78,7 +79,7 @@ public class OrderService : IOrderService
             request with { FulfillmentWarehouseCode = request.FulfillmentWarehouseCode?.ToUpperInvariant() }));
 
         // As for stock adjustments (Chapter 6), the key check, the new order, and the stored result are one step
-        lock (CreateLock)
+        lock (_createLock)
         {
             if (_idempotencyContext.TryGetEntry(idempotencyKey, out var existingEntry))
             {

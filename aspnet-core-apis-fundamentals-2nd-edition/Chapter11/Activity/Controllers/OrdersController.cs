@@ -30,7 +30,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<OrderResponse>> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<OrderResponse>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var order = await _orderService.GetByIdAsync(id, cancellationToken);
 
@@ -145,7 +145,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         try
         {

@@ -4,56 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Xunit;
 
+namespace LibraryDesk.Tests;
+
 public sealed class InteropLifetimeTests
 {
-    [Fact]
-    public async Task ImportFinishingAfterDisposalIsReleased()
-    {
-        using var context = new BunitContext();
-        var runtime = new PendingImport();
-        context.Services.AddSingleton<IJSRuntime>(runtime);
-        var cut = context.Render<ImportObserver>();
-        Assert.Equal(1, runtime.Imports);
-        var firstRender = cut.Instance.FirstAfterRender
-            ?? throw new InvalidOperationException(
-                "The first render task was not captured.");
-        await cut.InvokeAsync(
-            () => cut.Instance.DisposeAsync().AsTask());
-        var module = new Module();
-        runtime.Completion.SetResult(module);
-        await firstRender;
-        Assert.Equal(1, module.Disposals);
-        Assert.Equal(0, module.Invocations);
-        await cut.InvokeAsync(
-            () => cut.Instance.DisposeAsync().AsTask());
-        Assert.Equal(1, module.Disposals);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task DisposalReleasesTheDotNetReference(
-        bool disconnected)
-    {
-        using var context = new BunitContext();
-        var runtime = new PendingImport();
-        var module = new Module { Disconnected = disconnected };
-        runtime.Completion.SetResult(module);
-        context.Services.AddSingleton<IJSRuntime>(runtime);
-        var cut = context.Render<InteropDemo>();
-        cut.WaitForAssertion(() => Assert.False(
-            cut.FindAll("button")[1].HasAttribute("disabled")));
-        cut.FindAll("button")[1].Click();
-        Assert.Same(cut.Instance, module.Reference!.Value);
-        var reference = module.Reference;
-        await cut.InvokeAsync(
-            () => cut.Instance.DisposeAsync().AsTask());
-        Assert.Equal(1, module.Disposals);
-        Assert.Throws<ObjectDisposedException>(
-            () => reference.Value);
-        await cut.Instance.ReceiveTime("Late callback ignored");
-    }
-
     public sealed class ImportObserver : InteropDemo
     {
         public Task? FirstAfterRender { get; private set; }
@@ -137,4 +91,52 @@ public sealed class InteropLifetimeTests
         }
     }
 #pragma warning restore BL0016
+
+    [Fact]
+    public async Task ImportFinishingAfterDisposalIsReleased()
+    {
+        using var context = new BunitContext();
+        var runtime = new PendingImport();
+        context.Services.AddSingleton<IJSRuntime>(runtime);
+        var cut = context.Render<ImportObserver>();
+        Assert.Equal(1, runtime.Imports);
+        var firstRender = cut.Instance.FirstAfterRender
+            ?? throw new InvalidOperationException(
+                "The first render task was not captured.");
+        await cut.InvokeAsync(
+            () => cut.Instance.DisposeAsync().AsTask());
+        var module = new Module();
+        runtime.Completion.SetResult(module);
+        await firstRender;
+        Assert.Equal(1, module.Disposals);
+        Assert.Equal(0, module.Invocations);
+        await cut.InvokeAsync(
+            () => cut.Instance.DisposeAsync().AsTask());
+        Assert.Equal(1, module.Disposals);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task DisposalReleasesTheDotNetReference(
+        bool disconnected)
+    {
+        using var context = new BunitContext();
+        var runtime = new PendingImport();
+        var module = new Module { Disconnected = disconnected };
+        runtime.Completion.SetResult(module);
+        context.Services.AddSingleton<IJSRuntime>(runtime);
+        var cut = context.Render<InteropDemo>();
+        cut.WaitForAssertion(() => Assert.False(
+            cut.FindAll("button")[1].HasAttribute("disabled")));
+        cut.FindAll("button")[1].Click();
+        Assert.Same(cut.Instance, module.Reference!.Value);
+        var reference = module.Reference;
+        await cut.InvokeAsync(
+            () => cut.Instance.DisposeAsync().AsTask());
+        Assert.Equal(1, module.Disposals);
+        Assert.Throws<ObjectDisposedException>(
+            () => reference.Value);
+        await cut.Instance.ReceiveTime("Late callback ignored");
+    }
 }

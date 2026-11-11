@@ -1,6 +1,6 @@
 # Blazor Fundamentals, Third Edition: companion code
 
-This download follows the book's Visual Studio workflow. Use Windows, Visual Studio 2026 with .NET 11 support and the ASP.NET and web development workload, the released .NET 11 SDK 11.0.100 or later, and Edge or Chrome. Framework packages are pinned to 11.0.0; SDK and package versions use different numbering. Python 3 is needed only for the local static host in Chapters 20 and 23 and the optional exercise generator.
+This download follows the book's Visual Studio workflow. Use Windows, Visual Studio with .NET 11 support and the ASP.NET and web development workload, the released .NET 11 SDK 11.0.100 or later, and Edge or Chrome. Framework packages are pinned to 11.0.0; SDK and package versions use different numbering. Python 3 is needed only for the local static host in Chapters 20 and 23 and the optional exercise generator.
 
 ## Find the right folder
 

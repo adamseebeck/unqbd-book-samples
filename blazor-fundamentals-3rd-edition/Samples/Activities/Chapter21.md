@@ -9,7 +9,7 @@ The activity adds a help text to the feedback form's Message box, in a copy, and
 In the copy's LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, the help paragraph sits above the Message box, and the box's aria-describedby lists both ids:
 
 ```razor
-    <p id="feedback-message-help">Use 5 to 300 characters. This example saves locally.</p>
+    <p id="feedback-message-help">Use 5 to 300 characters. Accepted feedback is not stored.</p>
     <InputTextArea id="feedback-message"
                    aria-required="true"
                    aria-describedby="feedback-message-help feedback-message-error"
@@ -18,7 +18,7 @@ In the copy's LibraryDesk/LibraryDesk.Client/Components/FeedbackForm.razor, the 
 
 ## What you should see
 
-- Open /accessibility and inspect the Message box in the Accessibility pane: its description is the help text, Use 5 to 300 characters. This example saves locally.
+- Open /accessibility and inspect the Message box in the Accessibility pane: its description is the help text, Use 5 to 300 characters. Accepted feedback is not stored.
 - Submit the form empty: the description is now the help text followed by The Message field is required.
 - With the keyboard only, the empty, invalid-email and valid cases behave as before: Tab reaches each box after its label, the focus outline is visible, and the status message reports the result.
 - Stop debugging, build and run Chapter21.Tests in Test Explorer. Its one exercise test passes after the description IDs and help text are corrected.

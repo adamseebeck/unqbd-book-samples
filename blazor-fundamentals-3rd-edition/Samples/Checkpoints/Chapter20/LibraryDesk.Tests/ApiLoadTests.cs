@@ -6,8 +6,48 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
+namespace LibraryDesk.Tests;
+
 public sealed class ApiLoadTests
 {
+    private sealed class ControlledCatalog : ICatalogQuery
+    {
+        private readonly List<TaskCompletionSource<BookItem[]>>
+            pending = [];
+        private bool released;
+        public int Calls { get; private set; }
+
+        public Task<BookItem[]> GetAsync(
+            CancellationToken token = default)
+        {
+            Calls++;
+            if (released)
+            {
+                return Task.FromResult(new[]
+                {
+                    new BookItem(1, "C# Field Notes", 24),
+                    new BookItem(2, "Blazor Field Notes", 28),
+                    new BookItem(3, "Database Field Notes", 26)
+                });
+            }
+            var request = new TaskCompletionSource<BookItem[]>(
+                TaskCreationOptions
+                    .RunContinuationsAsynchronously);
+            pending.Add(request);
+            return request.Task;
+        }
+
+        public void FailPending()
+        {
+            released = true;
+            foreach (var request in pending)
+            {
+                request.TrySetException(new HttpRequestException(
+                    "Controlled first-read failure."));
+            }
+        }
+    }
+
     [Fact]
     public async Task SecondClickWaitsAndFailureAllowsRetry()
     {
@@ -46,43 +86,5 @@ public sealed class ApiLoadTests
             () => Assert.Equal(3, cut.FindAll("li").Count));
         Assert.Equal(2, query.Calls);
         Assert.False(cut.Find("button").HasAttribute("disabled"));
-    }
-
-    private sealed class ControlledCatalog : ICatalogQuery
-    {
-        private readonly List<TaskCompletionSource<BookItem[]>>
-            pending = [];
-        private bool released;
-        public int Calls { get; private set; }
-
-        public Task<BookItem[]> GetAsync(
-            CancellationToken token = default)
-        {
-            Calls++;
-            if (released)
-            {
-                return Task.FromResult(new[]
-                {
-                    new BookItem(1, "C# Field Notes", 24),
-                    new BookItem(2, "Blazor Field Notes", 28),
-                    new BookItem(3, "Database Field Notes", 26)
-                });
-            }
-            var request = new TaskCompletionSource<BookItem[]>(
-                TaskCreationOptions
-                    .RunContinuationsAsynchronously);
-            pending.Add(request);
-            return request.Task;
-        }
-
-        public void FailPending()
-        {
-            released = true;
-            foreach (var request in pending)
-            {
-                request.TrySetException(new HttpRequestException(
-                    "Controlled first-read failure."));
-            }
-        }
     }
 }

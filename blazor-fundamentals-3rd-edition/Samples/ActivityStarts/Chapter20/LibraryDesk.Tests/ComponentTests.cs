@@ -8,8 +8,30 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
+namespace LibraryDesk.Tests;
+
 public sealed class ComponentTests
 {
+    private sealed class NotFoundHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken token) =>
+            Task.FromResult(
+                new HttpResponseMessage(HttpStatusCode.NotFound));
+    }
+
+    private sealed class FixedCatalog : ICatalogQuery
+    {
+        public Task<BookItem[]> GetAsync(
+            CancellationToken token = default) =>
+            Task.FromResult(new[]
+            {
+                new BookItem(1, "C# Field Notes", 24),
+                new BookItem(2, "Blazor Field Notes", 28)
+            });
+    }
+
     [Fact]
     public void CounterRespondsToClicks()
     {
@@ -178,25 +200,5 @@ public sealed class ComponentTests
         cut.Find("input").Input("Cooking");
         Assert.Empty(cut.FindAll("li"));
         Assert.Contains("No matching titles.", cut.Markup);
-    }
-
-    private sealed class NotFoundHandler : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken token) =>
-            Task.FromResult(
-                new HttpResponseMessage(HttpStatusCode.NotFound));
-    }
-
-    private sealed class FixedCatalog : ICatalogQuery
-    {
-        public Task<BookItem[]> GetAsync(
-            CancellationToken token = default) =>
-            Task.FromResult(new[]
-            {
-                new BookItem(1, "C# Field Notes", 24),
-                new BookItem(2, "Blazor Field Notes", 28)
-            });
     }
 }

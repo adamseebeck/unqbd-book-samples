@@ -470,4 +470,69 @@ public sealed class AgentTests
         {
         }
     }
+
+    [Theory]
+    [InlineData(401,AgentFailureMode.Authorization)]
+    [InlineData(403,AgentFailureMode.Authorization)]
+    [InlineData(400,AgentFailureMode.Unrecoverable)]
+    [InlineData(404,AgentFailureMode.Unrecoverable)]
+    [InlineData(408,AgentFailureMode.Transient)]
+    [InlineData(429,AgentFailureMode.Transient)]
+    [InlineData(503,AgentFailureMode.Transient)]
+    public void HttpFailureStatusChoosesTheRecovery(int status,AgentFailureMode expected)
+    {
+        Assert.Equal(expected,AgentFailureClassifier.Classify(new HttpRequestException("Synthetic failure",null,(System.Net.HttpStatusCode)status)));
+    }
+
+    [Theory]
+    [InlineData(403,AgentFailureMode.Authorization)]
+    [InlineData(503,AgentFailureMode.Transient)]
+    public async Task TriagePropagatesAndLogsPriorityToolFailure(int status,AgentFailureMode expected)
+    {
+        var kernel=new Mock<IKernelOrchestrator>();
+        kernel.Setup(k=>k.ExecutePluginFunctionAsync(It.IsAny<string>(),It.IsAny<string>(),It.IsAny<Dictionary<string,object>>(),It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException("Synthetic priority failure",null,(System.Net.HttpStatusCode)status));
+        using var host=await AgentTestHost.StartAsync(services=>services.AddScoped(_=>kernel.Object));
+        using var scope=host.Services.CreateScope();
+        var result=await scope.ServiceProvider.GetRequiredService<SupportCopilotService>().TriageTicketAsync(SampleData.PasswordTicketId);
+        Assert.Equal(expected,result.Artifacts[AgentArtifactKeys.FailureMode]);
+        Assert.Equal(expected!=AgentFailureMode.Transient,result.RequiresHandoff);
+        var conversation=await scope.ServiceProvider.GetRequiredService<IConversationRepository>().GetByTicketAsync(SampleData.PasswordTicketId);
+        var runs=await scope.ServiceProvider.GetRequiredService<IAgentRunRepository>().GetByConversationAsync(conversation!.Id);
+        var triage=Assert.Single(runs,r=>r.AgentName==AgentNames.Triage);
+        Assert.True(triage.IsFallback);
+        Assert.NotEmpty(triage.ErrorMessage!);
+    }
+
+    [Fact]
+    public async Task TriageCannotSucceedWhenModelSkipsPriorityTool()
+    {
+        var extractor=new Mock<IIntentExtractor>();
+        extractor.Setup(e=>e.ExtractAsync(It.IsAny<string>(),It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SupportIntent { Intent="PasswordReset",Urgency="High",ProductArea="Authentication",ConfidenceScore=0.9 });
+        using var host=await AgentTestHost.StartAsync(services=>
+        {
+            services.AddScoped(_=>extractor.Object);
+            services.AddSingleton<IChatClient>(new OnlyClassifyChatClient());
+        });
+        using var scope=host.Services.CreateScope();
+        var result=await scope.ServiceProvider.GetRequiredService<SupportCopilotService>().TriageTicketAsync(SampleData.PasswordTicketId);
+        Assert.Equal(AgentFailureMode.Unrecoverable,result.Artifacts[AgentArtifactKeys.FailureMode]);
+        Assert.True(result.RequiresHandoff);
+    }
+
+    private sealed class OnlyClassifyChatClient:IChatClient
+    {
+        public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages,ChatOptions? options=null,CancellationToken cancellationToken=default)
+        {
+            var list=messages.ToList();var lastUser=list.FindLastIndex(m=>m.Role==ChatRole.User);
+            var hasResult=list.Skip(lastUser+1).SelectMany(m=>m.Contents.OfType<FunctionResultContent>()).Any();
+            var message=hasResult?new ChatMessage(ChatRole.Assistant,"Classification complete.")
+                :new ChatMessage(ChatRole.Assistant,[new FunctionCallContent("only-classify",TicketClassificationTool.ToolName,new Dictionary<string,object?>())]);
+            return Task.FromResult(new ChatResponse(message) { FinishReason=hasResult?ChatFinishReason.Stop:ChatFinishReason.ToolCalls });
+        }
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages,ChatOptions? options=null,CancellationToken cancellationToken=default)=>throw new NotSupportedException();
+        public object? GetService(Type type,object? key=null)=>type.IsInstanceOfType(this)?this:null;
+        public void Dispose() { }
+    }
 }

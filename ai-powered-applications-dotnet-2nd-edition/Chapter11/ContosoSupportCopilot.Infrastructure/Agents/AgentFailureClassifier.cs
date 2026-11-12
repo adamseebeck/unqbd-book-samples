@@ -13,7 +13,11 @@ public static class AgentFailureClassifier
     {
         // Worth another attempt later: timeouts, an open circuit, throttling, service errors, a connection that
         // never answered (status 0), and a session that other runs kept saving first.
-        TimeoutRejectedException or TimeoutException or BrokenCircuitException or HttpRequestException => AgentFailureMode.Transient,
+        TimeoutRejectedException or TimeoutException or BrokenCircuitException => AgentFailureMode.Transient,
+        HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden } => AgentFailureMode.Authorization,
+        HttpRequestException { StatusCode: null or System.Net.HttpStatusCode.RequestTimeout or System.Net.HttpStatusCode.TooManyRequests } => AgentFailureMode.Transient,
+        HttpRequestException ex when ex.StatusCode is { } status && (int)status >= 500 => AgentFailureMode.Transient,
+        HttpRequestException => AgentFailureMode.Unrecoverable,
         InvalidOperationException { InnerException: BrokenCircuitException or TimeoutRejectedException } => AgentFailureMode.Transient,
         ClientResultException { Status: 0 or 408 or 429 or >= 500 } => AgentFailureMode.Transient,
         AgentSessionConflictException => AgentFailureMode.Transient,

@@ -51,7 +51,7 @@ public sealed class EntraTokenValidationTests : IDisposable
     }
 
     [Fact]
-    public async Task AV2TokenForTheApiClientId_WithTheCopilotScope_NamesTheEngineerByObjectId()
+    public async Task V2CopilotApiToken_UsesEngineerObjectId()
     {
         var context = await AuthenticateAsync(CreateToken(audience: ApiClientId, scope: "Copilot.Use"));
 

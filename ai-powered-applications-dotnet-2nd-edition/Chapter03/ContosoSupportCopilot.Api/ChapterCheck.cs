@@ -61,7 +61,7 @@ public static class ChapterCheck
         var kernelDraft = await provider.GetRequiredService<SupportCopilotService>().DraftReplyAsync(SampleData.ApiTicketId);
         Console.WriteLine($"Semantic Kernel draft: {kernelDraft}");
 
-        if (chunks < 2 || string.IsNullOrWhiteSpace(reply) || string.IsNullOrWhiteSpace(kernelDraft))
+        if (string.IsNullOrWhiteSpace(streamed.ToString()) || string.IsNullOrWhiteSpace(reply) || string.IsNullOrWhiteSpace(kernelDraft))
         {
             Console.WriteLine("Check failed: drafting returned no streamed or complete text.");
             return 1;

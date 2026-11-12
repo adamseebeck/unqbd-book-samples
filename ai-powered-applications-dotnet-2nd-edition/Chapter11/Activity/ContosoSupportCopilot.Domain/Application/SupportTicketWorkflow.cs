@@ -231,7 +231,8 @@ public class SupportTicketWorkflow : ISupportWorkflow
             Intent = state.CurrentStep.ToString(),
             RequesterId = state.RequesterId,
             Knowledge = knowledge,
-            Metadata = { ["input"] = state.InitialInput, ["workflow_id"] = state.WorkflowId }
+            AdditionalContext = state.InitialInput,
+            Metadata = { ["workflow_id"] = state.WorkflowId }
         };
         return _coordinator.ExecuteAgentAsync(agentName, context, cancellationToken);
     }

@@ -313,4 +313,30 @@ public sealed class SupportTicketWorkflowTests
         public Task<bool> TryRecordIdempotencyKeyAsync(string requesterId, string idempotencyKey, Guid workflowId, CancellationToken cancellationToken = default) =>
             Task.FromResult(_keys.TryAdd((requesterId, idempotencyKey), workflowId));
     }
+
+    [Theory]
+    [InlineData("reset email expired")]
+    [InlineData("the reset link was already used")]
+    public async Task WorkflowInputReachesRetrieval_WhileTicketOwnsTheArea(string initialInput)
+    {
+        RagRequest? captured=null;
+        var rag=new Mock<IRagOrchestrator>();
+        rag.Setup(r=>r.GenerateGroundedResponseAsync(It.IsAny<RagRequest>(),It.IsAny<SupportTicket>(),It.IsAny<CancellationToken>()))
+            .Callback((RagRequest request,SupportTicket _,CancellationToken _)=>captured=request)
+            .ReturnsAsync(new RagResult
+            {
+                Response="An administrator can clear the lockout.",IsGrounded=true,ModelId="synthetic",
+                Citations=[Citation],CitedArticleIds=[Citation.ArticleId]
+            });
+        using var host=await AgentTestHost.StartAsync(services=>services.AddScoped(_=>rag.Object));
+        using var scope=host.Services.CreateScope();
+        var result=await scope.ServiceProvider.GetRequiredService<ISupportWorkflow>()
+            .ExecuteAsync(SampleData.PasswordTicketId,"engineer-ana",initialInput);
+        Assert.Equal(WorkflowStep.Completed,result.FinalStep);
+        Assert.NotNull(captured);
+        Assert.Contains(initialInput,captured.Query);
+        Assert.Equal(SampleData.PasswordTicketId,captured.TicketId);
+        Assert.Equal("Authentication",captured.ProductArea);
+        Assert.Equal("engineer-ana",captured.RequesterId);
+    }
 }

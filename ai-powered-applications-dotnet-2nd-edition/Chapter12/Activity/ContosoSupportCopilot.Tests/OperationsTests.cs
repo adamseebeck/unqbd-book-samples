@@ -319,4 +319,34 @@ public sealed class OperationsTests : IDisposable
         {
         }
     }
+
+    [Theory]
+    [InlineData("chat",null,null,false)]
+    [InlineData("chat",10,null,false)]
+    [InlineData("chat",null,20,false)]
+    [InlineData("chat",0,0,true)]
+    [InlineData("chat",10,20,true)]
+    [InlineData("embeddings",null,null,false)]
+    [InlineData("embeddings",9,null,true)]
+    [InlineData("embeddings",0,null,true)]
+    public async Task UsageStoreKeepsOnlyCompletePrincipalCounts(string operation,int? input,int? output,bool record)
+    {
+        await using var context=await CreateContextAsync();
+        using var services=new ServiceCollection().AddDbContext<CopilotDbContext>(o=>o.UseSqlite(_connection)).BuildServiceProvider();
+        var recorder=new ModelUsageRecorder(services.GetRequiredService<IServiceScopeFactory>(),new CorrelationContext(),NullLogger<ModelUsageRecorder>.Instance);
+        await recorder.RecordAsync(operation,"synthetic",new UsageDetails { InputTokenCount=input,OutputTokenCount=output });
+        var rows=await context.ModelUsage.ToListAsync();
+        if(!record) { Assert.Empty(rows);return; }
+        var row=Assert.Single(rows);Assert.Equal((long?)input,row.InputTokens);Assert.Equal((long)(output??0),row.OutputTokens);
+    }
+
+    [Fact]
+    public async Task AbsentUsageDoesNotCreateAnArtificialZeroCostCall()
+    {
+        await using var context=await CreateContextAsync();
+        using var services=new ServiceCollection().AddDbContext<CopilotDbContext>(o=>o.UseSqlite(_connection)).BuildServiceProvider();
+        var recorder=new ModelUsageRecorder(services.GetRequiredService<IServiceScopeFactory>(),new CorrelationContext(),NullLogger<ModelUsageRecorder>.Instance);
+        await recorder.RecordAsync(ModelUsageRecord.Chat,"synthetic",null);
+        Assert.Empty(await context.ModelUsage.ToListAsync());
+    }
 }

@@ -24,7 +24,7 @@ public static class ProductionServiceExtensions
         services.AddSingleton<AIProviderHealthMonitor>();
         services.AddHostedService(sp => sp.GetRequiredService<AIProviderHealthMonitor>());
 
-        // A check that hangs reports Unhealthy after 2 seconds, inside the probe's timeoutSeconds of 3.
+        // Request cancellation after 2 seconds; clients must honor it before the 3-second probe timeout.
         services.AddHealthChecks().AddCheck<CompositeHealthCheck>("dependencies", tags: ["ready"], timeout: TimeSpan.FromSeconds(2));
         return services;
     }

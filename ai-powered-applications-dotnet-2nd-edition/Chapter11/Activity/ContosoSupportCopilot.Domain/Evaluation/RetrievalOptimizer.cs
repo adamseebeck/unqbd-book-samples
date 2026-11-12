@@ -65,12 +65,13 @@ public class RetrievalOptimizer : IRetrievalOptimizer
 
         if (metrics.CitationUsefulnessScore < 0.6 && currentChunkingOptions.MaxChunkSize > 256)
         {
+            var nextMaximum = (int)(currentChunkingOptions.MaxChunkSize * 0.8);
             chunking = currentChunkingOptions with
             {
-                MaxChunkSize = (int)(currentChunkingOptions.MaxChunkSize * 0.8),
-                OverlapSize = (int)(currentChunkingOptions.OverlapSize * 1.2)
+                MaxChunkSize = nextMaximum,
+                OverlapSize = Math.Min((int)(currentChunkingOptions.OverlapSize * 1.2), nextMaximum / 2)
             };
-            reasons.Add("Poor citation usefulness suggests smaller chunks with more overlap");
+            reasons.Add("Poor citation usefulness suggests smaller chunks with overlap kept within half their size");
         }
 
         return Task.FromResult(new OptimizationRecommendation

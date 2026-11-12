@@ -23,8 +23,10 @@ public sealed class ModelUsageRecorder
 
     public async Task RecordAsync(string operation, string? modelId, UsageDetails? usage, CancellationToken cancellationToken = default)
     {
-        if (usage is null)
+        var isEmbedding = operation == ModelUsageRecord.Embeddings;
+        if (usage?.InputTokenCount is null || (!isEmbedding && usage.OutputTokenCount is null))
         {
+            _logger.LogWarning("Incomplete usage for a {Operation} call; its cost is unknown and it is excluded from the estimate", operation);
             return;
         }
 
@@ -38,9 +40,9 @@ public sealed class ModelUsageRecorder
                 Timestamp = DateTime.UtcNow,
                 Operation = operation,
                 ModelId = modelId ?? string.Empty,
-                InputTokens = usage.InputTokenCount ?? 0,
+                InputTokens = usage.InputTokenCount.Value,
                 CachedInputTokens = usage.CachedInputTokenCount ?? 0,
-                OutputTokens = usage.OutputTokenCount ?? 0,
+                OutputTokens = isEmbedding ? 0 : usage.OutputTokenCount!.Value,
                 CorrelationId = _correlation.CorrelationId
             });
             await db.SaveChangesAsync(cancellationToken);

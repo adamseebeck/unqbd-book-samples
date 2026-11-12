@@ -79,7 +79,7 @@ public class FallbackDraftingServiceTests
     }
 
     [Fact]
-    public async Task DraftReplyStreamingAsync_KeepsPartialText_AndAddsTheFallback_WhenTheStreamFails()
+    public async Task StreamingFailure_KeepsPartialTextAndFallback()
     {
         _inner
             .Setup(d => d.DraftReplyStreamingAsync(_ticket, It.IsAny<DraftingOptions>(), It.IsAny<CancellationToken>()))

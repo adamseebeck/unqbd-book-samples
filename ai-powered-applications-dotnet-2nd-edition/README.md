@@ -2,6 +2,8 @@
 
 Companion code for *AI-Powered Applications with .NET Fundamentals, Second Edition* by Adam Seebeck: Contoso Support Copilot, built up chapter by chapter with .NET 11 and Microsoft.Extensions.AI. Every `ChapterNN` folder is the complete solution at the end of that chapter, and every chapter runs without an AI account.
 
+On Windows, copy this edition folder to a short local path, such as `C:\Code\AiBook`, with `global.json` beside the `ChapterNN` folders. Long paths can make Visual Studio's generated files fail to build. Move the edition folder to the shorter path and reopen its solution if that happens.
+
 ## What You Need
 
 - The .NET 11 SDK, version 11.0.100 or later. The `global.json` file in this folder selects it and accepts later .NET 11 feature bands; check with `dotnet --version`.

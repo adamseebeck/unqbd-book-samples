@@ -11,7 +11,7 @@ public class VectorSearchServiceTests
     private static readonly KnowledgeArticle OtherArea = new() { Id = Guid.NewGuid(), Title = "Other", ProductArea = "API", IsPublished = true };
 
     [Fact]
-    public async Task SearchAsync_FiltersByProductAreaAndPublication_AndSortsByScore()
+    public async Task Search_FiltersAreaPublicationAndSorts()
     {
         var store = await CreateStoreAsync();
 

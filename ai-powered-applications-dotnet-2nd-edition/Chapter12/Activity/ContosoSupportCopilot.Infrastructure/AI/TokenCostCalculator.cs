@@ -7,16 +7,16 @@ public static class TokenCostCalculator
 {
     public static decimal Calculate(UsageDetails? usage, TokenPricingOptions pricing)
     {
-        if (usage is null)
+        if (usage?.InputTokenCount is null || usage.OutputTokenCount is null)
         {
-            return 0m;
+            throw new ArgumentException("Input and output token counts are required.", nameof(usage));
         }
 
         // Cached input tokens are part of InputTokenCount and bill at the cached rate.
         // Reasoning tokens are part of OutputTokenCount and bill at the output rate.
-        var input = usage.InputTokenCount ?? 0;
+        var input = usage.InputTokenCount.Value;
         var cached = Math.Min(usage.CachedInputTokenCount ?? 0, input);
-        var output = usage.OutputTokenCount ?? 0;
+        var output = usage.OutputTokenCount.Value;
 
         var cost = ((input - cached) * pricing.InputPerMillion)
             + (cached * pricing.CachedInputPerMillion)

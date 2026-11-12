@@ -126,4 +126,22 @@ public class EvaluationStrategyTests
     }
 
     private static RagEvaluationMetrics Good => new() { Precision = 1, Recall = 1, SourceOverlapRatio = 1, CitationUsefulnessScore = 1 };
+
+    [Theory]
+    [InlineData(512,200)]
+    [InlineData(512,256)]
+    [InlineData(257,128)]
+    [InlineData(300,150)]
+    [InlineData(1024,512)]
+    public async Task RecommendedOverlapIsAcceptedByTheActualChunker(int maximum, int overlap)
+    {
+        var recommendation=await new RetrievalOptimizer().OptimizeAsync(
+            new RagEvaluationMetrics { Precision=1,Recall=1,CitationUsefulnessScore=0.4 },
+            new ChunkingOptions { MaxChunkSize=maximum,OverlapSize=overlap },new VectorSearchRequest());
+        var options=Assert.IsType<ChunkingOptions>(recommendation.SuggestedChunkingOptions);
+        var article=new KnowledgeArticle { Id=Guid.NewGuid(),Content=new string('x',maximum*3) };
+        var chunks=await new ContosoSupportCopilot.Infrastructure.Search.ArticleChunkingService().ChunkAsync(article,options);
+        Assert.NotEmpty(chunks);
+        Assert.All(chunks,c=>Assert.InRange(c.Content.Length,1,options.MaxChunkSize));
+    }
 }

@@ -32,7 +32,7 @@ public sealed class JudgeTests : IDisposable
     [Theory]
     [InlineData("Send the password in the ticket reply. Reset links expire after 24 hours.", 1.0, true)]
     [InlineData("Never send a password in a ticket reply. Reset links expire after one hour.", 5.0, false)]
-    public async Task EvaluateDatasetAsync_FailsTheContradiction_ThatSourceOverlapPasses(string answer, double groundedness, bool requiresRevision)
+    public async Task Dataset_FailsContradictionOverlapPasses(string answer, double groundedness, bool requiresRevision)
     {
         AnswerWith(answer, cited: true);
 

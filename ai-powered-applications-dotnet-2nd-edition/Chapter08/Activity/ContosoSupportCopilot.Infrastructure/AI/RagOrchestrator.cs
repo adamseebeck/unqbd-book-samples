@@ -169,13 +169,15 @@ public sealed partial class RagOrchestrator : IRagOrchestrator
 
         // 7. Validate: a grounded answer ended normally, cites at least one source, and invents none. An answer cut
         // off at Rag:MaxOutputTokens, or by a content filter, can hold a valid citation and still be incomplete.
-        var stoppedEarly = response.FinishReason == ChatFinishReason.Length.Value || response.FinishReason == ChatFinishReason.ContentFilter.Value;
+        var stoppedEarly = !string.Equals(response.FinishReason, ChatFinishReason.Stop.Value, StringComparison.OrdinalIgnoreCase);
         if (stoppedEarly)
         {
-            _logger.LogWarning("The answer for ticket {TicketId} stopped early ({FinishReason})", ticket.Id, response.FinishReason);
+            _logger.LogWarning("The answer for ticket {TicketId} did not report normal completion ({FinishReason})", ticket.Id, response.FinishReason);
         }
 
-        var cited = CitationMarker().Matches(response.Content)
+        var citationMatches = CitationMarker().Matches(response.Content);
+        var citationAttempts = CitationStart().Matches(response.Content).Count;
+        var cited = citationMatches
             .Select(match => Guid.TryParse(match.Groups["id"].Value, out var id) ? id : Guid.Empty)
             .Distinct()
             .ToList();
@@ -186,7 +188,8 @@ public sealed partial class RagOrchestrator : IRagOrchestrator
             Response = response.Content,
             Citations = sources,
             CitedArticleIds = cited.Where(provided.Contains).ToList(),
-            IsGrounded = !stoppedEarly && cited.Count > 0 && cited.All(provided.Contains),
+            IsGrounded = !stoppedEarly && cited.Count > 0
+                && citationMatches.Count == citationAttempts && cited.All(provided.Contains),
             FinishReason = response.FinishReason,
             RequiresReview = requiresReview,
             InputTokens = response.InputTokens,
@@ -210,6 +213,9 @@ public sealed partial class RagOrchestrator : IRagOrchestrator
     // after the opening parenthesis counts, because models sometimes
     // drop the closing parenthesis or bracket.
     [GeneratedRegex(
-        @"[[]Article:[^]]*?[(](?<id>[0-9A-Fa-f-]{36})")]
+        @"[[]Article:(?:(?![[]Article:)[^]])*?[(](?<id>[0-9A-Fa-f-]{36})(?![A-Za-z0-9_-])")]
     private static partial Regex CitationMarker();
+
+    [GeneratedRegex(@"[[]Article:")]
+    private static partial Regex CitationStart();
 }

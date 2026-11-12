@@ -1,5 +1,7 @@
 using System.ClientModel;
 using System.Globalization;
+using System.Net;
+using System.Net.Http.Headers;
 using ContosoSupportCopilot.Infrastructure.Configuration;
 using Polly;
 using Polly.CircuitBreaker;
@@ -23,20 +25,33 @@ public static class KernelResiliencePipeline
             // 2. The only retry layer: AIClientFactory turns the OpenAI SDK's own retries off.
             .AddRetry(new RetryStrategyOptions
             {
-                ShouldHandle = args => ValueTask.FromResult(IsTransient(args.Outcome.Exception, args.Context.CancellationToken)),
+                ShouldHandle = args =>
+                    ValueTask.FromResult(
+                        IsTransient(
+                            args.Outcome.Exception,
+                            args.Context.CancellationToken)),
                 MaxRetryAttempts = options.MaxRetryAttempts,
                 BackoffType = DelayBackoffType.Exponential,
                 UseJitter = true,
                 Delay = TimeSpan.FromMilliseconds(options.BaseDelayMilliseconds),
                 MaxDelay = TimeSpan.FromMilliseconds(options.MaxDelayMilliseconds),
                 // A throttled service says how long to wait; null keeps the backoff delay.
-                DelayGenerator = args => ValueTask.FromResult(RetryAfter(args.Outcome.Exception))
+                DelayGenerator = args =>
+                    ValueTask.FromResult(
+                        RetryAfter(
+                            args.Outcome.Exception,
+                            TimeSpan.FromSeconds(
+                                options.TotalTimeoutSeconds)))
             })
             // 3. Stop calling a service that keeps failing. Every attempt counts: an outcome that
             //    IsTransient rejects, the caller's cancellation included, counts as a success.
             .AddCircuitBreaker(new CircuitBreakerStrategyOptions
             {
-                ShouldHandle = args => ValueTask.FromResult(IsTransient(args.Outcome.Exception, args.Context.CancellationToken)),
+                ShouldHandle = args =>
+                    ValueTask.FromResult(
+                        IsTransient(
+                            args.Outcome.Exception,
+                            args.Context.CancellationToken)),
                 FailureRatio = options.CircuitBreakerFailureRatio,
                 MinimumThroughput = options.CircuitBreakerMinimumThroughput,
                 SamplingDuration = TimeSpan.FromSeconds(options.CircuitBreakerSamplingSeconds),
@@ -51,14 +66,16 @@ public static class KernelResiliencePipeline
     // attempt timeout. The caller's cancellation is never one of them.
     public static bool IsTransient(Exception? exception, CancellationToken cancellationToken) => exception switch
     {
-        TimeoutRejectedException or HttpRequestException or IOException => true,
+        TimeoutRejectedException or IOException => true,
+        HttpRequestException { StatusCode: null or HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests } => true,
+        HttpRequestException failure when failure.StatusCode is { } status => (int)status >= 500,
         ClientResultException failure => failure.Status is 0 or 408 or 429 or 500 or 502 or 503 or 504,
         OperationCanceledException => !cancellationToken.IsCancellationRequested,
         _ => false
     };
 
-    // A throttled service names its wait in retry-after-ms or in Retry-After (seconds).
-    private static TimeSpan? RetryAfter(Exception? exception)
+    // A service can name milliseconds, seconds or an HTTP date; no wait needs more than the whole call budget.
+    private static TimeSpan? RetryAfter(Exception? exception, TimeSpan maximumWait)
     {
         var headers = (exception as ClientResultException)?.GetRawResponse()?.Headers;
         if (headers is null)
@@ -67,14 +84,19 @@ public static class KernelResiliencePipeline
         }
 
         if (headers.TryGetValue("retry-after-ms", out var milliseconds)
-            && double.TryParse(milliseconds, NumberStyles.Float, CultureInfo.InvariantCulture, out var wait))
+            && double.TryParse(milliseconds, NumberStyles.Float, CultureInfo.InvariantCulture, out var wait)
+            && double.IsFinite(wait) && wait >= 0)
         {
-            return TimeSpan.FromMilliseconds(wait);
+            return TimeSpan.FromMilliseconds(Math.Min(wait, maximumWait.TotalMilliseconds));
         }
 
-        return headers.TryGetValue("Retry-After", out var seconds)
-            && int.TryParse(seconds, NumberStyles.Integer, CultureInfo.InvariantCulture, out var delay)
-            ? TimeSpan.FromSeconds(delay)
-            : null;
+        if (!headers.TryGetValue("Retry-After", out var value)
+            || !RetryConditionHeaderValue.TryParse(value, out var retry))
+        {
+            return null;
+        }
+
+        var delay = retry.Delta ?? (retry.Date.GetValueOrDefault() - DateTimeOffset.UtcNow);
+        return delay < TimeSpan.Zero ? TimeSpan.Zero : delay > maximumWait ? maximumWait : delay;
     }
 }

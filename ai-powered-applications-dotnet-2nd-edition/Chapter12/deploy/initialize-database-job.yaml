@@ -25,7 +25,7 @@ spec:
           emptyDir: {}
       containers:
         - name: initialize-database
-          image: <registry>.azurecr.io/contoso-support-copilot:1.0.0
+          image: <registry>.azurecr.io/contoso-support-copilot:1.0.0@sha256:<image-digest>
           args: ["--initialize-database"]
           env:
             - name: ASPNETCORE_ENVIRONMENT

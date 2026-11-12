@@ -54,7 +54,7 @@ public class RagOrchestratorTests
     }
 
     [Fact]
-    public async Task GenerateGroundedResponseAsync_IsNotGrounded_WhenTheAnswerCitesAnUnknownArticle()
+    public async Task Grounding_RejectsUnknownArticleCitation()
     {
         AnswerWith($"Accounts unlock after 30 minutes. [Article: Lockouts ({_lockouts.Id})] [Article: Invented ({Guid.NewGuid()})]");
 
@@ -268,4 +268,84 @@ public class RagOrchestratorTests
         ArticleTitle = article.Title,
         ProductArea = article.ProductArea
     };
+
+    [Theory]
+    [InlineData("password=pw!1234", "pw!1234")]
+    [InlineData("{\"password\":\"correct-horse-9\"}", "correct-horse-9")]
+    [InlineData("DB_PASSWORD=\"correct horse battery staple\"", "horse battery staple")]
+    [InlineData("client_secret: 'my short secret'", "short secret")]
+    [InlineData("Authorization: Bearer abc", "Bearer abc")]
+    [InlineData("password=\"unterminated secret", "unterminated secret")]
+    public async Task GenerateGroundedResponseAsync_CommonCredentialsNeverReachPromptOrCitations(string content, string forbidden)
+    {
+        _vectorSearch
+            .Setup(v => v.SearchAsync(It.IsAny<float[]>(), It.IsAny<VectorSearchRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([Result(_lockouts, content, 0.8)]);
+        string? prompt = null;
+        _chatClient
+            .Setup(c => c.CompleteAsync(It.IsAny<string>(), It.IsAny<SupportChatOptions?>(), It.IsAny<CancellationToken>()))
+            .Callback((string text, SupportChatOptions? _, CancellationToken _) => prompt = text)
+            .ReturnsAsync(new SupportChatResponse { Content = $"Done. [Article: Lockouts ({_lockouts.Id})]", FinishReason = "stop" });
+        var result = await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket);
+        Assert.NotNull(prompt);
+        Assert.DoesNotContain(forbidden, prompt);
+        var citation = Assert.Single(result.Citations);
+        Assert.DoesNotContain(forbidden, citation.Content);
+        Assert.DoesNotContain(forbidden, citation.Excerpt);
+        Assert.Contains("[CREDENTIAL_REDACTED]", citation.Content);
+    }
+
+    [Theory]
+    [InlineData("[Article: Invented (not-a-guid)]", false)]
+    [InlineData("[Article: Invented (12345678-1234)]", false)]
+    [InlineData("[Article: Invented (", true)]
+    public async Task GenerateGroundedResponseAsync_ValidCitationDoesNotHideMalformedAttempt(string malformed, bool malformedFirst)
+    {
+        var valid = $"[Article: Lockouts ({_lockouts.Id})]";
+        AnswerWith(malformedFirst ? malformed + " " + valid : valid + " " + malformed);
+        var result = await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket);
+        Assert.False(result.IsGrounded);
+        Assert.Equal([_lockouts.Id], result.CitedArticleIds);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("custom_reason")]
+    [InlineData("tool_calls")]
+    public async Task GenerateGroundedResponseAsync_UnknownFinishReasonDoesNotClaimGrounding(string reason)
+    {
+        AnswerWith($"Done. [Article: Lockouts ({_lockouts.Id})]", reason);
+        var result = await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket);
+        Assert.False(result.IsGrounded);
+        Assert.Equal(reason, result.FinishReason);
+    }
+
+    [Fact]
+    public async Task GenerateGroundedResponseAsync_NormalStopComparisonIsCaseInsensitive()
+    {
+        AnswerWith($"Done. [Article: Lockouts ({_lockouts.Id})]", "STOP");
+        Assert.True((await CreateOrchestrator().GenerateGroundedResponseAsync(Request(), _ticket)).IsGrounded);
+    }
+
+    [Theory]
+    [InlineData("access_token: Bearer tokenZQ79","tokenZQ79")]
+    [InlineData("token: Bearer secret987","secret987")]
+    [InlineData("accessToken: zq!123","zq!123")]
+    [InlineData("clientSecret=zq!","zq!")]
+    [InlineData("{\"userPassword\":\"x\"}","\"x\"")]
+    [InlineData("nestedClientApiKey=\"one two\"","one two")]
+    public async Task GenerateGroundedResponseAsync_CredentialVariantsNeverReachThePromptOrCitations(string content,string forbidden)
+    {
+        _vectorSearch.Setup(v=>v.SearchAsync(It.IsAny<float[]>(),It.IsAny<VectorSearchRequest>(),It.IsAny<CancellationToken>()))
+            .ReturnsAsync([Result(_lockouts,content,0.8)]);
+        string? prompt=null;
+        _chatClient.Setup(c=>c.CompleteAsync(It.IsAny<string>(),It.IsAny<SupportChatOptions?>(),It.IsAny<CancellationToken>()))
+            .Callback((string text,SupportChatOptions? _,CancellationToken _)=>prompt=text)
+            .ReturnsAsync(new SupportChatResponse { Content=$"Done. [Article: Lockouts ({_lockouts.Id})]",FinishReason="stop" });
+        var result=await CreateOrchestrator().GenerateGroundedResponseAsync(Request(),_ticket);
+        Assert.NotNull(prompt);Assert.DoesNotContain(forbidden,prompt);
+        var citation=Assert.Single(result.Citations);
+        Assert.DoesNotContain(forbidden,citation.Content);Assert.DoesNotContain(forbidden,citation.Excerpt);
+        Assert.Contains("[CREDENTIAL_REDACTED]",citation.Content);
+    }
 }

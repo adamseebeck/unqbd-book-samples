@@ -12,6 +12,9 @@ public record AgentContext
     // What the knowledge agent found, for the drafting agent; the code that hands the work over sets it.
     public DraftingKnowledge? Knowledge { get; init; }
 
+    // Extra engineer-supplied context for retrieval; it does not replace the stored ticket or permissions.
+    public string AdditionalContext { get; init; } = string.Empty;
+
     public Dictionary<string, object> Metadata { get; init; } = new();
 }
 

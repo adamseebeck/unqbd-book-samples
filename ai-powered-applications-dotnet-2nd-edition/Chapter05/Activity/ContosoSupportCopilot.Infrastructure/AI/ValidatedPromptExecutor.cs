@@ -88,8 +88,11 @@ public sealed class ValidatedPromptExecutor : IValidatedPromptExecutor
             prompt, StructuredOutputJson.Options, options, cancellationToken: cancellationToken);
 
         var usage = response.Usage;
+        var estimatedCost = usage?.InputTokenCount is not null && usage.OutputTokenCount is not null
+            ? TokenCostCalculator.Calculate(usage, _pricing).ToString("F6")
+            : "unknown";
         _logger.LogInformation(
-            "{Template} v{Version} answered in {LatencyMs}ms. Tokens: {Input} input ({Cached} cached), {Output} output ({Reasoning} reasoning). Cost: ${Cost:F6}",
+            "{Template} v{Version} answered in {LatencyMs}ms. Tokens: {Input} input ({Cached} cached), {Output} output ({Reasoning} reasoning). Estimated cost USD: {EstimatedCost}",
             template.Name,
             template.Version,
             stopwatch.ElapsedMilliseconds,
@@ -97,7 +100,7 @@ public sealed class ValidatedPromptExecutor : IValidatedPromptExecutor
             usage?.CachedInputTokenCount,
             usage?.OutputTokenCount,
             usage?.ReasoningTokenCount,
-            TokenCostCalculator.Calculate(usage, _pricing));
+            estimatedCost);
 
         return Validate(template, response, validator);
     }

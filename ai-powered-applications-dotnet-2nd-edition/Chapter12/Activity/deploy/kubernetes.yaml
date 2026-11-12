@@ -38,8 +38,8 @@ spec:
           emptyDir: {}
       containers:
         - name: api
-          # A version tag, never latest: every rollout and rollback names exactly what runs.
-          image: <registry>.azurecr.io/contoso-support-copilot:1.0.0
+          # Use the same immutable release digest in the Deployment and schema Job.
+          image: <registry>.azurecr.io/contoso-support-copilot:1.0.0@sha256:<image-digest>
           ports:
             - containerPort: 8080
           env:
@@ -108,7 +108,7 @@ spec:
               mountPath: /tmp
           # Startup allows 60 seconds before liveness counts. Liveness only asks whether the process answers.
           # Readiness checks the dependencies: an AI outage reports Degraded (status 200), a database Unhealthy (503).
-          # It never waits for a model, and its check gives up after 2 seconds, inside the 3 seconds allowed here.
+          # It never waits for a model. Its 2-second cancellation deadline requires cooperative dependency clients.
           startupProbe:
             httpGet:
               path: /health/live

@@ -16,4 +16,8 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="evaluation-results/**" />
+    <None Remove="evaluation-results/**" />
+  </ItemGroup>
 </Project>

@@ -53,25 +53,36 @@ public class TriageAgent : IAgent
         var outcome = await _runner.RunAsync(agent, context, $"{ticket.Subject}\n{ticket.Description}", [classify, priority],
             ChatToolMode.RequireSpecific(TicketClassificationTool.ToolName), cancellationToken);
         var classification = classify.Calls.LastOrDefault()?.Result;
-        await _runner.LogRunAsync(context, Name, outcome, cancellationToken: cancellationToken);
+        var priorityResult = priority.Calls.LastOrDefault()?.Result;
 
-        // The classification must come from the tool, never from the model's own text.
-        if (outcome.Response is null || classification?.Value is not SupportIntent intent)
+        // Both required results come from successful tools, never from the model's own text.
+        if (outcome.Response is null
+            || classification is not { IsSuccess: true, Value: SupportIntent intent }
+            || priorityResult is not { IsSuccess: true, Value: double score })
         {
-            return AgentResults.Failure(Name, outcome.FailureMode ?? classification?.FailureMode ?? AgentFailureMode.Unrecoverable);
+            var mode = outcome.FailureMode ?? (classification is { IsSuccess: false }
+                ? classification.FailureMode : priorityResult is { IsSuccess: false }
+                    ? priorityResult.FailureMode : AgentFailureMode.Unrecoverable);
+            var failed = outcome with
+            {
+                FailureMode = mode,
+                ErrorMessage = outcome.ErrorMessage ?? classification?.ErrorMessage
+                    ?? priorityResult?.ErrorMessage ?? "Triage did not complete both required tools."
+            };
+            await _runner.LogRunAsync(context, Name, failed, cancellationToken: cancellationToken);
+            return AgentResults.Failure(Name, mode);
         }
+
+        await _runner.LogRunAsync(context, Name, outcome, cancellationToken: cancellationToken);
 
         var artifacts = new Dictionary<string, object>
         {
             [AgentArtifactKeys.Intent] = intent.Intent,
             [AgentArtifactKeys.Urgency] = intent.Urgency,
             [AgentArtifactKeys.ProductArea] = intent.ProductArea,
-            [AgentArtifactKeys.Confidence] = intent.ConfidenceScore
+            [AgentArtifactKeys.Confidence] = intent.ConfidenceScore,
+            [AgentArtifactKeys.PriorityScore] = score
         };
-        if (priority.Calls.LastOrDefault()?.Result.Value is double score)
-        {
-            artifacts[AgentArtifactKeys.PriorityScore] = score;
-        }
 
         // The ticket is customer text that can steer the model's sentence, so that sentence is for display only;
         // every decision here uses the tool's typed result.

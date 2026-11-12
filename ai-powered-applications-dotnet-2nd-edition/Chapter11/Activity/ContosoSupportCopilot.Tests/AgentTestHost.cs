@@ -41,12 +41,15 @@ public sealed class AgentTestHost : IDisposable
             ["Logging:LogLevel:Default"] = "Warning"
         });
 
-        builder.Services.AddSupportCopilotInfrastructure(builder.Configuration);
+        builder.Services.AddSupportCopilotInfrastructure(
+            builder.Configuration);
         builder.Services.AddCoreAIServices();
-        builder.Services.AddSemanticKernelServices(builder.Configuration);
+        builder.Services.AddSemanticKernelServices(
+            builder.Configuration);
         builder.Services.AddPromptValidationServices();
         builder.Services.AddWorkflowServices(builder.Configuration);
-        builder.Services.AddVectorSearchServices(builder.Configuration);
+        builder.Services.AddVectorSearchServices(
+            builder.Configuration);
         builder.Services.AddRagServices(builder.Configuration);
         builder.Services.AddAgentServices();
         builder.Services.AddWorkflowOrchestration(builder.Configuration);

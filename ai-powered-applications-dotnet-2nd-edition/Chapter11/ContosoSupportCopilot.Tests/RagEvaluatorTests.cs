@@ -78,7 +78,7 @@ public class RagEvaluatorTests
     [Theory]
     [InlineData("Send the password in the ticket reply.")]
     [InlineData("Reset links expire after 24 hours.")]
-    public async Task SourceOverlapEvaluator_PassesAContradiction_ThatReusesTheSourcesWords(string answer)
+    public async Task SourceOverlap_PassesContradictoryWords(string answer)
     {
         var source = new CitationReference
         {

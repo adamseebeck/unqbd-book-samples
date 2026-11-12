@@ -37,7 +37,9 @@ public class IntentExtractor : IIntentExtractor
         string ticketDescription,
         CancellationToken cancellationToken = default)
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var cts =
+            CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(30));
 
         var systemPrompt = """
@@ -86,14 +88,17 @@ public class IntentExtractor : IIntentExtractor
         stopwatch.Stop();
 
         var usage = response.Usage;
+        var estimatedCost = usage?.InputTokenCount is not null && usage.OutputTokenCount is not null
+            ? TokenCostCalculator.Calculate(usage, _pricing).ToString("F6")
+            : "unknown";
         _logger.LogInformation(
-            "Intent extraction completed in {LatencyMs}ms. Tokens: {Input} input ({Cached} cached), {Output} output ({Reasoning} reasoning). Cost: ${Cost:F6}",
+            "Intent extraction completed in {LatencyMs}ms. Tokens: {Input} input ({Cached} cached), {Output} output ({Reasoning} reasoning). Estimated cost USD: {EstimatedCost}",
             stopwatch.ElapsedMilliseconds,
             usage?.InputTokenCount,
             usage?.CachedInputTokenCount,
             usage?.OutputTokenCount,
             usage?.ReasoningTokenCount,
-            TokenCostCalculator.Calculate(usage, _pricing));
+            estimatedCost);
 
         if (response.FinishReason == ChatFinishReason.Length)
         {

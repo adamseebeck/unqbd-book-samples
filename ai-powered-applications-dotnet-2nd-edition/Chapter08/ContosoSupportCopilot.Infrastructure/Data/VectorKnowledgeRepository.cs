@@ -60,7 +60,8 @@ public class VectorKnowledgeRepository : ISupportContext
         // deleted or unpublished after it was indexed is left out.
         var articleIds = results.Select(r => r.ArticleId).Distinct().ToList();
         var articles = (await _innerContext.GetArticlesAsync(articleIds, cancellationToken))
-            .Where(a => a.IsPublished)
+            .Where(a => a.IsPublished && (string.IsNullOrWhiteSpace(productArea)
+                || string.Equals(a.ProductArea, productArea, StringComparison.Ordinal)))
             .ToDictionary(a => a.Id);
 
         // Results arrive best first, so the articles stay in the order of their best chunk.

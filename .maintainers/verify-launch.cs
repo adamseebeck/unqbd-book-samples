@@ -9,6 +9,7 @@
 //   --root <dir>       verify this folder instead of the checkout that holds this script
 //   --books <a,b>      only these book folders (prefix match, for example --books blazor,efcore)
 //   --parallel <n>     concurrent build/test groups (default: half the logical processors)
+//   --maui-target <t>  windows or android (default: windows on Windows, android elsewhere)
 //   --skip-images      skip the container image check
 //   --images-only      only run the container image check
 //   --logs <dir>       where per-project logs go (default: a new folder under the temp directory)
@@ -16,8 +17,8 @@
 // Projects are grouped by chapter folder. Projects inside a group build one after another so
 // shared project references are never built by two processes at once; groups run in parallel.
 // Anything that fails is retried once on its own before it is reported as a failure.
-// MAUI platform heads build only when a maui workload is installed (Windows target on Windows,
-// Android elsewhere); otherwise they are reported as skipped. A project whose nearest global.json pins SDK 11.0.999 is a deliberate
+// MAUI projects and solutions build for the selected platform when its workload is installed.
+// A project whose nearest global.json pins SDK 11.0.999 is a deliberate
 // broken starting point for a reader activity, so it is expected to fail SDK resolution.
 
 using System.Collections.Concurrent;
@@ -36,6 +37,15 @@ var bookFilter = (Opt("--books") ?? "").Split(',', StringSplitOptions.RemoveEmpt
 var parallel = int.TryParse(Opt("--parallel"), out var p) && p > 0 ? p : Math.Max(1, Environment.ProcessorCount / 2);
 var logRoot = Path.GetFullPath(Opt("--logs") ?? Path.Combine(Path.GetTempPath(), "unqbd-verify-" + DateTime.Now.ToString("yyyyMMdd-HHmmss")));
 var imagesOnly = Flag("--images-only");
+var mauiTarget = Opt("--maui-target")?.ToLowerInvariant()
+    ?? (OperatingSystem.IsWindows() ? "windows" : "android");
+if (mauiTarget is not ("windows" or "android") || (mauiTarget == "windows" && !OperatingSystem.IsWindows()))
+{
+    Console.Error.WriteLine("Use --maui-target android on this host, or --maui-target windows on Windows.");
+    return 2;
+}
+var mauiTfm = mauiTarget == "windows" ? "net11.0-windows10.0.19041.0" : "net11.0-android";
+var mauiProperty = "-p:BookTargetFrameworks=" + mauiTfm;
 Directory.CreateDirectory(logRoot);
 
 // Projects that only build after a step the reader performs, as their own README explains.
@@ -53,8 +63,9 @@ Console.WriteLine($"SDK:        {sdk}");
 if (sdk.Contains('-'))
     Console.WriteLine("WARNING: this is a prerelease SDK. The global.json files request the released 11.0.100 SDK.");
 var workloads = (await Run("dotnet", ["workload", "list"], root, TimeSpan.FromMinutes(2))).Output;
-var hasMaui = Regex.IsMatch(workloads, @"^\s*maui", RegexOptions.Multiline | RegexOptions.IgnoreCase);
-Console.WriteLine($"MAUI:       {(hasMaui ? "workload installed, platform heads build for " + (OperatingSystem.IsWindows() ? "Windows" : "Android") : "workload not installed, platform heads skipped")}");
+var hasMaui = Regex.IsMatch(workloads, $@"^\s*(?:maui|maui-{mauiTarget})\s+",
+    RegexOptions.Multiline | RegexOptions.IgnoreCase);
+Console.WriteLine($"MAUI:       {mauiTfm} ({(hasMaui ? "workload installed" : "workload missing, platform builds skipped")})");
 Console.WriteLine($"Parallel:   {parallel}");
 Console.WriteLine();
 
@@ -80,19 +91,21 @@ if (!imagesOnly)
     {
         if (NeedsReaderStep.TryGetValue(Rel(proj), out var step)) return Skip("build", proj, step);
         if (IsFragment(proj)) return Skip("build", proj, "overlay fragment: its ProjectReference only exists after create_copy.py copies it into a checkpoint");
-        if (mauiHeads.Contains(proj) && !hasMaui) return Skip("build", proj, "MAUI platform head, maui workload not installed");
-        // The MAUI README's own Windows command, or Android elsewhere.
-        var mauiTfm = OperatingSystem.IsWindows() ? "net11.0-windows10.0.19041.0" : "net11.0-android";
-        string[] extra = mauiHeads.Contains(proj) ? ["-p:BookTargetFrameworks=" + mauiTfm, "-f", mauiTfm] : [];
+        var usesMaui = mauiHeads.Contains(proj);
+        if (usesMaui && !hasMaui) return Skip("build", proj, $"requires the maui-{mauiTarget} workload");
+        string[] extra = usesMaui ? [mauiProperty, "-f", mauiTfm] : [];
         return await Step("build", proj, ["build", proj, "-nologo", "-v:q", "-clp:ErrorsOnly", .. extra]);
     });
 
     // 2. Solutions
     await RunGroups("solution", solutions, async sln =>
     {
-        if (!hasMaui && SolutionProjects(sln).Any(mauiHeads.Contains)) return Skip("solution", sln, "contains a MAUI platform head, maui workload not installed");
-        if (SolutionProjects(sln).Any(p => NeedsReaderStep.ContainsKey(Rel(p)))) return Skip("solution", sln, "contains a project that needs a reader step first");
-        return await Step("solution", sln, ["build", sln, "-nologo", "-v:q", "-clp:ErrorsOnly"]);
+        var solutionProjects = SolutionProjects(sln).ToArray();
+        var usesMaui = solutionProjects.Any(mauiHeads.Contains);
+        if (usesMaui && !hasMaui) return Skip("solution", sln, $"requires the maui-{mauiTarget} workload");
+        if (solutionProjects.Any(p => NeedsReaderStep.ContainsKey(Rel(p)))) return Skip("solution", sln, "contains a project that needs a reader step first");
+        string[] extra = usesMaui ? [mauiProperty] : [];
+        return await Step("solution", sln, ["build", sln, "-nologo", "-v:q", "-clp:ErrorsOnly", .. extra]);
     });
 
     // 3. Tests

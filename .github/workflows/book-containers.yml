@@ -1,0 +1,126 @@
+name: Book containers
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/book-containers.yml'
+      - 'aspnet-core-fundamentals-2nd-edition/AdventureWorks/Chapter18*/**'
+      - 'aspnet-core-apis-fundamentals-2nd-edition/global.json'
+      - 'aspnet-core-apis-fundamentals-2nd-edition/Chapter16/**'
+      - 'ai-powered-applications-dotnet-2nd-edition/Chapter12/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/book-containers.yml'
+      - 'aspnet-core-fundamentals-2nd-edition/AdventureWorks/Chapter18*/**'
+      - 'aspnet-core-apis-fundamentals-2nd-edition/global.json'
+      - 'aspnet-core-apis-fundamentals-2nd-edition/Chapter16/**'
+      - 'ai-powered-applications-dotnet-2nd-edition/Chapter12/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-run:
+    name: ${{ matrix.sample }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sample: ASP.NET Core Chapter 18
+            context: aspnet-core-fundamentals-2nd-edition/AdventureWorks/Chapter18
+            dockerfile: Dockerfile
+            profile: store
+          - sample: ASP.NET Core Chapter 18 activity
+            context: aspnet-core-fundamentals-2nd-edition/AdventureWorks/Chapter18-Activity
+            dockerfile: Dockerfile
+            profile: store
+          - sample: ASP.NET Core Chapter 18 Native AOT
+            context: aspnet-core-fundamentals-2nd-edition/AdventureWorks/Chapter18-Activity
+            dockerfile: Dockerfile.aot
+            profile: aot
+          - sample: ASP.NET Core APIs Chapter 16
+            context: aspnet-core-apis-fundamentals-2nd-edition
+            dockerfile: Chapter16/Dockerfile
+            profile: warehouse
+          - sample: AI-Powered Applications Chapter 12
+            context: ai-powered-applications-dotnet-2nd-edition/Chapter12
+            dockerfile: Dockerfile
+            profile: copilot
+          - sample: AI-Powered Applications Chapter 12 activity
+            context: ai-powered-applications-dotnet-2nd-edition/Chapter12/Activity
+            dockerfile: Dockerfile
+            profile: copilot
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build the published Dockerfile
+        env:
+          BUILD_CONTEXT: ${{ matrix.context }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+        run: docker build --pull --file "$BUILD_CONTEXT/$DOCKERFILE" --tag book-sample "$BUILD_CONTEXT"
+      - name: Start the sample as its image user
+        shell: bash
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          set -euo pipefail
+          case "$(docker image inspect book-sample --format '{{.Config.User}}')" in
+            ''|0|0:*|root|root:*) echo 'The image must declare a non-root user.'; exit 1 ;;
+          esac
+
+          cleanup() {
+            status=$?
+            if (( status != 0 )); then
+              docker logs book-app 2>/dev/null || true
+              docker logs book-inventory 2>/dev/null || true
+            fi
+            docker rm -f book-app book-inventory >/dev/null 2>&1 || true
+            docker network rm book-smoke >/dev/null 2>&1 || true
+            docker volume rm book-smoke >/dev/null 2>&1 || true
+            exit "$status"
+          }
+          trap cleanup EXIT
+
+          args=()
+          case "$PROFILE" in
+            store)
+              docker volume create book-smoke
+              docker network create book-smoke
+              docker run --rm --network none --volume book-smoke:/app/data \
+                --entrypoint /app/efbundle book-sample
+              docker run --detach --name book-inventory --network book-smoke --network-alias inventory \
+                --workdir /app/inventory book-sample InventoryService.dll
+              args+=(--network book-smoke --volume book-smoke:/app/data
+                --env Inventory__BaseUrl=http://inventory:8080/)
+              ;;
+            warehouse)
+              # The liveness probe starts the host without needing a database or a token.
+              args+=(--env 'ConnectionStrings__WarehouseDb=Server=127.0.0.1,1;Database=Smoke;Integrated Security=True'
+                --env Authentication__Schemes__Bearer__Authority=https://localhost:9443
+                --env Authentication__Schemes__Bearer__ValidAudience=container-smoke)
+              ;;
+          esac
+
+          docker run --detach --name book-app --publish 127.0.0.1::8080 "${args[@]}" book-sample
+          address="http://$(docker port book-app 8080/tcp)"
+          probe() {
+            local path=$1 status
+            for (( attempt=0; attempt<45; attempt++ )); do
+              if status=$(curl --silent --max-time 2 --output /dev/null --write-out '%{http_code}' "$address$path") && [[ $status == 200 ]]; then
+                printf 'Passed %s\n' "$path"
+                return 0
+              fi
+              sleep 1
+            done
+            printf 'Timed out waiting for %s\n' "$path" >&2
+            return 1
+          }
+          probe /health/live
+          case "$PROFILE" in
+            store|copilot) probe /health/ready ;;
+            aot) probe /feed ;;
+          esac

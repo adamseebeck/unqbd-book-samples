@@ -101,7 +101,9 @@ jobs:
               # The liveness probe starts the host without needing a database or a token.
               args+=(--env 'ConnectionStrings__WarehouseDb=Server=127.0.0.1,1;Database=Smoke;Integrated Security=True'
                 --env Authentication__Schemes__Bearer__Authority=https://localhost:9443
-                --env Authentication__Schemes__Bearer__ValidAudience=container-smoke)
+                --env Authentication__Schemes__Bearer__ValidAudience=container-smoke
+                --env ExternalShipmentService__BaseUrl=http://127.0.0.1:1/
+                --env ExternalShipmentService__ApiKey=container-smoke-placeholder)
               ;;
           esac
 

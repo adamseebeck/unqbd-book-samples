@@ -45,6 +45,46 @@ var NeedsReaderStep = new Dictionary<string, string>(StringComparer.OrdinalIgnor
         "needs the Kiota clients the reader generates into GeneratedV1/GeneratedV2 (Chapter14/Consumer/README.md)",
 };
 
+if (imagesOnly && Flag("--skip-images"))
+{
+    Console.Error.WriteLine("Choose either --images-only or --skip-images.");
+    return 2;
+}
+
+if (!Directory.Exists(root))
+{
+    Console.Error.WriteLine($"Could not find the companion checkout at {root}.");
+    return 2;
+}
+
+var availableBooks = Directory.GetDirectories(root)
+    .Select(Path.GetFileName)
+    .Where(n => n is not null && !n.StartsWith('.') && File.Exists(Path.Combine(root, n, "README.md")))
+    .Select(n => n!)
+    .OrderBy(n => n)
+    .ToList();
+if (availableBooks.Count == 0)
+{
+    Console.Error.WriteLine($"No book folders found under {root}.");
+    return 2;
+}
+
+var missingPrefixes = bookFilter
+    .Where(prefix => !availableBooks.Any(book => book.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+    .ToArray();
+if (missingPrefixes.Length > 0 || (bookFilter.Length == 0 && Flag("--books")))
+{
+    Console.Error.WriteLine(missingPrefixes.Length > 0
+        ? $"No book matches {string.Join(", ", missingPrefixes)}."
+        : "Pass at least one book folder prefix to --books.");
+    Console.Error.WriteLine($"Available book folders are {string.Join(", ", availableBooks)}.");
+    return 2;
+}
+
+var books = availableBooks
+    .Where(book => bookFilter.Length == 0 || bookFilter.Any(prefix => book.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+    .ToList();
+
 Console.WriteLine($"Repository: {root}");
 Console.WriteLine($"Logs:       {logRoot}");
 
@@ -58,20 +98,18 @@ Console.WriteLine($"MAUI:       {(hasMaui ? "workload installed, platform heads 
 Console.WriteLine($"Parallel:   {parallel}");
 Console.WriteLine();
 
-var books = Directory.GetDirectories(root)
-    .Select(Path.GetFileName)
-    .Where(n => n is not null && !n.StartsWith('.') && File.Exists(Path.Combine(root, n, "README.md")))
-    .Where(n => bookFilter.Length == 0 || bookFilter.Any(f => n!.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
-    .Select(n => n!)
-    .OrderBy(n => n)
-    .ToList();
-
 var results = new ConcurrentBag<Result>();
 
 if (!imagesOnly)
 {
     var projects = books.SelectMany(b => Find(Path.Combine(root, b), "*.csproj")).ToList();
     var solutions = books.SelectMany(b => Find(Path.Combine(root, b), "*.sln").Concat(Find(Path.Combine(root, b), "*.slnx"))).ToList();
+    if (projects.Count == 0 && solutions.Count == 0)
+    {
+        Console.Error.WriteLine("No projects or solutions found in the selected books.");
+        return 2;
+    }
+
     var mauiHeads = projects.Where(IsMauiHead).ToHashSet();
     Console.WriteLine($"Found {projects.Count} projects ({mauiHeads.Count} MAUI platform heads) and {solutions.Count} solutions in {books.Count} books.");
 
@@ -224,8 +262,18 @@ async Task<Result> Step(string kind, string path, string[] dotnetArgs, TimeSpan?
     string detail;
     if (expectedFail)
     {
-        status = run.ExitCode != 0 ? Status.ExpectedFail : Status.Fail;
-        detail = run.ExitCode != 0 ? "deliberate 11.0.999 SDK pin (reader activity start)" : "expected the deliberate 11.0.999 pin to fail, but it built";
+        // SdkResolveFailure from the .NET host. Unix process exit status retains the low byte.
+        const int sdkResolveFailure = unchecked((int)0x8000809b);
+        int missingSdkExitCode = OperatingSystem.IsWindows() ? sdkResolveFailure : sdkResolveFailure & 0xff;
+        bool missingSdk = !run.TimedOut && run.ExitCode == missingSdkExitCode;
+        status = missingSdk ? Status.ExpectedFail : Status.Fail;
+        detail = run switch
+        {
+            { TimedOut: true } => "timed out",
+            { ExitCode: 0 } => "expected the deliberate 11.0.999 pin to fail, but it built",
+            { ExitCode: var exitCode } when exitCode == missingSdkExitCode => "deliberate 11.0.999 SDK pin (reader activity start)",
+            _ => FirstErrors(run.Output)
+        };
     }
     else if (kind == "test" && run.ExitCode != 0 && !run.TimedOut && Rel(path).Contains("/ActivityStarts/") && failedTests > 0)
     {

@@ -36,6 +36,15 @@ var bookFilter = (Opt("--books") ?? "").Split(',', StringSplitOptions.RemoveEmpt
 var parallel = int.TryParse(Opt("--parallel"), out var p) && p > 0 ? p : Math.Max(1, Environment.ProcessorCount / 2);
 var logRoot = Path.GetFullPath(Opt("--logs") ?? Path.Combine(Path.GetTempPath(), "unqbd-verify-" + DateTime.Now.ToString("yyyyMMdd-HHmmss")));
 var imagesOnly = Flag("--images-only");
+Directory.CreateDirectory(logRoot);
+
+// Projects that only build after a step the reader performs, as their own README explains.
+var NeedsReaderStep = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+{
+    ["aspnet-core-fundamentals-2nd-edition/Chapter14/Consumer/Consumer.csproj"] =
+        "needs the Kiota clients the reader generates into GeneratedV1/GeneratedV2 (Chapter14/Consumer/README.md)",
+};
+
 if (imagesOnly && Flag("--skip-images"))
 {
     Console.Error.WriteLine("Choose either --images-only or --skip-images.");
@@ -75,14 +84,6 @@ if (missingPrefixes.Length > 0 || (bookFilter.Length == 0 && Flag("--books")))
 var books = availableBooks
     .Where(book => bookFilter.Length == 0 || bookFilter.Any(prefix => book.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
     .ToList();
-Directory.CreateDirectory(logRoot);
-
-// Projects that only build after a step the reader performs, as their own README explains.
-var NeedsReaderStep = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-{
-    ["aspnet-core-fundamentals-2nd-edition/Chapter14/Consumer/Consumer.csproj"] =
-        "needs the Kiota clients the reader generates into GeneratedV1/GeneratedV2 (Chapter14/Consumer/README.md)",
-};
 
 Console.WriteLine($"Repository: {root}");
 Console.WriteLine($"Logs:       {logRoot}");
@@ -261,8 +262,18 @@ async Task<Result> Step(string kind, string path, string[] dotnetArgs, TimeSpan?
     string detail;
     if (expectedFail)
     {
-        status = run.ExitCode != 0 ? Status.ExpectedFail : Status.Fail;
-        detail = run.ExitCode != 0 ? "deliberate 11.0.999 SDK pin (reader activity start)" : "expected the deliberate 11.0.999 pin to fail, but it built";
+        // SdkResolveFailure from the .NET host. Unix process exit status retains the low byte.
+        const int sdkResolveFailure = unchecked((int)0x8000809b);
+        int missingSdkExitCode = OperatingSystem.IsWindows() ? sdkResolveFailure : sdkResolveFailure & 0xff;
+        bool missingSdk = !run.TimedOut && run.ExitCode == missingSdkExitCode;
+        status = missingSdk ? Status.ExpectedFail : Status.Fail;
+        detail = run switch
+        {
+            { TimedOut: true } => "timed out",
+            { ExitCode: 0 } => "expected the deliberate 11.0.999 pin to fail, but it built",
+            { ExitCode: var exitCode } when exitCode == missingSdkExitCode => "deliberate 11.0.999 SDK pin (reader activity start)",
+            _ => FirstErrors(run.Output)
+        };
     }
     else if (kind == "test" && run.ExitCode != 0 && !run.TimedOut && Rel(path).Contains("/ActivityStarts/") && failedTests > 0)
     {

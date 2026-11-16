@@ -36,6 +36,45 @@ var bookFilter = (Opt("--books") ?? "").Split(',', StringSplitOptions.RemoveEmpt
 var parallel = int.TryParse(Opt("--parallel"), out var p) && p > 0 ? p : Math.Max(1, Environment.ProcessorCount / 2);
 var logRoot = Path.GetFullPath(Opt("--logs") ?? Path.Combine(Path.GetTempPath(), "unqbd-verify-" + DateTime.Now.ToString("yyyyMMdd-HHmmss")));
 var imagesOnly = Flag("--images-only");
+if (imagesOnly && Flag("--skip-images"))
+{
+    Console.Error.WriteLine("Choose either --images-only or --skip-images.");
+    return 2;
+}
+
+if (!Directory.Exists(root))
+{
+    Console.Error.WriteLine($"Could not find the companion checkout at {root}.");
+    return 2;
+}
+
+var availableBooks = Directory.GetDirectories(root)
+    .Select(Path.GetFileName)
+    .Where(n => n is not null && !n.StartsWith('.') && File.Exists(Path.Combine(root, n, "README.md")))
+    .Select(n => n!)
+    .OrderBy(n => n)
+    .ToList();
+if (availableBooks.Count == 0)
+{
+    Console.Error.WriteLine($"No book folders found under {root}.");
+    return 2;
+}
+
+var missingPrefixes = bookFilter
+    .Where(prefix => !availableBooks.Any(book => book.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+    .ToArray();
+if (missingPrefixes.Length > 0 || (bookFilter.Length == 0 && Flag("--books")))
+{
+    Console.Error.WriteLine(missingPrefixes.Length > 0
+        ? $"No book matches {string.Join(", ", missingPrefixes)}."
+        : "Pass at least one book folder prefix to --books.");
+    Console.Error.WriteLine($"Available book folders are {string.Join(", ", availableBooks)}.");
+    return 2;
+}
+
+var books = availableBooks
+    .Where(book => bookFilter.Length == 0 || bookFilter.Any(prefix => book.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+    .ToList();
 Directory.CreateDirectory(logRoot);
 
 // Projects that only build after a step the reader performs, as their own README explains.
@@ -58,20 +97,18 @@ Console.WriteLine($"MAUI:       {(hasMaui ? "workload installed, platform heads 
 Console.WriteLine($"Parallel:   {parallel}");
 Console.WriteLine();
 
-var books = Directory.GetDirectories(root)
-    .Select(Path.GetFileName)
-    .Where(n => n is not null && !n.StartsWith('.') && File.Exists(Path.Combine(root, n, "README.md")))
-    .Where(n => bookFilter.Length == 0 || bookFilter.Any(f => n!.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
-    .Select(n => n!)
-    .OrderBy(n => n)
-    .ToList();
-
 var results = new ConcurrentBag<Result>();
 
 if (!imagesOnly)
 {
     var projects = books.SelectMany(b => Find(Path.Combine(root, b), "*.csproj")).ToList();
     var solutions = books.SelectMany(b => Find(Path.Combine(root, b), "*.sln").Concat(Find(Path.Combine(root, b), "*.slnx"))).ToList();
+    if (projects.Count == 0 && solutions.Count == 0)
+    {
+        Console.Error.WriteLine("No projects or solutions found in the selected books.");
+        return 2;
+    }
+
     var mauiHeads = projects.Where(IsMauiHead).ToHashSet();
     Console.WriteLine($"Found {projects.Count} projects ({mauiHeads.Count} MAUI platform heads) and {solutions.Count} solutions in {books.Count} books.");
 

@@ -31,4 +31,6 @@ dotnet run .maintainers/verify-launch.cs -- --images-only
 
 `--root <dir>` verifies another copy, `--parallel <n>` sets concurrency, `--skip-images` skips the image check and `--logs <dir>` sets the log folder.
 
+Each prefix passed to `--books` must match at least one folder in the selected checkout. Choose one of `--images-only` and `--skip-images` when limiting the checks. The runner exits with code 2 for invalid selections.
+
 Blazor's `ActivityStarts` copies are unsolved on purpose, so their exercise tests failing is reported as expected. The EF Core Retail tests (Chapters 12 to 16 and Activity 12) and the APIs Chapter 16 tests need SQL Server Express LocalDB, so run the check on Windows with LocalDB installed; elsewhere they show up as failures with their log path.

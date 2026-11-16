@@ -1,1 +1,5 @@
 * text=auto
+
+# The Chapter 14 activity regenerates these OpenAPI documents on every build, and the generator
+# writes LF. Check them out as LF too, so a build leaves them unchanged unless the contract changed.
+aspnet-core-fundamentals-2nd-edition/AdventureWorks/Chapter14-Activity/AdventureWorks/docs/*.json text eol=lf
